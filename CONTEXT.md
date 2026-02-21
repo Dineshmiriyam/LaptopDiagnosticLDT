@@ -1,8 +1,9 @@
-# LDT v6.0 — Project Context & Guardrails
+# LDT v7.0 — Project Context
 
 > This file is the single source of truth for the LDT project.
 > Every developer, AI assistant, and contributor must read this before making any changes.
-> Last updated: 2026-02-19
+> For strict rules and prohibitions, see [GUARDRAILS.md](GUARDRAILS.md).
+> Last updated: 2026-02-21
 
 ---
 
@@ -11,15 +12,18 @@
 | Field | Value |
 |-------|-------|
 | **Name** | Laptop Diagnostic Toolkit (LDT) |
-| **Version** | 6.0.0 |
+| **Version** | 7.0.0 |
 | **Purpose** | USB-portable diagnostic and repair automation for Lenovo ThinkPad fleets |
 | **Users** | IT technicians, field engineers, fleet managers (limited developer experience) |
 | **Platform** | Windows 10/11 on Lenovo ThinkPad hardware |
 | **Deployment** | USB drive (8GB+), fully offline, zero installation on target machine |
 | **Core Script** | `Laptop_Diagnostic_Suite.ps1` (378KB, PowerShell) |
+| **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (3,494 lines, 9-phase auto-detect + auto-fix) |
 | **Launcher** | `Laptop_Master_Diagnostic.bat` (right-click → Run as Administrator) |
-| **Config** | `Config\config.ini` (23 sections, 200+ tuneable parameters) |
-| **Modules** | 45 diagnostic/repair modules across 8 categories, 48 menu options |
+| **Config** | `Config\config.ini` (23 sections) + `Config\config.json` (enterprise engines) |
+| **Modules** | 45 diagnostic modules + 6 enterprise engines, 56 menu options (0-55) |
+| **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport |
+| **Repository** | https://github.com/Dineshmiriyam/LaptopDiagnosticLDT |
 
 ---
 
@@ -44,24 +48,41 @@ These rules define what LDT is. Violating any of these breaks the product.
 
 ```
 E:\LDT-v6.0\
-├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-49)
-├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules)
-├── Team_Issue_Detector.ps1         ← Option 49: BSOD + Reset + VPN detector + auto-fix
-├── config.ini                      ← Root config (copy of Config\config.ini)
+├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-55)
+├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules, Options 1-48)
+├── Smart_Diagnosis_Engine.ps1      ← Option 54: 9-phase auto-detect + auto-fix
+├── Team_Issue_Detector.ps1         ← Option 49: BSOD + Reset + VPN detector
+├── Quick_Start.ps1                 ← Options 51-53: Score, Auto-Discover, What's Wrong
+├── Fleet_Aggregator.ps1            ← Option 50: Multi-machine fleet dashboard
+├── OEM_Validation.ps1              ← Option 55: 8 read-only hardware validation checks
 ├── CONTEXT.md                      ← THIS FILE
+├── GUARDRAILS.md                   ← Strict rules for all contributors
+├── README.md                       ← GitHub project overview
+├── CHANGELOG.md                    ← Version history
 ├── Config\
-│   └── config.ini                  ← Master configuration (23 sections)
+│   ├── config.ini                  ← Master configuration (23 sections, 200+ params)
+│   ├── config.json                 ← Enterprise engine config (scoring, guards, features)
+│   └── VersionManifest.json        ← SHA256 platform integrity hashes
+├── Core\                           ← Enterprise engine modules (v7.0)
+│   ├── GuardEngine.psm1            ← 6-gate remediation authority
+│   ├── IntegrityEngine.psm1        ← SHA256 tamper detection + log sealing
+│   ├── ScoringEngine.psm1          ← Weighted 0-100 health scoring
+│   ├── TrendEngine.psm1            ← 90-session historical tracking
+│   ├── ComplianceExport.psm1       ← ISO/SOC2/CIS artifact generation
+│   └── LDT-EngineAdapter.psm1      ← Bridge between LDT and engines
 ├── Docs\
 │   ├── fonts\                      ← Bebas Neue, DM Sans, JetBrains Mono (woff2)
-│   ├── LDT_Step_by_Step_Guide.html ← Visual step-by-step guide (v1.0)
+│   ├── LDT_Step_by_Step_Guide.html ← Visual step-by-step guide
 │   ├── Laptop_Toolkit_v6_Team_Guide.html
 │   └── Laptop_Toolkit_v6_Team_Guide.pdf
 ├── Tools\
-│   ├── CPU-Z\
-│   ├── LenovoThinInstaller\
-│   └── VPNInstaller\
+│   ├── Update-VersionManifest.ps1  ← SHA256 hash regeneration tool
+│   ├── CPU-Z\                      ← Hardware detection utility
+│   ├── LenovoThinInstaller\        ← Lenovo driver update tool (optional)
+│   └── VPNInstaller\               ← VPN client installer (optional)
+├── TrendStore\                     ← Per-machine trend JSON files (USB-portable)
 ├── Logs\                           ← Auto-generated per-session logs
-├── Reports\                        ← Auto-generated HTML reports
+├── Reports\                        ← Auto-generated HTML + JSON reports
 ├── Results\                        ← Fleet CSV exports
 ├── Temp\                           ← Working directory (cleared between runs)
 ├── Backups\                        ← Restore points before repairs
@@ -186,9 +207,14 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 
 | Version | Date | What Changed |
 |---------|------|-------------|
+| 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 55), Phase 6A direct fixes, scoring/remediation overhaul |
+| 6.1.3 | 2026-02-20 | Display diagnostics: Phase 4H/4I/4J (GPU health, TDR events, panel health) |
+| 6.1.2 | 2026-02-20 | Phase 0 preflight, Phase 3/5 enrichment, backup expansion |
+| 6.1.1 | 2026-02-20 | Smart Diagnosis Engine (Option 54): 8-phase root cause analysis |
+| 6.1.0 | 2026-02-20 | Quick Start (Options 51-53), Fleet Aggregator (Option 50), health scoring |
 | 6.0.0 | 2026-02-13 | Initial LDT v6.0 — 45 modules, 8 categories, config.ini, BAT launcher |
-| docs-1.0 | 2026-02-19 | Step-by-Step Guide: 12 enterprise visual enhancements (glassmorphism, nav, accessibility, responsive, print, scroll animations, footer, progress bar, back-to-top) |
-| detect-1.0 | 2026-02-19 | Team Issue Detector (Option 49): BSOD + Reset + VPN detection, terminal output, HTML report, auto-fix launcher. New file: Team_Issue_Detector.ps1. BAT updated with Option 49. |
+| docs-1.0 | 2026-02-19 | Step-by-Step Guide: 12 enterprise visual enhancements |
+| detect-1.0 | 2026-02-19 | Team Issue Detector (Option 49): BSOD + Reset + VPN detection |
 
 ---
 
@@ -255,14 +281,22 @@ Before deploying any change, manually verify ALL of the following.
 ### Completed
 | # | Item | Status | Type |
 |---|------|--------|------|
-| 1 | Issue Detector Script (BSOD, Reset, VPN) | DONE — Option 49, detect + auto-fix, terminal + HTML | New feature |
+| 1 | Issue Detector Script (BSOD, Reset, VPN) | DONE — Option 49 | New feature |
+| 2 | Smart Diagnosis Engine (Option 54) | DONE — 9-phase auto-detect + auto-fix | New feature |
+| 3 | Quick Start workflows (Options 51-53) | DONE — Score, Auto-Discover, What's Wrong | New feature |
+| 4 | Fleet Aggregator (Option 50) | DONE — Multi-machine dashboard | New feature |
+| 5 | OEM Validation Mode (Option 55) | DONE — 8 read-only hardware checks | New feature |
+| 6 | Enterprise Engines (Core/) | DONE — Guard, Integrity, Scoring, Trend, Compliance | New feature |
+| 7 | Phase 6A Direct Fixes | DONE — BITS, DISM, SFC, display driver 4-method | Enhancement |
+| 8 | Git repository initialized | DONE — github.com/Dineshmiriyam/LaptopDiagnosticLDT | Process |
+| 9 | Tested on real ThinkPad T495 hardware | DONE — AMD Vega 8 driver issue identified | Testing |
 
-### Agreed / In Discussion
+### Planned / In Discussion
 | # | Item | Status | Type |
 |---|------|--------|------|
-| 2 | Initialize Git repository | Agreed — not yet done | Process |
-| 3 | Add version number to HTML guide footer | Agreed — not yet done | Quick fix |
-| 4 | Test Issue Detector on laptop with known issues | Needed — validate detection accuracy | Testing |
+| 10 | Bundle Lenovo Thin Installer on USB | Planned — enables automatic driver updates | Enhancement |
+| 11 | Add display driver download automation | Planned — direct download from AMD/Lenovo | Enhancement |
+| 12 | Populate VersionManifest.json with real hashes | Planned — run Update-VersionManifest.ps1 | Maintenance |
 
 ---
 

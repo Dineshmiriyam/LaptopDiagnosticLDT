@@ -2,6 +2,43 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [7.0.0] - 2026-02-21
+
+### Added
+- **Enterprise Engine Modules** (6 new files in `Core/`):
+  - `GuardEngine.psm1`: 6-gate remediation authority with 20-item prohibition list
+  - `IntegrityEngine.psm1`: SHA256 platform tamper detection + session log sealing
+  - `ScoringEngine.psm1`: Weighted 0-100 health scoring across 9 categories
+  - `TrendEngine.psm1`: 90-session per-machine historical tracking (TrendStore/)
+  - `ComplianceExport.psm1`: ISO 27001/SOC2/CIS compliance artifact generation (6 JSONs)
+  - `LDT-EngineAdapter.psm1`: Bridge module between LDT and enterprise engines
+- **OEM Validation Mode** (Option 55): 8 read-only hardware checks (SecureBoot, TPM, BIOS, fingerprint, Win11 readiness, POST history, driver catalog, baseline drift)
+- **Phase 6A Direct Targeted Fixes**: BITS service restart, DISM component store repair, SFC system file check, display driver 4-method update (WU, Lenovo System Update, Thin Installer, pnputil)
+- **Phase 6 smart gating**: Proceeds with obvious fixable issues even when root-cause confidence is below threshold
+- **Finding status "Repaired"**: Fixed items marked as Repaired with 5% score penalty (vs 50% for Fail)
+- **Driver Update Escalation**: When all 4 auto-update methods fail, provides manufacturer-specific download URLs
+- `Config/config.json`: Enterprise engine configuration (scoring weights, guard rules, feature flags)
+- `Config/VersionManifest.json`: SHA256 integrity baseline for platform files
+- `Tools/Update-VersionManifest.ps1`: Hash regeneration utility
+- `README.md`, `GUARDRAILS.md`: Project documentation for GitHub
+- Git repository: github.com/Dineshmiriyam/LaptopDiagnosticLDT
+
+### Changed
+- Smart Diagnosis Engine integrated with all 6 enterprise engines (graceful degradation if Core/ missing)
+- Phase 0 now includes GuardEngine init, platform integrity check, log seal verification
+- Phase 6 split into 6A (direct fixes) and 6B (suite dispatch) with deduplication
+- Phase 8 now includes ScoringEngine, TrendEngine, ComplianceExport, log sealing
+- TDR/GPU events reclassified from "Hardware" to "Driver" category (software-fixable)
+- Enterprise score formula: added Repaired status at 5% penalty, Info at 0%
+- BAT launcher: added Option 55, updated version to 7.0.0, prompt accepts 0-55
+- Version bumped to 7.0.0 across config.ini, BAT, and all scripts
+
+### Fixed
+- Phase 6 no longer skips when confidence is below threshold but fixable issues exist
+- Phase 6 filter now includes Warnings (not just Fails) for software-fixable categories
+- Em-dash encoding bug: replaced all U+2014 characters with -- in double-quoted strings (PS 5.1 parse fix)
+- Driver Update Escalation finding no longer worsens enterprise score (changed to Info/weight 0)
+
 ## [6.1.3] - 2026-02-20
 
 ### Added
