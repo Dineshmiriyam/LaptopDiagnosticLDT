@@ -1,4 +1,4 @@
-# Fleet_Aggregator.ps1 — Merge fleet CSV files from multiple USB drives
+﻿# Fleet_Aggregator.ps1 -- Merge fleet CSV files from multiple USB drives
 # Usage: Run from LDT menu (Option 50) or standalone
 # Input: Folder containing CSV files (default: Results folder on USB)
 # Output: Master_Fleet_Report.csv with deduplicated, scored fleet data

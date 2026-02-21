@@ -2,6 +2,20 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [7.0.1] - 2026-02-21
+
+### Added
+- `Tools/Test-LDTPlatform.ps1`: 7-check platform validation (parse, PS7+ scan, encoding, config drift, BAT routing, version consistency, hash verification)
+- Known Limitations section in README.md (driver update gaps, domain conflicts, compliance scope)
+- Lenovo Thin Installer setup instructions in README.md
+
+### Changed
+- Unified dual scoring model: HTML report and JSON export now prefer ScoringEngine weighted score when v7 engines are available
+- HTML report label changed from "Enterprise Score" to "Health Score" with band indicator
+- `VersionManifest.json` populated with real SHA256 hashes (14 files verified)
+- Fixed 13 em-dash (U+2014) encoding issues across Laptop_Diagnostic_Suite.ps1, Fleet_Aggregator.ps1, Update-VersionManifest.ps1
+- Fixed `Update-VersionManifest.ps1` strict mode compatibility and em-dash in synopsis
+
 ## [7.0.0] - 2026-02-21
 
 ### Added

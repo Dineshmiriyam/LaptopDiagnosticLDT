@@ -152,7 +152,7 @@ function Get-SystemInformation {
         $productName = $cspProduct.Name
         $productHasTP = $productVersion -match "ThinkPad"
         $productNameHasTP = $productName -match "ThinkPad"
-        # Lenovo MTM pattern: 4-char machine type (e.g. 20NK) + model suffix — ThinkPads use 20XX/21XX prefixes
+        # Lenovo MTM pattern: 4-char machine type (e.g. 20NK) + model suffix -- ThinkPads use 20XX/21XX prefixes
         $mtmIsTP = $false
         if ($isLenovo -and $computerSystem.Model -match '^\d{2}[A-Z0-9]{2}') {
             # Known Lenovo ThinkPad machine type prefixes (20xx and 21xx series are ThinkPads)
@@ -475,7 +475,7 @@ function Test-DomainSafety {
     )
     if (-not $script:SystemInfo) { Get-SystemInformation | Out-Null }
     if (-not $script:IsDomainJoined) { return $true }
-    # Domain-joined machine — check if action is safe
+    # Domain-joined machine -- check if action is safe
     switch ($ActionType) {
         'DNS' {
             Write-Host "`n  [DOMAIN GUARD] This machine is joined to domain: $($script:DomainName)" -ForegroundColor Red
@@ -497,7 +497,7 @@ function Test-DomainSafety {
                 if ($null -ne $fwReg -and $null -ne $fwReg.EnableFirewall) { $gpoManaged = $true }
             } catch { }
             if ($gpoManaged) {
-                Write-Host "`n  [DOMAIN GUARD] Firewall is managed by Group Policy — skipping modification." -ForegroundColor Red
+                Write-Host "`n  [DOMAIN GUARD] Firewall is managed by Group Policy -- skipping modification." -ForegroundColor Red
                 Write-Log "Firewall change skipped - GPO-managed on domain $($script:DomainName)" -Level Warning
                 return $false
             }
@@ -1626,8 +1626,8 @@ function Invoke-DriverRepair {
             $null = $results.Add([PSCustomObject]@{ Component = "Dell Command Update"; Status = "Pass"; Details = "Installed: $($dellCU.Name) v$($dellCU.Version)" })
             Write-Host "  Dell Command Update found: v$($dellCU.Version)" -ForegroundColor Green
         } else {
-            $null = $results.Add([PSCustomObject]@{ Component = "Dell Command Update"; Status = "Info"; Details = "Not installed — use Windows Update for drivers" })
-            Write-Host "  Dell Command Update not found — using Windows Update" -ForegroundColor Yellow
+            $null = $results.Add([PSCustomObject]@{ Component = "Dell Command Update"; Status = "Info"; Details = "Not installed -- use Windows Update for drivers" })
+            Write-Host "  Dell Command Update not found -- using Windows Update" -ForegroundColor Yellow
         }
     } elseif ($script:Vendor -eq 'HP') {
         Write-Host "Checking HP driver tools..." -ForegroundColor Yellow
@@ -1636,12 +1636,12 @@ function Invoke-DriverRepair {
             $null = $results.Add([PSCustomObject]@{ Component = "HP Support Tool"; Status = "Pass"; Details = "Installed: $($hpIA.Name) v$($hpIA.Version)" })
             Write-Host "  HP tool found: $($hpIA.Name)" -ForegroundColor Green
         } else {
-            $null = $results.Add([PSCustomObject]@{ Component = "HP Support Tool"; Status = "Info"; Details = "Not installed — use Windows Update for drivers" })
-            Write-Host "  HP Image Assistant not found — using Windows Update" -ForegroundColor Yellow
+            $null = $results.Add([PSCustomObject]@{ Component = "HP Support Tool"; Status = "Info"; Details = "Not installed -- use Windows Update for drivers" })
+            Write-Host "  HP Image Assistant not found -- using Windows Update" -ForegroundColor Yellow
         }
     } else {
-        $null = $results.Add([PSCustomObject]@{ Component = "Vendor Tools"; Status = "Info"; Details = "Vendor: $($script:Vendor) — using Windows Update for drivers" })
-        Write-Host "  Vendor: $($script:Vendor) — Windows Update will be used for drivers" -ForegroundColor Gray
+        $null = $results.Add([PSCustomObject]@{ Component = "Vendor Tools"; Status = "Info"; Details = "Vendor: $($script:Vendor) -- using Windows Update for drivers" })
+        Write-Host "  Vendor: $($script:Vendor) -- Windows Update will be used for drivers" -ForegroundColor Gray
     }
 
     # Attempt repairs for problem devices
@@ -4542,7 +4542,7 @@ function Invoke-BSODTroubleshooter {
         # SFC quick status check if SFC was run
         $sfcRan = $results | Where-Object { $_.Component -match 'SFC' }
         if ($sfcRan) {
-            Write-Host "    SFC was run — full results in CBS.log after reboot" -ForegroundColor Gray
+            Write-Host "    SFC was run -- full results in CBS.log after reboot" -ForegroundColor Gray
         }
     }
 
@@ -4663,7 +4663,7 @@ function Invoke-InputTroubleshooter {
     Write-Host "  [5/8] Checking keyboard driver..." -ForegroundColor Yellow
     try {
         $kbDevices = Get-PnpDevice -Class Keyboard -ErrorAction SilentlyContinue
-        # Only flag Error/Degraded — "Unknown" is normal for composite HID devices
+        # Only flag Error/Degraded -- "Unknown" is normal for composite HID devices
         $problemKB = @($kbDevices | Where-Object { $_.Status -in @("Error", "Degraded") })
         $unknownKB = @($kbDevices | Where-Object { $_.Status -eq "Unknown" })
         if ($unknownKB.Count -gt 0) {
@@ -4747,7 +4747,7 @@ function Invoke-InputTroubleshooter {
     Write-Host "  [7/8] Checking pointing devices..." -ForegroundColor Yellow
     try {
         $mouseDevices = Get-PnpDevice -Class Mouse -ErrorAction SilentlyContinue
-        # Only flag Error/Degraded — "Unknown" is normal for composite HID devices
+        # Only flag Error/Degraded -- "Unknown" is normal for composite HID devices
         $problemMouse = @($mouseDevices | Where-Object { $_.Status -in @("Error", "Degraded") })
         $unknownMouse = @($mouseDevices | Where-Object { $_.Status -eq "Unknown" })
         if ($unknownMouse.Count -gt 0) {

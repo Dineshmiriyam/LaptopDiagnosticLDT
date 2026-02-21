@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    LDT Manifest Updater — Computes and writes real SHA256 hashes into VersionManifest.json
+    LDT Manifest Updater -- Computes and writes real SHA256 hashes into VersionManifest.json
 
 .DESCRIPTION
     Run this tool ONCE after deployment or after any platform update to populate
@@ -32,11 +32,12 @@ if (-not (Test-Path $manifestPath)) {
 $manifest = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 Write-Host ""
-Write-Host "  LDT Manifest Updater — Computing SHA256 hashes" -ForegroundColor Cyan
+Write-Host "  LDT Manifest Updater -- Computing SHA256 hashes" -ForegroundColor Cyan
 Write-Host "  Platform Root: $PlatformRoot" -ForegroundColor Gray
 Write-Host ""
 
-$updated = 0; $missing = 0
+$updated = 0
+$missing = 0
 
 foreach ($entry in $manifest.files) {
     $fullPath = Join-Path $PlatformRoot $entry.relativePath
@@ -70,8 +71,8 @@ $content  = $content -replace '"COMPUTED_AFTER_WRITE"', "`"$selfHash`""
 $content  | Set-Content $manifestPath -Encoding UTF8
 
 Write-Host ""
-Write-Host "  ─────────────────────────────────────────────────────" -ForegroundColor DarkGray
-$missingColor = if ($missing -gt 0) { 'Yellow' } else { 'Green' }
+Write-Host "  ---------------------------------------------------------" -ForegroundColor DarkGray
+if ($missing -gt 0) { $missingColor = 'Yellow' } else { $missingColor = 'Green' }
 Write-Host "  Updated : $updated file(s)" -ForegroundColor Green
 Write-Host "  Missing : $missing file(s)" -ForegroundColor $missingColor
 Write-Host "  Manifest: $manifestPath" -ForegroundColor Gray

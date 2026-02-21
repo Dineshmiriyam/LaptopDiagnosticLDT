@@ -217,6 +217,28 @@ Common scenarios and which option to use:
 
 ---
 
+## Known Limitations
+
+- **Display driver auto-update**: Phase 6A tries 4 methods in sequence (Windows Update COM API, Lenovo System Update, Lenovo Thin Installer, pnputil). If none of these tools are installed on the target machine or USB, the update will fail and the script escalates with a manual download URL. To maximize success, place [Lenovo Thin Installer](https://support.lenovo.com/solutions/ht037099) in `Tools/LenovoThinInstaller/` before deployment.
+- **Domain-joined machines**: Driver Auto-Update (Option 35) and some Phase 6 fixes may conflict with SCCM/WSUS/Intune policies. The toolkit detects domain membership and warns before proceeding, but cannot override Group Policy restrictions.
+- **Hardware diagnostics**: Some findings (e.g., swollen battery, cracked screen, physical damage) require visual inspection. The toolkit flags related symptoms (battery wear, display anomalies) but cannot replace hands-on assessment.
+- **Compliance mappings**: ISO 27001, SOC 2, and CIS benchmark artifact generation is self-assessed based on the toolkit's operational scope. These artifacts have not been certified by an external auditor. They are intended as supporting evidence for compliance programs, not as standalone proof of compliance.
+- **Offline driver catalog**: The toolkit ships no driver binaries. All driver updates require either an internet connection or pre-staged OEM update utilities on the USB drive.
+
+---
+
+## Lenovo Thin Installer Setup (Recommended)
+
+To enable the most reliable driver update path in Phase 6A:
+
+1. Download [Lenovo Thin Installer](https://support.lenovo.com/solutions/ht037099) from Lenovo Support
+2. Place the executable in `Tools/LenovoThinInstaller/` on your USB drive
+3. The Smart Diagnosis Engine will automatically detect and use it when updating display drivers
+
+Without Thin Installer, the toolkit falls back to Windows Update and pnputil, which may not have the latest Lenovo-specific drivers.
+
+---
+
 ## Built With
 
 - **PowerShell 5.1** -- Core diagnostic engine and all automation scripts. Ships with Windows 10/11; no additional runtime required.

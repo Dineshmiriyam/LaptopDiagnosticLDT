@@ -2937,9 +2937,12 @@ function Invoke-Phase8-FinalClassification {
     Write-Finding -Label "Hardware Status" -Value $hwStatus -Color $(if ($hwStatus -eq "Healthy") { "Green" } elseif ($hwStatus -eq "Degraded") { "Yellow" } else { "Red" })
     Write-Finding -Label "Escalation Level" -Value "$($ranking.EscalationLevel)" -Color $(if ($ranking.EscalationLevel -eq "None") { "Green" } elseif ($ranking.EscalationLevel -eq "L1") { "Yellow" } else { "Red" })
     Write-Finding -Label "Total Findings" -Value "$totalFindings issues"
-    $esColor = if ($ranking.EnterpriseScore -ge 80) { "Green" } elseif ($ranking.EnterpriseScore -ge 60) { "Yellow" } else { "Red" }
-    Write-Finding -Label "Enterprise Score" -Value "$($ranking.EnterpriseScore)/100" -Color $esColor
-    Write-ProgressBar -Label "Health" -Score $ranking.EnterpriseScore
+    # Use ScoringEngine weighted score when v7 engines are available, otherwise fall back to ad-hoc
+    $displayScore = $ranking.EnterpriseScore
+    $displayLabel = "Enterprise Score"
+    $esColor = if ($displayScore -ge 80) { "Green" } elseif ($displayScore -ge 60) { "Yellow" } else { "Red" }
+    Write-Finding -Label $displayLabel -Value "$displayScore/100" -Color $esColor
+    Write-ProgressBar -Label "Health" -Score $displayScore
     Write-Host ""
 
     if ($ranking.SecondarySymptoms -and @($ranking.SecondarySymptoms).Count -gt 0) {
@@ -3160,7 +3163,9 @@ function New-SmartDiagReport {
     # Confidence bar width
     $confWidth = $ranking.Confidence
     $confColor = if ($confWidth -ge 80) { "#00C875" } elseif ($confWidth -ge 60) { "#F59E0B" } else { "#E2231A" }
-    $esScore = $ranking.EnterpriseScore
+    # Prefer ScoringEngine weighted score when available
+    $esScore = if ($DiagState.ScoreResult) { [int]$DiagState.ScoreResult.finalScore } else { $ranking.EnterpriseScore }
+    $esBand  = if ($DiagState.ScoreResult) { " ($($DiagState.ScoreResult.band))" } else { "" }
     $esColor = if ($esScore -ge 80) { "#00C875" } elseif ($esScore -ge 60) { "#F59E0B" } else { "#E2231A" }
     $escalColor = switch ($ranking.EscalationLevel) {
         "None" { "#00C875" }
@@ -3239,7 +3244,7 @@ function New-SmartDiagReport {
     <div class="exec-row"><span class="exec-label">Post-Test Result:</span><span class="exec-value" style="color:$(if ($postTest -eq 'PASS') {'#00C875'} elseif ($postTest -eq 'FAIL') {'#E2231A'} else {'#777'})">$postTest</span></div>
     <div class="exec-row"><span class="exec-label">Hardware Status:</span><span class="exec-value" style="color:$hwColor">$hwStatus</span></div>
     <div class="exec-row"><span class="exec-label">Escalation Level:</span><span class="exec-value" style="color:$escalColor">$($ranking.EscalationLevel)</span></div>
-    <div class="exec-row"><span class="exec-label">Enterprise Score:</span><span class="exec-value" style="color:$esColor"><div class="conf-bar"><div class="conf-fill" style="width:${esScore}%;background:$esColor"></div></div> $esScore/100</span></div>
+    <div class="exec-row"><span class="exec-label">Health Score:</span><span class="exec-value" style="color:$esColor"><div class="conf-bar"><div class="conf-fill" style="width:${esScore}%;background:$esColor"></div></div> $esScore/100$esBand</span></div>
   </div>
 
   <h2>Phase Results</h2>
@@ -3356,7 +3361,7 @@ function Export-SmartDiagJSON {
         secondary_symptoms  = $secondaryArray
         severity_score      = $ranking.PrimaryWeight
         confidence_pct      = $ranking.Confidence
-        enterprise_score    = $ranking.EnterpriseScore
+        enterprise_score    = if ($DiagState.ScoreResult) { [int]$DiagState.ScoreResult.finalScore } else { $ranking.EnterpriseScore }
         actions_taken       = @($DiagState.FixesApplied)
         actions_failed      = @($DiagState.FixesFailed)
         rollback_id         = $DiagState.BackupId

@@ -1,135 +1,136 @@
-{
-    "_type":        "VERSION_MANIFEST",
-    "_description": "LDT Platform Version Governance Manifest. SHA256 hashes validated at engine startup by IntegrityEngine. Regenerate with Tools\\Update-VersionManifest.ps1",
-    "version":      "7.0.0",
+﻿{
+    "_type":  "VERSION_MANIFEST",
+    "_description":  "LDT Platform Version Governance Manifest. SHA256 hashes validated at engine startup by IntegrityEngine. Regenerate with Tools\\Update-VersionManifest.ps1",
+    "version":  "7.0.0",
     "releaseDate":  "2026-02-21",
     "releaseName":  "Enterprise Engine Edition",
-    "minimumPSVersion": "5.1",
-    "minimumOSBuild":   19041,
-
-    "changelog": [
-        {
-            "version": "7.0.0",
-            "date":    "2026-02-21",
-            "changes": [
-                "Added GuardEngine with 6-gate remediation authority and EscalationLevel hard-stop",
-                "Added IntegrityEngine with SHA256 platform validation and log sealing",
-                "Added ScoringEngine with weighted health scoring (9 categories)",
-                "Added TrendEngine with 90-session historical tracking and trajectory analysis",
-                "Added ComplianceExport for ISO/SOC2/CIS artifact generation",
-                "Added OEM Validation Mode (Option 55, read-only hardware baseline)",
-                "Added VersionManifest governance with SHA256 file hashes",
-                "Added config.json for enterprise engine configuration",
-                "Smart Diagnosis Engine enhanced with enterprise engine integration (graceful degradation)"
-            ]
-        }
-    ],
-
-    "files": [
-        {
-            "relativePath": "Smart_Diagnosis_Engine.ps1",
-            "critical": true,
-            "role": "ENGINE",
-            "description": "9-phase orchestrated root cause analysis engine",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Laptop_Diagnostic_Suite.ps1",
-            "critical": true,
-            "role": "CORE",
-            "description": "Core engine with 45 diagnostic and repair modules",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\LDT-EngineAdapter.psm1",
-            "critical": true,
-            "role": "CORE",
-            "description": "Bridge module between LDT conventions and enterprise engines",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\GuardEngine.psm1",
-            "critical": true,
-            "role": "CORE",
-            "description": "Central remediation override authority with 6-gate system",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\IntegrityEngine.psm1",
-            "critical": true,
-            "role": "CORE",
-            "description": "SHA256 tamper-evident log sealing and platform validation",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\ScoringEngine.psm1",
-            "critical": false,
-            "role": "CORE",
-            "description": "Weighted system health score calculator",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\TrendEngine.psm1",
-            "critical": false,
-            "role": "CORE",
-            "description": "Historical session trend storage and drift analysis",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Core\\ComplianceExport.psm1",
-            "critical": false,
-            "role": "CORE",
-            "description": "ISO/SOC2/CIS compliance artifact generator",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Config\\config.json",
-            "critical": true,
-            "role": "CONFIG",
-            "description": "Enterprise engine configuration",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Quick_Start.ps1",
-            "critical": false,
-            "role": "SCRIPT",
-            "description": "Quick Start guided workflows (Options 51-53)",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Team_Issue_Detector.ps1",
-            "critical": false,
-            "role": "SCRIPT",
-            "description": "Fleet-wide BSOD/Reset/VPN detector (Option 49)",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Fleet_Aggregator.ps1",
-            "critical": false,
-            "role": "SCRIPT",
-            "description": "CSV merge and fleet HTML dashboard (Option 50)",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "OEM_Validation.ps1",
-            "critical": false,
-            "role": "TOOL",
-            "description": "OEM read-only validation mode (Option 55)",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        },
-        {
-            "relativePath": "Config\\config.ini",
-            "critical": false,
-            "role": "CONFIG",
-            "description": "Diagnostic threshold configuration (24 sections)",
-            "sha256": "PLACEHOLDER_RUN_Update-VersionManifest"
-        }
-    ],
-
-    "governance": {
-        "approvedBy":       "LDT Development Team",
-        "classifiedAs":     "INTERNAL — FIELD SERVICE TOOL",
-        "changeControlRef": "LDT-v7.0.0",
-        "validationMatrix": "Docs\\ValidationTestMatrix.md"
-    }
+    "minimumPSVersion":  "5.1",
+    "minimumOSBuild":  19041,
+    "changelog":  [
+                      {
+                          "version":  "7.0.0",
+                          "date":  "2026-02-21",
+                          "changes":  [
+                                          "Added GuardEngine with 6-gate remediation authority and EscalationLevel hard-stop",
+                                          "Added IntegrityEngine with SHA256 platform validation and log sealing",
+                                          "Added ScoringEngine with weighted health scoring (9 categories)",
+                                          "Added TrendEngine with 90-session historical tracking and trajectory analysis",
+                                          "Added ComplianceExport for ISO/SOC2/CIS artifact generation",
+                                          "Added OEM Validation Mode (Option 55, read-only hardware baseline)",
+                                          "Added VersionManifest governance with SHA256 file hashes",
+                                          "Added config.json for enterprise engine configuration",
+                                          "Smart Diagnosis Engine enhanced with enterprise engine integration (graceful degradation)"
+                                      ]
+                      }
+                  ],
+    "files":  [
+                  {
+                      "relativePath":  "Smart_Diagnosis_Engine.ps1",
+                      "critical":  true,
+                      "role":  "ENGINE",
+                      "description":  "9-phase orchestrated root cause analysis engine",
+                      "sha256":  "50CB3F9F21BED985E4F64549CB3A0A1CCB55C5ABAFFAB9A7D5D0DBB8B38D2F36"
+                  },
+                  {
+                      "relativePath":  "Laptop_Diagnostic_Suite.ps1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "Core engine with 45 diagnostic and repair modules",
+                      "sha256":  "C7C5DD225BBB04CB4DBEE0A9882E708FC566D33CC39F238633227EB011EFB5D8"
+                  },
+                  {
+                      "relativePath":  "Core\\LDT-EngineAdapter.psm1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "Bridge module between LDT conventions and enterprise engines",
+                      "sha256":  "3D9C2095C1CEDBCA0359A478C7200A1283D70578138DF7CA57D1DAD29B3B23C1"
+                  },
+                  {
+                      "relativePath":  "Core\\GuardEngine.psm1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "Central remediation override authority with 6-gate system",
+                      "sha256":  "5662E9269690583163B37AD6CBA72E191A05C70EC2A8305D27F9238946470594"
+                  },
+                  {
+                      "relativePath":  "Core\\IntegrityEngine.psm1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "SHA256 tamper-evident log sealing and platform validation",
+                      "sha256":  "C01DA5D555752745E1F3DB0E7EFFFA5B68CEAA1C4B51235F42CC563009713C5E"
+                  },
+                  {
+                      "relativePath":  "Core\\ScoringEngine.psm1",
+                      "critical":  false,
+                      "role":  "CORE",
+                      "description":  "Weighted system health score calculator",
+                      "sha256":  "3B3A191D1B70FAC2047CB772537167C0D777EAD929A6A4AC63F093C644175F85"
+                  },
+                  {
+                      "relativePath":  "Core\\TrendEngine.psm1",
+                      "critical":  false,
+                      "role":  "CORE",
+                      "description":  "Historical session trend storage and drift analysis",
+                      "sha256":  "4955632AFBF78E94CC8756B25695CB018001F2520D79BFE3CDF2F536E8D6A77D"
+                  },
+                  {
+                      "relativePath":  "Core\\ComplianceExport.psm1",
+                      "critical":  false,
+                      "role":  "CORE",
+                      "description":  "ISO/SOC2/CIS compliance artifact generator",
+                      "sha256":  "E56934A6A674C1101D2CF2EAF7D21627506EBA5C9FD58708B7A179756F34A2D1"
+                  },
+                  {
+                      "relativePath":  "Config\\config.json",
+                      "critical":  true,
+                      "role":  "CONFIG",
+                      "description":  "Enterprise engine configuration",
+                      "sha256":  "FE09EDAE0FA56A3D2223FCA2E1B0017E47DEBA2AA9060745756D346CC7477D14"
+                  },
+                  {
+                      "relativePath":  "Quick_Start.ps1",
+                      "critical":  false,
+                      "role":  "SCRIPT",
+                      "description":  "Quick Start guided workflows (Options 51-53)",
+                      "sha256":  "4B4F20BF74214012E3BE9F75E5E2015945DED3A46C27D24675148566F20BDDB5"
+                  },
+                  {
+                      "relativePath":  "Team_Issue_Detector.ps1",
+                      "critical":  false,
+                      "role":  "SCRIPT",
+                      "description":  "Fleet-wide BSOD/Reset/VPN detector (Option 49)",
+                      "sha256":  "39EABF105183DEF2EB2D7D1334381E5FFA99AA869B1E20B0BC3774549F9856FB"
+                  },
+                  {
+                      "relativePath":  "Fleet_Aggregator.ps1",
+                      "critical":  false,
+                      "role":  "SCRIPT",
+                      "description":  "CSV merge and fleet HTML dashboard (Option 50)",
+                      "sha256":  "374D897BEDBB2A866AD9B3729A56B2865C5B986B61BECBF1994DB0F5E6BC8B1D"
+                  },
+                  {
+                      "relativePath":  "OEM_Validation.ps1",
+                      "critical":  false,
+                      "role":  "TOOL",
+                      "description":  "OEM read-only validation mode (Option 55)",
+                      "sha256":  "86C5B83256E620DC45FDE92CF4F2C21C765AA99A486F07328488A6BC17AB43B6"
+                  },
+                  {
+                      "relativePath":  "Config\\config.ini",
+                      "critical":  false,
+                      "role":  "CONFIG",
+                      "description":  "Diagnostic threshold configuration (24 sections)",
+                      "sha256":  "0E3070A6A8CDD4ACF269C57AD0FC1D2155C1F17D72B09DD994251404311008B4"
+                  }
+              ],
+    "governance":  {
+                       "approvedBy":  "LDT Development Team",
+                       "classifiedAs":  "INTERNAL — FIELD SERVICE TOOL",
+                       "changeControlRef":  "LDT-v7.0.0",
+                       "validationMatrix":  "Docs\\ValidationTestMatrix.md"
+                   },
+    "_selfHash":  "A9057F9CEEF5978CFD6F14982DD5FC6DE405E8F42733A5D707DE4B1D827BEA9F",
+    "_manifestUpdatedAt":  "2026-02-21T17:36:22.7465905+05:30",
+    "_manifestUpdatedBy":  "DESKTOP-7G6HT08\\LENOVO"
 }
+
