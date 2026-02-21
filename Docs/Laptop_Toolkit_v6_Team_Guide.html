@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laptop Diagnostic Toolkit v6.0 - Team Guide</title>
+<style>
+  @page { size: A4; margin: 15mm 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.5; background: #fff; }
+  h1 { font-size: 22pt; color: #00539B; border-bottom: 3px solid #00539B; padding-bottom: 8px; margin: 20px 0 12px; }
+  h2 { font-size: 15pt; color: #00539B; border-bottom: 2px solid #cce0f0; padding-bottom: 4px; margin: 22px 0 10px; page-break-after: avoid; }
+  h3 { font-size: 12pt; color: #004080; margin: 14px 0 6px; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 10pt; page-break-inside: auto; }
+  th { background: #00539B; color: #fff; text-align: left; padding: 6px 10px; font-weight: 600; }
+  td { border: 1px solid #d0d8e0; padding: 5px 10px; vertical-align: top; }
+  tr:nth-child(even) { background: #f4f8fc; }
+  tr { page-break-inside: avoid; }
+  code, .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 9.5pt; background: #f0f4f8; padding: 1px 5px; border-radius: 3px; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 12px 16px; border-radius: 6px; font-size: 9pt; overflow-x: auto; margin: 8px 0 12px; white-space: pre-wrap; word-wrap: break-word; page-break-inside: avoid; }
+  .info-box { background: #e8f4fd; border-left: 4px solid #00539B; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; }
+  .warn-box { background: #fff8e1; border-left: 4px solid #f5a623; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; }
+  .danger-box { background: #fde8e8; border-left: 4px solid #d32f2f; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; }
+  .success-box { background: #e8f5e9; border-left: 4px solid #388e3c; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 8.5pt; font-weight: 600; }
+  .tag-safe { background: #e8f5e9; color: #2e7d32; }
+  .tag-caution { background: #fff8e1; color: #f57f17; }
+  .tag-danger { background: #fde8e8; color: #c62828; }
+  .tag-info { background: #e8f4fd; color: #0277bd; }
+  ul, ol { margin: 6px 0 6px 22px; }
+  li { margin: 3px 0; }
+  .page-break { page-break-before: always; }
+  .toc a { color: #00539B; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  .header-bar { background: #00539B; color: #fff; padding: 20px 24px; margin: 0 0 20px; }
+  .header-bar h1 { color: #fff; border: none; margin: 0; padding: 0; }
+  .header-bar p { color: #cce0f0; margin: 4px 0 0; }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px 40px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .flow-step { display: inline-block; background: #00539B; color: #fff; padding: 4px 12px; border-radius: 4px; margin: 2px 4px 2px 0; font-size: 9.5pt; }
+  .flow-arrow { color: #00539B; font-weight: bold; margin: 0 2px; }
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+  <h1 style="font-size:26pt;">Laptop Diagnostic Toolkit v6.0</h1>
+  <p style="font-size:13pt;">Team Reference Guide &mdash; Consolidated Single-Module Architecture</p>
+  <p style="font-size:10pt; margin-top:8px;">Version 6.0.0 &bull; February 2026 &bull; 45 Functions &bull; USB-Portable</p>
+</div>
+
+<div class="container">
+
+<!-- TABLE OF CONTENTS -->
+<h2>Table of Contents</h2>
+<ol class="toc" style="font-size:10.5pt;">
+  <li><a href="#s1">Overview &amp; Architecture</a></li>
+  <li><a href="#s2">Quick Start</a></li>
+  <li><a href="#s3">Menu Reference (Options 0&ndash;48)</a></li>
+  <li><a href="#s4">Diagnostics (Options 1&ndash;5)</a></li>
+  <li><a href="#s5">Repair Tools (Options 6&ndash;9)</a></li>
+  <li><a href="#s6">Fleet Management (Options 10&ndash;13)</a></li>
+  <li><a href="#s7">Hardware Tests (Options 14&ndash;22)</a></li>
+  <li><a href="#s8">System Management (Options 23&ndash;27)</a></li>
+  <li><a href="#s9">Refurbishment (Options 28&ndash;30)</a></li>
+  <li><a href="#s10">Troubleshooters &mdash; Auto-Fix (Options 31&ndash;35)</a></li>
+  <li><a href="#s10b">Advanced Diagnostics (Options 39&ndash;48)</a></li>
+  <li><a href="#s11">Impact Levels &amp; Safety</a></li>
+  <li><a href="#s12">Troubleshooter Workflows</a></li>
+  <li><a href="#s13">Configuration Reference</a></li>
+  <li><a href="#s14">USB Directory Structure</a></li>
+  <li><a href="#s15">Quick Lookup Table</a></li>
+  <li><a href="#s16">Changelog</a></li>
+</ol>
+
+<!-- SECTION 1 -->
+<h2 id="s1">1. Overview &amp; Architecture</h2>
+<p>The Laptop Diagnostic Toolkit v6.0 is a USB-portable, single-module PowerShell diagnostic and remediation suite designed for Lenovo ThinkPad fleet management. It runs from any USB drive with no installation required.</p>
+
+<h3>Architecture</h3>
+<table>
+  <tr><th>Component</th><th>File</th><th>Purpose</th></tr>
+  <tr><td>PowerShell Module</td><td><code>Laptop_Diagnostic_Suite.ps1</code></td><td>All 45 functions in one file (~6,000 lines)</td></tr>
+  <tr><td>BAT Launcher</td><td><code>Laptop_Master_Diagnostic.bat</code></td><td>Admin elevation, menu UI, function dispatch</td></tr>
+  <tr><td>Config</td><td><code>Config\config.ini</code></td><td>All thresholds, paths, toggles (23 sections)</td></tr>
+  <tr><td>Module Registry</td><td><code>DiagnosticModules.csv</code></td><td>45 rows mapping functions to categories</td></tr>
+</table>
+
+<h3>Key Design Principles</h3>
+<ul>
+  <li><strong>Single-module</strong> &mdash; one PS1 file, no external dependencies</li>
+  <li><strong>USB-portable</strong> &mdash; all paths use <code>$PSScriptRoot</code>, logs/reports stay on USB</li>
+  <li><strong>ThinkPad-optimized</strong> &mdash; auto-detects ThinkPad via 3 WMI sources (Model, SystemFamily, ComputerSystemProduct.Version)</li>
+  <li><strong>Non-destructive by default</strong> &mdash; diagnostic functions are read-only; troubleshooters require Y/N approval per fix</li>
+  <li><strong>Enterprise-ready</strong> &mdash; Fleet Report exports CSV for aggregation across multiple laptops</li>
+</ul>
+
+<!-- SECTION 2 -->
+<h2 id="s2" class="page-break">2. Quick Start</h2>
+
+<h3>Step 1: Plug in USB</h3>
+<p>Insert the USB drive containing the toolkit into the target laptop.</p>
+
+<h3>Step 2: Run as Administrator</h3>
+<p>Right-click <code>Laptop_Master_Diagnostic.bat</code> and select <strong>Run as administrator</strong>. The BAT file handles UAC elevation automatically if needed.</p>
+
+<h3>Step 3: Select an Option</h3>
+<p>Choose from options 0&ndash;48 in the menu. Each option runs a specific diagnostic, troubleshooter, or advanced analysis function.</p>
+
+<h3>Step 4: Review Results</h3>
+<p>HTML reports are saved to <code>Reports\</code> and logs to <code>Logs\</code> on the USB drive. Reports open automatically in the default browser.</p>
+
+<div class="info-box">
+  <strong>Tip:</strong> For a full system assessment, run options in this order: 1 (Advanced Diagnostic) &rarr; 14 (Battery Health) &rarr; 17 (Thermal Analysis) &rarr; 27 (Security Check). For auto-fix, follow up with options 31&ndash;35 (Troubleshooters).
+</div>
+
+<div class="warn-box">
+  <strong>USB Safety:</strong> Do not unplug the USB while a function is running. Wait until you return to the main menu. All fixes are applied directly to the laptop &mdash; they persist after the USB is removed.
+</div>
+
+<!-- SECTION 3 -->
+<h2 id="s3" class="page-break">3. Menu Reference (Options 0&ndash;48)</h2>
+<table>
+  <tr><th>#</th><th>Category</th><th>Option Name</th><th>Description</th><th>Impact</th></tr>
+  <tr><td>1</td><td>Diagnostics</td><td>Advanced Diagnostic</td><td>Full system scan: disk, memory, CPU, updates, event logs, network</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>2</td><td>Diagnostics</td><td>BSOD Analysis</td><td>Analyze crash dumps, reliability records, problem drivers</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>3</td><td>Diagnostics</td><td>Enhanced Hardware Test</td><td>CPU stress, memory allocation, disk I/O, network, battery</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>4</td><td>Diagnostics</td><td>Custom Tests</td><td>Select specific test categories</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>5</td><td>Diagnostics</td><td>Diagnostic Analyzer</td><td>Analyze previous diagnostic log files for patterns</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>6</td><td>Repair Tools</td><td>Boot Repair</td><td>BCD check, bootrec/bcdboot, SFC, DISM repair</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>7</td><td>Repair Tools</td><td>BIOS Repair</td><td>BIOS version check, age analysis, update recommendations</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>8</td><td>Repair Tools</td><td>Driver Repair</td><td>Scan problem/unsigned drivers, device reset</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>9</td><td>Repair Tools</td><td>Software Cleanup</td><td>Scan temp files, browser caches, WU cache, startup programs</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>10</td><td>Fleet Mgmt</td><td>Fleet Report</td><td>System inventory with CSV export</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>11</td><td>Fleet Mgmt</td><td>Verify Scripts</td><td>Check PS1 module syntax, function count, BAT launcher</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>12</td><td>Fleet Mgmt</td><td>Compatibility Checker</td><td>PowerShell version, .NET, execution policy, admin check</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>13</td><td>Fleet Mgmt</td><td>Hardware Inventory</td><td>Full CIM hardware enumeration with CSV export</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>14</td><td>Hardware Tests</td><td>Battery Health</td><td>powercfg report, wear/cycle analysis, charge rate</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>15</td><td>Hardware Tests</td><td>Network Diagnostic</td><td>Adapters, IP config, DNS resolution, latency tests</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>16</td><td>Hardware Tests</td><td>Performance Analyzer</td><td>CPU/memory/disk benchmarks, bottleneck ID</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>17</td><td>Hardware Tests</td><td>Thermal Analysis</td><td>30-second temperature monitoring, fan status</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>18</td><td>Hardware Tests</td><td>Display Calibration</td><td>GPU info, resolution, monitor details, dead pixel guidance</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>19</td><td>Hardware Tests</td><td>Audio Diagnostic</td><td>Sound devices, audio service status, test tone</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>20</td><td>Hardware Tests</td><td>Keyboard Test</td><td>Keyboard detection, hotkey driver check, input test</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>21</td><td>Hardware Tests</td><td>TrackPoint Calibration</td><td>TrackPoint/touchpad detection, driver check</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>22</td><td>Hardware Tests</td><td>Power Settings</td><td>Power plans, sleep/lid settings, Power Manager check</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>23</td><td>System Mgmt</td><td>Secure Wipe</td><td>Double-confirm temp/cache/WU cleanup</td><td><span class="tag tag-danger">Destructive</span></td></tr>
+  <tr><td>24</td><td>System Mgmt</td><td>Deployment Prep</td><td>Pre-deployment checklist: disk, activation, updates</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>25</td><td>System Mgmt</td><td>Update Manager</td><td>Windows Update COM check, Lenovo System Update</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>26</td><td>System Mgmt</td><td>BIOS Update</td><td>BIOS version/age check, flash utility detection</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>27</td><td>System Mgmt</td><td>Security Check</td><td>Defender, firewall, BitLocker, TPM, Secure Boot, UAC</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>28</td><td>Refurbishment</td><td>Refurb Battery Analysis</td><td>Battery cycle count, wear, health score for resale</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>29</td><td>Refurbishment</td><td>Refurb Quality Check</td><td>10-point QA checklist</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>30</td><td>Refurbishment</td><td>Refurb Thermal Analysis</td><td>5-minute CPU stress + thermal monitoring</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>31</td><td>Troubleshooters</td><td>Security Hardening</td><td>Auto-fix Defender, firewall, UAC, Windows Update, temp cleanup</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>32</td><td>Troubleshooters</td><td>Network Troubleshooter</td><td>Auto-fix Wi-Fi, Bluetooth, VPN, mobile network</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>33</td><td>Troubleshooters</td><td>BSOD Troubleshooter</td><td>Identify crash-causing driver, rollback/update, SFC/DISM</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>34</td><td>Troubleshooters</td><td>Input Troubleshooter</td><td>Fix Filter/Sticky Keys, keyboard driver, Fn keys, TrackPoint</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>35</td><td>Troubleshooters</td><td>Driver Auto-Update</td><td>Update outdated drivers via Windows Update + Lenovo Thin Installer</td><td><span class="tag tag-caution">Caution</span></td></tr>
+  <tr><td>39</td><td>Advanced Diag.</td><td>POST Error Reader</td><td>ThinkPad POST/BIOS error codes from Event Logs</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>40</td><td>Advanced Diag.</td><td>SMART Disk Analysis</td><td>Deep SMART attribute analysis: temp, wear, errors</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>41</td><td>Advanced Diag.</td><td>CMOS Battery Check</td><td>RTC coin cell health via clock drift + Event Logs</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>42</td><td>Advanced Diag.</td><td>Machine Identity Check</td><td>Serial Number, UUID, Machine Type, Asset Tag</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>43</td><td>Advanced Diag.</td><td>TPM Health Check</td><td>TPM 2.0, ROCA vulnerability, BitLocker integration</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>44</td><td>Advanced Diag.</td><td>Win11 Readiness Check</td><td>Full Windows 11 hardware compatibility assessment</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>45</td><td>Advanced Diag.</td><td>Lenovo Vantage Check</td><td>Vantage, Commercial Vantage, System Update stack</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>46</td><td>Advanced Diag.</td><td>Memory Error Log Check</td><td>WHEA events, WMD results, BugCheck cross-reference</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>47</td><td>Advanced Diag.</td><td>Display Pixel Check</td><td>LCD pixel policy, GPU driver, backlight health</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>48</td><td>Advanced Diag.</td><td>Enterprise Readiness</td><td>Master health scorecard (0-100 weighted score)</td><td><span class="tag tag-safe">Read-Only</span></td></tr>
+  <tr><td>36</td><td>Other</td><td>Run Interactive Menu</td><td>PS1 built-in menu (alternative to BAT menu)</td><td><span class="tag tag-info">N/A</span></td></tr>
+  <tr><td>37</td><td>Other</td><td>Open Logs Folder</td><td>Open Logs\ directory in File Explorer</td><td><span class="tag tag-info">N/A</span></td></tr>
+  <tr><td>38</td><td>Other</td><td>Open Reports Folder</td><td>Open Reports\ directory in File Explorer</td><td><span class="tag tag-info">N/A</span></td></tr>
+  <tr><td>0</td><td>Other</td><td>Exit</td><td>Exit the toolkit</td><td><span class="tag tag-info">N/A</span></td></tr>
+</table>
+
+<!-- SECTION 4 -->
+<h2 id="s4" class="page-break">4. Diagnostics (Options 1&ndash;5)</h2>
+<p>All diagnostic functions are <strong>read-only</strong> &mdash; they scan and report without making changes.</p>
+
+<h3>Option 1: Advanced Diagnostic</h3>
+<p>Comprehensive system scan covering disk health (S.M.A.R.T.), memory usage, CPU performance, Windows Update status, event log analysis (errors/warnings from last 7 days), and network configuration. Best for initial triage.</p>
+
+<h3>Option 2: BSOD Analysis</h3>
+<p>Reads <code>C:\Windows\Minidump\*.dmp</code> crash dumps, correlates with reliability records, identifies faulting drivers/modules. Maps known crash-causing drivers (ndis.sys, nvlddmkm.sys, ntfs.sys, etc.) to root causes. Pairs with Option 33 (BSOD Troubleshooter) for auto-fix.</p>
+
+<h3>Option 3: Enhanced Hardware Test</h3>
+<p>Multi-component stress test: CPU load generation (~10 sec), memory allocation/pattern test (100 MB), sequential disk I/O (100 MB), network adapter enumeration, and battery validation. Estimated runtime: 30 minutes.</p>
+
+<h3>Option 4: Custom Tests</h3>
+<p>Select specific test categories to run: storage, memory, display, network, thermal, audio, input devices. Useful for targeted testing when the issue area is already known.</p>
+
+<h3>Option 5: Diagnostic Analyzer</h3>
+<p>Analyzes previously generated log files from the <code>Logs\</code> folder. Identifies patterns, recurring errors, and trends across multiple diagnostic runs. No admin privileges required.</p>
+
+<!-- SECTION 5 -->
+<h2 id="s5">5. Repair Tools (Options 6&ndash;9)</h2>
+
+<h3>Option 6: Boot Repair</h3>
+<p>Checks Boot Configuration Data (BCD), runs <code>bootrec</code>/<code>bcdboot</code>, followed by <code>sfc /scannow</code> and <code>DISM /RestoreHealth</code>. Use when a laptop has boot issues or corrupted system files.</p>
+
+<h3>Option 7: BIOS Repair</h3>
+<p>Read-only BIOS version check, age analysis, and update recommendations. Checks against known Lenovo BIOS versions for ThinkPads.</p>
+
+<h3>Option 8: Driver Repair</h3>
+<p>Scans for devices with problem status codes, unsigned drivers, and outdated Lenovo-specific drivers. Can reset individual devices via disable/enable cycle. Pairs with Option 35 (Driver Auto-Update) for automatic updating.</p>
+
+<h3>Option 9: Software Cleanup</h3>
+<p>Scans temp files, browser caches, Windows Update cache, and startup programs. Reports sizes and offers cleanup. Use before Deployment Prep (Option 24).</p>
+
+<!-- SECTION 6 -->
+<h2 id="s6">6. Fleet Management (Options 10&ndash;13)</h2>
+
+<h3>Option 10: Fleet Report</h3>
+<p>Generates a system inventory report and exports it as CSV for fleet-level aggregation. Captures: serial number, model, OS version, CPU, RAM, disk health, battery status, and more.</p>
+
+<h3>Option 11: Verify Scripts</h3>
+<p>Validates the toolkit itself: checks PS1 module syntax (0 parse errors expected), counts functions (37 expected), verifies BAT launcher dispatch table, and validates config.ini sections.</p>
+
+<h3>Option 12: Compatibility Checker</h3>
+<p>Checks prerequisites: PowerShell version (5.1+ required), .NET Framework, execution policy, admin privileges, CIM/WMI subsystem health.</p>
+
+<h3>Option 13: Hardware Inventory</h3>
+<p>Full CIM hardware enumeration: processor, memory, disk, GPU, network adapters, battery, monitor, USB devices. Exports to CSV.</p>
+
+<!-- SECTION 7 -->
+<h2 id="s7" class="page-break">7. Hardware Tests (Options 14&ndash;22)</h2>
+
+<h3>Option 14: Battery Health</h3>
+<p>Generates <code>powercfg /batteryreport</code>, analyzes wear percentage (design vs. actual capacity), cycle count, charge rate, and health status. Pairs with Option 28 (Refurb Battery Analysis) for resale scoring.</p>
+
+<h3>Option 15: Network Diagnostic</h3>
+<p>Enumerates all network adapters, checks IP configuration, DNS resolution, latency tests (ping), proxy settings, and VPN adapter status. Pairs with Option 32 (Network Troubleshooter) for auto-fix.</p>
+
+<h3>Option 16: Performance Analyzer</h3>
+<p>CPU/memory/disk benchmarks with bottleneck identification. Reports current resource usage and scores performance relative to expected baselines.</p>
+
+<h3>Option 17: Thermal Analysis</h3>
+<p>30-second temperature monitoring with 5-second sample intervals. Checks fan status where available. Warning at 75&deg;C, critical at 85&deg;C (configurable).</p>
+
+<h3>Option 18: Display Calibration</h3>
+<p>GPU information, current resolution vs. native, monitor details (make/model/size), and dead pixel test guidance.</p>
+
+<h3>Option 19: Audio Diagnostic</h3>
+<p>Enumerates sound devices, checks Windows Audio service status, provides test tone guidance.</p>
+
+<h3>Option 20: Keyboard Test</h3>
+<p>Keyboard device detection, HID driver status check, Lenovo hotkey driver verification. Interactive typing test. Pairs with Option 34 (Input Troubleshooter) for auto-fix.</p>
+
+<h3>Option 21: TrackPoint Calibration</h3>
+<p>TrackPoint and touchpad device detection, pointing device driver check, calibration guidance. ThinkPad-recommended.</p>
+
+<h3>Option 22: Power Settings</h3>
+<p>Lists active power plan, sleep/hibernate/lid settings, and checks for Lenovo Power Manager or Vantage.</p>
+
+<!-- SECTION 8 -->
+<h2 id="s8">8. System Management (Options 23&ndash;27)</h2>
+
+<h3>Option 23: Secure Wipe</h3>
+<p>Double-confirmation privacy cleanup: removes temp files, browser caches, Windows Update cache, recent file lists. Use before returning a laptop to the pool. <span class="tag tag-danger">Destructive</span> &mdash; deleted files cannot be recovered.</p>
+
+<h3>Option 24: Deployment Prep</h3>
+<p>Pre-deployment checklist: disk space, Windows activation status, pending updates, battery health, driver status. Generates a pass/fail checklist for handoff.</p>
+
+<h3>Option 25: Update Manager</h3>
+<p>Checks Windows Update via COM API, detects Lenovo System Update or Vantage presence. Reports pending updates and last update date.</p>
+
+<h3>Option 26: BIOS Update</h3>
+<p>Checks current BIOS version and age. Detects flash utilities in <code>Tools\BIOS\</code> on the USB. Safety checks: requires AC power, minimum 20% battery.</p>
+
+<h3>Option 27: Security Check</h3>
+<p>Checks: Windows Defender real-time protection, signature age, firewall profiles, BitLocker status, TPM version, Secure Boot, UAC level. Pairs with Option 31 (Security Hardening) for auto-fix.</p>
+
+<!-- SECTION 9 -->
+<h2 id="s9" class="page-break">9. Refurbishment (Options 28&ndash;30)</h2>
+<p>Functions for evaluating used/refurbished laptops for resale readiness.</p>
+
+<h3>Option 28: Refurb Battery Analysis</h3>
+<p>Scores battery on a 100-point scale:</p>
+<table>
+  <tr><th>Component</th><th>Weight</th><th>Green</th><th>Yellow</th><th>Red</th></tr>
+  <tr><td>Wear Percentage</td><td>50%</td><td>&le; 20%</td><td>&le; 35%</td><td>&gt; 35%</td></tr>
+  <tr><td>Cycle Count</td><td>30%</td><td>&le; 500</td><td>&le; 800</td><td>&gt; 800</td></tr>
+  <tr><td>WMI Status</td><td>20%</td><td>OK</td><td>Degraded</td><td>Replace</td></tr>
+</table>
+<p>Verdict: <strong>PASS</strong> (&ge;75), <strong>WARN</strong> (&ge;50), <strong>FAIL</strong> (&lt;50). All thresholds configurable in <code>config.ini [Refurbishment]</code>.</p>
+
+<h3>Option 29: Refurb Quality Check</h3>
+<p>10-point QA checklist: Windows activation, driver status, disk health, security settings, cleanup status, battery health, display, input devices, network, and thermal. Generates pass/fail for each point with an overall pass rate (minimum 80% configurable).</p>
+
+<h3>Option 30: Refurb Thermal Analysis</h3>
+<p>5-minute CPU stress test with continuous thermal monitoring at 5-second intervals. Detects throttling under sustained load. Pass &le;75&deg;C, Warn &le;85&deg;C, Fail &gt;85&deg;C.</p>
+
+<!-- SECTION 10 -->
+<h2 id="s10" class="page-break">10. Troubleshooters &mdash; Auto-Fix (Options 31&ndash;35)</h2>
+
+<div class="info-box">
+  <strong>How Troubleshooters Work:</strong> Each troubleshooter follows the closed-loop cycle:<br>
+  <span class="flow-step">Detect Issue</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Show Finding</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Ask Y/N</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Apply Fix</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Verify</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Log &amp; Report</span>
+  <br><br>
+  The technician controls every action via Y/N prompts. No fix is applied without explicit approval.
+</div>
+
+<h3>Option 31: Security Hardening</h3>
+<p>Pairs with Option 27 (Security Check). Detects and <strong>fixes</strong> security issues:</p>
+<table>
+  <tr><th>#</th><th>Check</th><th>Auto-Fix</th></tr>
+  <tr><td>1</td><td>Defender real-time protection disabled</td><td><code>Set-MpPreference -DisableRealtimeMonitoring $false</code></td></tr>
+  <tr><td>2</td><td>Defender signatures outdated (&gt;7 days)</td><td><code>Update-MpSignature</code></td></tr>
+  <tr><td>3</td><td>Firewall profiles disabled</td><td><code>Set-NetFirewallProfile -Enabled True</code></td></tr>
+  <tr><td>4</td><td>UAC disabled</td><td>Set registry <code>EnableLUA=1</code></td></tr>
+  <tr><td>5</td><td>Windows Update stuck/service stopped</td><td>Restart WU services, rename SoftwareDistribution</td></tr>
+  <tr><td>6</td><td>Temp files exceed threshold</td><td>Clean <code>%TEMP%</code> directory</td></tr>
+</table>
+
+<h3>Option 32: Network Troubleshooter</h3>
+<p>Pairs with Option 15 (Network Diagnostic). Sub-menu with 5 choices:</p>
+<table>
+  <tr><th>Sub-option</th><th>Fixes</th></tr>
+  <tr><td><strong>[1] Wi-Fi</strong></td><td>Enable adapter, update driver, flush DNS, set fallback DNS (8.8.8.8/1.1.1.1), reset TCP/IP stack, disable Large Send Offload, disable power management</td></tr>
+  <tr><td><strong>[2] Bluetooth</strong></td><td>Enable adapter, start bthserv service, update driver, disable BT power saving</td></tr>
+  <tr><td><strong>[3] VPN</strong></td><td>Restart VPN services (vpnagent/rasman), reset WAN Miniport, remove orphaned services, flush DNS, install VPN client from USB</td></tr>
+  <tr><td><strong>[4] Mobile Network</strong></td><td>Enable WWAN adapter, restart WwanSvc, report SIM/driver status</td></tr>
+  <tr><td><strong>[5] Run All</strong></td><td>Execute all four sub-workflows sequentially</td></tr>
+</table>
+
+<h3>Option 33: BSOD Troubleshooter</h3>
+<p>Pairs with Option 2 (BSOD Analysis). Reads crash dumps, identifies the faulting driver, and applies targeted fixes:</p>
+<table>
+  <tr><th>Faulting Module</th><th>Root Cause</th><th>Auto-Fix</th></tr>
+  <tr><td>ndis.sys / nwifi.sys</td><td>Network driver</td><td>Update/rollback + disable LSO</td></tr>
+  <tr><td>nvlddmkm.sys</td><td>NVIDIA GPU</td><td>Update GPU driver (reboot warning)</td></tr>
+  <tr><td>atikmdag.sys</td><td>AMD GPU</td><td>Update GPU driver (reboot warning)</td></tr>
+  <tr><td>ntfs.sys / ntoskrnl.exe</td><td>System/disk</td><td>SFC + DISM + check disk health</td></tr>
+  <tr><td>tcpip.sys</td><td>Network stack</td><td>netsh reset</td></tr>
+  <tr><td>dxgkrnl.sys</td><td>Display</td><td>Update GPU driver</td></tr>
+  <tr><td>storport.sys</td><td>Storage</td><td>Check SSD health + update storage driver</td></tr>
+</table>
+<p>Also offers: SFC scan, DISM repair, Windows Memory Diagnostic scheduling, and thermal check.</p>
+
+<h3>Option 34: Input Troubleshooter</h3>
+<p>Pairs with Options 20 (Keyboard Test) and 21 (TrackPoint Calibration). 8-step check:</p>
+<table>
+  <tr><th>#</th><th>Check</th><th>Auto-Fix</th></tr>
+  <tr><td>1</td><td>Filter Keys enabled</td><td>Set registry Flags=126</td></tr>
+  <tr><td>2</td><td>Sticky Keys active</td><td>Set registry Flags=506 (uses bitmask detection &mdash; only flags when actively ON)</td></tr>
+  <tr><td>3</td><td>Toggle Keys enabled</td><td>Set registry Flags=62</td></tr>
+  <tr><td>4</td><td>Keyboard layout</td><td>Report current layout (informational)</td></tr>
+  <tr><td>5</td><td>Keyboard driver error</td><td>Disable/enable cycle (only flags Error/Degraded status, groups duplicate HID devices)</td></tr>
+  <tr><td>6</td><td>Lenovo Hotkey driver missing</td><td>Run Lenovo Thin Installer from USB if available, otherwise report</td></tr>
+  <tr><td>7</td><td>Pointing device error</td><td>Disable/enable cycle (only flags Error/Degraded status, groups duplicate HID devices)</td></tr>
+  <tr><td>8</td><td>Interactive typing test</td><td>User types test phrase to verify keyboard input</td></tr>
+</table>
+
+<div class="success-box">
+  <strong>v6.0 Improvements (Input Troubleshooter):</strong>
+  <ul>
+    <li>HID devices with "Unknown" status are now correctly recognized as normal (composite USB devices) and skipped</li>
+    <li>Duplicate HID devices are grouped &mdash; one Y/N prompt per device type instead of per instance</li>
+    <li>Sticky Keys detection uses bitmask (bit 2) instead of string comparison, eliminating false positives</li>
+    <li>Error output from device reset operations is cleanly caught and displayed instead of showing raw PowerShell errors</li>
+    <li>Lenovo Hotkey driver fix can now launch Thin Installer directly from USB</li>
+  </ul>
+</div>
+
+<h3>Option 35: Driver Auto-Update</h3>
+<p>Pairs with Option 8 (Driver Repair). Multi-phase driver update:</p>
+<table>
+  <tr><th>Phase</th><th>Action</th></tr>
+  <tr><td>1. Scan</td><td>Enumerate all PnP devices, find: status != OK, driver &gt;12 months old, unsigned</td></tr>
+  <tr><td>2. Categorize</td><td><span class="tag tag-safe">Safe</span> (auto-update OK), <span class="tag tag-caution">Caution</span> (GPU &mdash; needs reboot), <span class="tag tag-danger">Blocked</span> (BIOS/Firmware &mdash; never auto)</td></tr>
+  <tr><td>3. Windows Update</td><td>Search for driver updates via COM API, install with Y/N per driver</td></tr>
+  <tr><td>4. Lenovo Thin Installer</td><td>If ThinkPad + Thin Installer on USB &rarr; Y/N &rarr; silent install</td></tr>
+  <tr><td>5. Verify</td><td>Re-scan devices, compare before/after, show changes</td></tr>
+</table>
+
+<div class="warn-box">
+  <strong>Never Auto-Updated:</strong> BIOS and Firmware updates are always blocked from automatic update. The <code>NeverAutoUpdate</code> setting in config.ini controls this.
+</div>
+
+<!-- SECTION 10B: ADVANCED DIAGNOSTICS -->
+<h2 id="s10b" class="page-break">10b. Advanced Diagnostics (Options 39&ndash;48)</h2>
+<p>These 10 modules provide deep-dive enterprise diagnostics covering POST errors, SMART analysis, TPM health, Windows 11 readiness, and a consolidated enterprise scorecard. All are <strong>read-only</strong>.</p>
+
+<h3>Option 39: POST Error Reader</h3>
+<p>Scans both <strong>System</strong> and <strong>Application</strong> Event Logs for ThinkPad POST/BIOS error codes using a built-in Lenovo error code database (0175&ndash;2201). Queries events from providers: <code>Lenovo*</code>, <code>BIOS*</code>, <code>ACPI*</code>, <code>LenovoBiosWmi*</code>. Also checks kernel power events (unexpected shutdowns, BugChecks) and BIOS age. Runs 5 checks total.</p>
+<table>
+  <tr><th>POST Code Range</th><th>Category</th><th>Common Resolution</th></tr>
+  <tr><td>0175&ndash;0176</td><td>Security / CRC error</td><td>System board replacement</td></tr>
+  <tr><td>0187&ndash;0192</td><td>Machine identity</td><td>System board / VPD repair</td></tr>
+  <tr><td>0210</td><td>Stuck key</td><td>Replace keyboard</td></tr>
+  <tr><td>0270&ndash;0271</td><td>RTC / CMOS</td><td>Replace CMOS battery</td></tr>
+  <tr><td>2100&ndash;2110</td><td>HDD/SSD detection</td><td>Reseat/replace storage device</td></tr>
+  <tr><td>2200&ndash;2201</td><td>Machine Type/UUID</td><td>Set via BIOS Setup or VPD tool</td></tr>
+</table>
+
+<h3>Option 40: SMART Disk Analysis</h3>
+<p>Deep SMART attribute analysis via <code>Get-StorageReliabilityCounter</code>. For each physical disk, checks: read errors, write errors, uncorrectable errors, corrected read errors, start/stop cycle count, temperature, SSD wear level, and power-on hours. Known bad SSD check (UMIS LENSE series on Win11). Also reports free space per logical disk.</p>
+<table>
+  <tr><th>Attribute</th><th>Warning</th><th>Critical/Fail</th></tr>
+  <tr><td>Read Errors Total</td><td>&ge; 1</td><td>&ge; 10</td></tr>
+  <tr><td>Read Errors Corrected</td><td>&ge; 100</td><td>&mdash;</td></tr>
+  <tr><td>Uncorrectable Errors</td><td>&mdash;</td><td>&ge; 1</td></tr>
+  <tr><td>Temperature</td><td>&ge; 55&deg;C</td><td>&ge; 65&deg;C</td></tr>
+  <tr><td>SSD Wear</td><td>&ge; 70%</td><td>&ge; 90%</td></tr>
+  <tr><td>Power-On Hours</td><td>&ge; 5 years</td><td>&mdash;</td></tr>
+  <tr><td>Start/Stop Cycles</td><td colspan="2">Logged for reference</td></tr>
+  <tr><td>Free Space</td><td>&le; 20%</td><td>&le; 10%</td></tr>
+</table>
+
+<h3>Option 41: CMOS Battery Check</h3>
+<p>Detects CMOS/RTC coin cell battery failure without relying on <code>Win32_Battery</code> (which only reads the main battery). Uses two detection methods:</p>
+<ul>
+  <li><strong>NTP clock drift:</strong> Queries <code>w32tm /stripchart</code> to measure time offset from <code>time.windows.com</code>. Warning at &gt;120s, Fail at &gt;3600s.</li>
+  <li><strong>Event Log analysis:</strong> Scans Kernel-General (ID 1/12) and W32Time (ID 129/134/142) for time synchronization failures and large time corrections in the last 180 days.</li>
+</ul>
+<div class="info-box">
+  <strong>Note:</strong> A dead CMOS battery is a $3 hardware fix (CR2032 coin cell replacement) that takes about 5 minutes. This module detects it so the technician knows to physically replace it.
+</div>
+
+<h3>Option 42: Machine Identity Check</h3>
+<p>Validates machine identity fields critical for fleet management: Serial Number, UUID, Machine Type, and Asset Tag. Detects placeholder values ("To Be Filled", "Default string", all-zeros UUID, all-F's UUID) that indicate failed VPD programming or system board replacement without identity restore.</p>
+
+<h3>Option 43: TPM Health Check</h3>
+<p>Comprehensive TPM assessment:</p>
+<table>
+  <tr><th>Check</th><th>Method</th></tr>
+  <tr><td>TPM Presence &amp; Version</td><td><code>Get-Tpm</code> cmdlet</td></tr>
+  <tr><td>TPM Firmware Version</td><td><code>Win32_Tpm</code> (root/cimv2/Security/MicrosoftTpm)</td></tr>
+  <tr><td>ROCA Vulnerability (CVE-2017-15361)</td><td>Infineon TPM firmware &lt; 7.85 detection</td></tr>
+  <tr><td>Event Log Issues</td><td>Event IDs 1794, 1796 (self-test failed), 5827, 5829</td></tr>
+  <tr><td>Sleep-Wake TPM Bug</td><td>Event ID 24620 (TPM failed to unlock after sleep)</td></tr>
+  <tr><td>BitLocker Status</td><td><code>Get-BitLockerVolume</code> (with Home edition guard)</td></tr>
+  <tr><td>Secure Boot</td><td><code>Confirm-SecureBootUEFI</code></td></tr>
+</table>
+
+<h3>Option 44: Win11 Readiness Check</h3>
+<p>Full Windows 11 hardware compatibility assessment covering 9 requirements:</p>
+<table>
+  <tr><th>#</th><th>Requirement</th><th>Check</th></tr>
+  <tr><td>1</td><td>Current OS</td><td>Detects Win10 EOL status or existing Win11</td></tr>
+  <tr><td>2</td><td>TPM 2.0</td><td><code>Get-Tpm</code> SpecVersion starts with "2."</td></tr>
+  <tr><td>3</td><td>CPU Generation</td><td>Intel 8th Gen+, Core Ultra, AMD Ryzen 2000+, Snapdragon</td></tr>
+  <tr><td>4</td><td>RAM</td><td>&ge; 4 GB</td></tr>
+  <tr><td>5</td><td>Storage</td><td>System drive &ge; 64 GB</td></tr>
+  <tr><td>6</td><td>Secure Boot</td><td><code>Confirm-SecureBootUEFI</code></td></tr>
+  <tr><td>7</td><td>UEFI Firmware</td><td><code>$env:firmware_type</code> with registry fallback</td></tr>
+  <tr><td>8</td><td>Display</td><td>&ge; 720p (1280x720)</td></tr>
+  <tr><td>9</td><td>Internet Connectivity</td><td><code>Test-NetConnection</code> to update.microsoft.com:443</td></tr>
+</table>
+<p>Verdict: <strong>READY</strong> (all pass), <strong>NOT READY</strong> (failures present), or <strong>ALREADY ON WIN11</strong>. Also reports Windows 10 end-of-life status (Oct 14, 2025 has already passed). Upgrade priority score 1&ndash;5.</p>
+
+<h3>Option 45: Lenovo Vantage Check</h3>
+<p>Detects the full Lenovo software stack for enterprise environments (9 checks):</p>
+<ul>
+  <li><strong>Commercial Vantage:</strong> AppX package <code>E046963F.LenovoSettingsforEnterprise</code></li>
+  <li><strong>Consumer Vantage:</strong> AppX package <code>E046963F.LenovoCompanion</code></li>
+  <li><strong>System Update:</strong> Registry <code>HKLM:\SOFTWARE\WOW6432Node\Lenovo\System Update</code></li>
+  <li><strong>Thin Installer:</strong> USB-based <code>ThinInstaller.exe</code> in <code>Tools\LenovoThinInstaller\</code></li>
+  <li><strong>ImController Service:</strong> Lenovo background service for driver management</li>
+  <li><strong>Lenovo Diagnostics:</strong> AppX or desktop install at <code>C:\Program Files\Lenovo\Lenovo Diagnostics\</code></li>
+  <li><strong>Lenovo Service Bridge:</strong> Web-based support integration service</li>
+  <li><strong>Warranty Info:</strong> Registry <code>HKLM:\SOFTWARE\Lenovo\Commercial Vantage\Warranty</code> &mdash; status and end date</li>
+</ul>
+<p>Flags conflicts (e.g., both consumer and commercial Vantage installed). Recommends Commercial Vantage for enterprise ThinkPads.</p>
+
+<h3>Option 46: Memory Error Log Check</h3>
+<p>Cross-references multiple memory error sources:</p>
+<table>
+  <tr><th>Source</th><th>Events</th></tr>
+  <tr><td>Windows Memory Diagnostic</td><td><code>MemoryDiagnostics-Results</code> Event ID 1001/1002</td></tr>
+  <tr><td>WHEA Logger</td><td>Event ID 17 (correctable), 18/19 (uncorrectable)</td></tr>
+  <tr><td>BugCheck Cross-Reference</td><td>0x1A, 0x4E, 0x50, 0xD1, 0x7A, 0xF4</td></tr>
+  <tr><td>Physical Memory Config</td><td>Mismatched speeds, single-channel detection</td></tr>
+  <tr><td>Current Usage</td><td>&gt;90% = Warning</td></tr>
+</table>
+
+<h3>Option 47: Display Pixel Check</h3>
+<p>Display and GPU health assessment (7 checks):</p>
+<ul>
+  <li><strong>GPU info:</strong> <code>Win32_VideoController</code> &mdash; driver date, error codes, adapter RAM</li>
+  <li><strong>Display PnP status:</strong> Device health via <code>Get-PnpDevice -Class Display</code></li>
+  <li><strong>GPU TDR events:</strong> System log Event IDs 4101/4116</li>
+  <li><strong>Monitor info:</strong> WMI monitor parameters (brightness, size, type)</li>
+  <li><strong>Native resolution match:</strong> Compares current resolution to <code>VideoModeDescription</code> native resolution &mdash; mismatch indicates scaling or driver issue</li>
+  <li><strong>Interactive pixel test:</strong> Prompts technician to enter dead pixel count (<code>Read-Host</code>). Evaluates against Lenovo 3-pixel defect threshold (ISO 9241-307 Class II)</li>
+  <li><strong>Backlight bleed test:</strong> Prompts technician to rate backlight bleed (None/Minor/Moderate/Severe). Maps to Pass/Info/Warning/Fail. Both prompts gracefully skip in non-interactive mode.</li>
+</ul>
+
+<h3>Option 48: Enterprise Readiness Report</h3>
+<p>Master health scorecard that aggregates data across 9 weighted categories into a single 0&ndash;100 score:</p>
+<table>
+  <tr><th>Category</th><th>Weight</th><th>What It Checks</th></tr>
+  <tr><td>Security</td><td>20%</td><td>Defender, Firewall, UAC, BitLocker, TPM, Secure Boot</td></tr>
+  <tr><td>Hardware</td><td>15%</td><td>CPU, RAM, physical disk health</td></tr>
+  <tr><td>Storage</td><td>15%</td><td>Disk health status, free space, SMART errors</td></tr>
+  <tr><td>Battery</td><td>10%</td><td>Wear percentage, cycle count, WMI status</td></tr>
+  <tr><td>Drivers</td><td>10%</td><td>Problem devices, outdated drivers</td></tr>
+  <tr><td>OS</td><td>10%</td><td>Windows version, activation, pending updates</td></tr>
+  <tr><td>Identity</td><td>10%</td><td>Serial, UUID, Machine Type validity</td></tr>
+  <tr><td>TPM</td><td>5%</td><td>TPM presence, version, readiness</td></tr>
+  <tr><td>Display</td><td>5%</td><td>GPU status, TDR events</td></tr>
+</table>
+<p>Lifecycle recommendation based on score:</p>
+<table>
+  <tr><th>Score</th><th>Rating</th><th>Recommendation</th></tr>
+  <tr><td>&ge; 90</td><td>EXCELLENT</td><td>Deploy as-is</td></tr>
+  <tr><td>70&ndash;89</td><td>GOOD</td><td>Minor maintenance recommended</td></tr>
+  <tr><td>50&ndash;69</td><td>FAIR</td><td>Significant maintenance needed</td></tr>
+  <tr><td>30&ndash;49</td><td>POOR</td><td>Major repair or replacement consideration</td></tr>
+  <tr><td>&lt; 30</td><td>CRITICAL</td><td>Replace or decommission</td></tr>
+</table>
+<p>Generates a custom HTML scorecard with CSS progress bars. Additional outputs:</p>
+<ul>
+  <li><strong>Action Plan:</strong> Ordered list of recommended next steps generated from all Fail/Warning items, with specific toolkit options to run for each issue.</li>
+  <li><strong>Enriched Fleet CSV:</strong> Exports a row to <code>Enterprise_Fleet_Enriched.csv</code> with fields: ComputerName, SerialNumber, Model, OverallScore, SecurityScore, HardwareScore, StorageScore, BatteryScore, DriverScore, OSScore, IdentityScore, TPMScore, DisplayScore, LifecycleRecommendation, ActionItemCount, TopActionItem, ReportDate. Appends to existing file for fleet aggregation.</li>
+</ul>
+
+<!-- SECTION 11 -->
+<h2 id="s11" class="page-break">11. Impact Levels &amp; Safety</h2>
+
+<table>
+  <tr><th>Level</th><th>Meaning</th><th>Options</th></tr>
+  <tr><td><span class="tag tag-safe">Read-Only</span></td><td>No system changes. Safe to run anytime.</td><td>1&ndash;5, 7, 10&ndash;22, 24&ndash;30, 39&ndash;48</td></tr>
+  <tr><td><span class="tag tag-caution">Caution</span></td><td>Makes system changes with Y/N prompts. Reversible in most cases.</td><td>6, 8, 9, 31&ndash;35</td></tr>
+  <tr><td><span class="tag tag-danger">Destructive</span></td><td>Deletes files permanently. Double-confirmation required.</td><td>23</td></tr>
+</table>
+
+<h3>Safety Features</h3>
+<ul>
+  <li><strong>Y/N per fix</strong> &mdash; troubleshooters ask before every action</li>
+  <li><strong>Invoke-FixAndVerify</strong> &mdash; every fix is verified after application; result is Pass/Partial/Fail</li>
+  <li><strong>Error suppression</strong> &mdash; non-terminating PowerShell errors are caught cleanly via <code>$ErrorActionPreference = 'Stop'</code> in the FixAndVerify wrapper, preventing raw red error text from alarming technicians</li>
+  <li><strong>ThinkPad detection</strong> &mdash; uses 3 WMI sources (Model, SystemFamily, ComputerSystemProduct.Version) for reliable detection</li>
+  <li><strong>Admin elevation</strong> &mdash; BAT launcher checks for admin and auto-elevates via UAC</li>
+  <li><strong>Logging</strong> &mdash; every action, approval, and result is logged to <code>Logs\</code> with timestamps</li>
+</ul>
+
+<!-- SECTION 12 -->
+<h2 id="s12" class="page-break">12. Troubleshooter Workflows</h2>
+
+<h3>Workflow 1: Laptop Won't Connect to Wi-Fi</h3>
+<ol>
+  <li>Run <strong>Option 15</strong> (Network Diagnostic) to identify the issue</li>
+  <li>Run <strong>Option 32</strong> (Network Troubleshooter) &rarr; select <strong>[1] Wi-Fi Issues</strong></li>
+  <li>Approve fixes as prompted (enable adapter, flush DNS, reset TCP/IP, etc.)</li>
+  <li>Review the HTML report for summary</li>
+</ol>
+
+<h3>Workflow 2: Laptop Has Frequent BSODs</h3>
+<ol>
+  <li>Run <strong>Option 2</strong> (BSOD Analysis) to identify the faulting driver</li>
+  <li>Run <strong>Option 33</strong> (BSOD Troubleshooter) to auto-fix the root cause</li>
+  <li>If driver update is needed, follow with <strong>Option 35</strong> (Driver Auto-Update)</li>
+  <li>Monitor for 48 hours</li>
+</ol>
+
+<h3>Workflow 3: Keyboard Not Working Properly</h3>
+<ol>
+  <li>Run <strong>Option 20</strong> (Keyboard Test) to diagnose</li>
+  <li>Run <strong>Option 34</strong> (Input Troubleshooter) to auto-fix</li>
+  <li>The troubleshooter will check accessibility settings, drivers, and Fn keys</li>
+  <li>If hardware damage is suspected, the typing test (step 8) will help confirm</li>
+</ol>
+
+<h3>Workflow 4: Preparing a Laptop for Resale</h3>
+<ol>
+  <li>Run <strong>Option 28</strong> (Refurb Battery Analysis) &mdash; check battery score</li>
+  <li>Run <strong>Option 30</strong> (Refurb Thermal Analysis) &mdash; check thermals under load</li>
+  <li>Run <strong>Option 29</strong> (Refurb Quality Check) &mdash; 10-point QA</li>
+  <li>Fix any issues: <strong>Option 31</strong> (Security) &rarr; <strong>Option 35</strong> (Drivers)</li>
+  <li>Final cleanup: <strong>Option 23</strong> (Secure Wipe) &rarr; <strong>Option 24</strong> (Deployment Prep)</li>
+</ol>
+
+<h3>Workflow 5: Full System Hardening</h3>
+<ol>
+  <li>Run <strong>Option 27</strong> (Security Check) to identify security gaps</li>
+  <li>Run <strong>Option 31</strong> (Security Hardening) to auto-fix all gaps</li>
+  <li>Run <strong>Option 35</strong> (Driver Auto-Update) to patch outdated drivers</li>
+  <li>Review reports for anything flagged as manual-only</li>
+</ol>
+
+<h3>Workflow 6: Enterprise Fleet Assessment</h3>
+<ol>
+  <li>Run <strong>Option 48</strong> (Enterprise Readiness Report) for the overall health score</li>
+  <li>For machines scoring &lt;70, investigate low categories:</li>
+  <li>&mdash; Security issues: <strong>Option 43</strong> (TPM) &rarr; <strong>Option 31</strong> (Security Hardening)</li>
+  <li>&mdash; Storage issues: <strong>Option 40</strong> (SMART Disk Analysis)</li>
+  <li>&mdash; Memory issues: <strong>Option 46</strong> (Memory Error Log Check)</li>
+  <li>&mdash; Identity issues: <strong>Option 42</strong> (Machine Identity Check)</li>
+  <li>Check Win11 upgrade path: <strong>Option 44</strong> (Win11 Readiness Check)</li>
+  <li>Ensure Lenovo software stack: <strong>Option 45</strong> (Lenovo Vantage Check)</li>
+</ol>
+
+<h3>Workflow 7: Post-Error Code Investigation</h3>
+<ol>
+  <li>Run <strong>Option 39</strong> (POST Error Reader) to identify any logged POST/BIOS errors</li>
+  <li>If CMOS/RTC errors (0270/0271): run <strong>Option 41</strong> (CMOS Battery Check) to confirm</li>
+  <li>If HDD errors (2100/2110): run <strong>Option 40</strong> (SMART Disk Analysis) for detailed disk health</li>
+  <li>If identity errors (2200/2201): run <strong>Option 42</strong> (Machine Identity Check)</li>
+</ol>
+
+<!-- SECTION 13 -->
+<h2 id="s13" class="page-break">13. Configuration Reference</h2>
+<p>All settings are in <code>Config\config.ini</code>. Key sections:</p>
+
+<h3>[General]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>Version</td><td>6.0.0</td><td>Toolkit version</td></tr>
+  <tr><td>ScriptFile</td><td>Laptop_Diagnostic_Suite.ps1</td><td>Main PS1 module filename</td></tr>
+</table>
+
+<h3>[HardwareTests]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>ThermalWarningThresholdC</td><td>75</td><td>Warning temperature (&deg;C)</td></tr>
+  <tr><td>ThermalCriticalThresholdC</td><td>85</td><td>Critical temperature (&deg;C)</td></tr>
+  <tr><td>CPUStressTestDurationSec</td><td>10</td><td>CPU stress test duration</td></tr>
+  <tr><td>ThermalMonitorDurationSec</td><td>30</td><td>Thermal monitoring window</td></tr>
+</table>
+
+<h3>[Refurbishment]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>CycleCountGreen</td><td>500</td><td>Battery cycles: green threshold</td></tr>
+  <tr><td>CycleCountYellow</td><td>800</td><td>Battery cycles: yellow threshold</td></tr>
+  <tr><td>WearPercentGreen</td><td>20</td><td>Battery wear: green threshold (%)</td></tr>
+  <tr><td>WearPercentYellow</td><td>35</td><td>Battery wear: yellow threshold (%)</td></tr>
+  <tr><td>MinimumBatteryScore</td><td>75</td><td>Minimum score for PASS verdict</td></tr>
+  <tr><td>StressDurationSec</td><td>300</td><td>Thermal stress test length (sec)</td></tr>
+</table>
+
+<h3>[AutoRemediation]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>AutoRemediationEnabled</td><td>1</td><td>Master switch for troubleshooters</td></tr>
+  <tr><td>CreateRestorePointBeforeFix</td><td>true</td><td>Create System Restore point before fixes</td></tr>
+  <tr><td>FallbackDNSPrimary</td><td>8.8.8.8</td><td>Fallback DNS server 1</td></tr>
+  <tr><td>FallbackDNSSecondary</td><td>1.1.1.1</td><td>Fallback DNS server 2</td></tr>
+  <tr><td>TempCleanupThresholdMB</td><td>500</td><td>Temp cleanup trigger size (MB)</td></tr>
+  <tr><td>WindowsUpdateMaxAgeDays</td><td>30</td><td>Days before WU is flagged as stale</td></tr>
+  <tr><td>DefenderSignatureMaxAgeDays</td><td>7</td><td>Days before Defender sigs flagged</td></tr>
+  <tr><td>LenovoThinInstallerPath</td><td>Tools\LenovoThinInstaller</td><td>Path to Thin Installer on USB</td></tr>
+  <tr><td>VPNInstallerPath</td><td>Tools\VPNInstaller</td><td>Path to VPN installer on USB</td></tr>
+  <tr><td>DriverUpdateSource</td><td>Both</td><td>WindowsUpdate, LenovoThinInstaller, or Both</td></tr>
+  <tr><td>NeverAutoUpdate</td><td>BIOS,Firmware</td><td>Categories blocked from auto-update</td></tr>
+</table>
+
+<h3>[SMARTDiskAnalysis]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>SMARTTemperatureWarnC</td><td>55</td><td>Disk temperature warning (&deg;C)</td></tr>
+  <tr><td>SMARTTemperatureCritC</td><td>65</td><td>Disk temperature critical (&deg;C)</td></tr>
+  <tr><td>SMARTWearWarnPercent</td><td>70</td><td>SSD wear warning (%)</td></tr>
+  <tr><td>SMARTWearFailPercent</td><td>90</td><td>SSD wear fail (%)</td></tr>
+  <tr><td>DiskFreeSpaceWarnPercent</td><td>20</td><td>Free space warning (%)</td></tr>
+</table>
+
+<h3>[EnterpriseReadinessReport]</h3>
+<table>
+  <tr><th>Key</th><th>Default</th><th>Description</th></tr>
+  <tr><td>WeightSecurity</td><td>20</td><td>Security category weight</td></tr>
+  <tr><td>WeightHardware</td><td>15</td><td>Hardware category weight</td></tr>
+  <tr><td>WeightStorage</td><td>15</td><td>Storage category weight</td></tr>
+  <tr><td>WeightBattery</td><td>10</td><td>Battery category weight</td></tr>
+  <tr><td>WeightDrivers</td><td>10</td><td>Drivers category weight</td></tr>
+  <tr><td>WeightOS</td><td>10</td><td>OS category weight</td></tr>
+  <tr><td>WeightIdentity</td><td>10</td><td>Identity category weight</td></tr>
+  <tr><td>WeightTPM</td><td>5</td><td>TPM category weight</td></tr>
+  <tr><td>WeightDisplay</td><td>5</td><td>Display category weight</td></tr>
+  <tr><td>PassingScoreThreshold</td><td>70</td><td>Score for GOOD rating</td></tr>
+  <tr><td>WarningScoreThreshold</td><td>50</td><td>Score for FAIR rating</td></tr>
+</table>
+
+<!-- SECTION 14 -->
+<h2 id="s14" class="page-break">14. USB Directory Structure</h2>
+<pre>
+E:\ (USB Drive)
++-- LDT-v6.0\
+    +-- Laptop_Diagnostic_Suite.ps1    (Main PS1 module - 45 functions)
+    +-- Laptop_Master_Diagnostic.bat   (BAT launcher with menu)
+    +-- DiagnosticModules.csv          (Function registry)
+    +-- Config\
+    |   +-- config.ini                 (All configuration settings)
+    +-- Logs\                          (Auto-created log files)
+    +-- Reports\                       (Auto-created HTML reports)
+    +-- Results\                       (Fleet CSV exports)
+    +-- Temp\                          (Working files, auto-cleaned)
+    +-- Backups\                       (Pre-repair backups)
+    +-- Data\                          (Reference data)
+    +-- Tools\
+    |   +-- LenovoThinInstaller\       (Place ThinInstaller.exe here)
+    |   |   +-- README.txt
+    |   +-- VPNInstaller\              (Place AnyConnect installer here)
+    |       +-- README.txt
+    +-- Docs\
+        +-- Laptop_Toolkit_v6_Team_Guide.pdf
+</pre>
+
+<h3>Tools Setup</h3>
+<div class="info-box">
+  <strong>Lenovo Thin Installer:</strong> Download from <code>support.lenovo.com/solutions/ht037099</code>. Place the EXE in <code>Tools\LenovoThinInstaller\</code>. Used by Options 34 (Input Troubleshooter &mdash; hotkey driver) and 35 (Driver Auto-Update).
+</div>
+<div class="info-box">
+  <strong>Cisco AnyConnect:</strong> Place the MSI/EXE installer in <code>Tools\VPNInstaller\</code>. Used by Option 32 (Network Troubleshooter &mdash; VPN sub-workflow) for silent VPN client installation/repair.
+</div>
+
+<!-- SECTION 15 -->
+<h2 id="s15" class="page-break">15. Quick Lookup Table</h2>
+<p>Find the right option for the symptom:</p>
+<table>
+  <tr><th>Symptom</th><th>Diagnose</th><th>Auto-Fix</th></tr>
+  <tr><td>Laptop crashes / BSOD</td><td>Option 2 (BSOD Analysis)</td><td>Option 33 (BSOD Troubleshooter)</td></tr>
+  <tr><td>Wi-Fi not connecting</td><td>Option 15 (Network Diagnostic)</td><td>Option 32 (Network Troubleshooter)</td></tr>
+  <tr><td>Bluetooth not working</td><td>Option 15 (Network Diagnostic)</td><td>Option 32 (Network Troubleshooter)</td></tr>
+  <tr><td>VPN broken / missing</td><td>Option 15 (Network Diagnostic)</td><td>Option 32 (Network Troubleshooter)</td></tr>
+  <tr><td>Keyboard typing wrong chars</td><td>Option 20 (Keyboard Test)</td><td>Option 34 (Input Troubleshooter)</td></tr>
+  <tr><td>Fn keys not working</td><td>Option 20 (Keyboard Test)</td><td>Option 34 (Input Troubleshooter)</td></tr>
+  <tr><td>TrackPoint/touchpad issues</td><td>Option 21 (TrackPoint Cal.)</td><td>Option 34 (Input Troubleshooter)</td></tr>
+  <tr><td>Outdated drivers</td><td>Option 8 (Driver Repair)</td><td>Option 35 (Driver Auto-Update)</td></tr>
+  <tr><td>Security gaps / Defender off</td><td>Option 27 (Security Check)</td><td>Option 31 (Security Hardening)</td></tr>
+  <tr><td>Laptop overheating</td><td>Option 17 (Thermal Analysis)</td><td>Check fans / thermal paste (manual)</td></tr>
+  <tr><td>Battery degraded</td><td>Option 14 (Battery Health)</td><td>Hardware replacement (manual)</td></tr>
+  <tr><td>Ready for resale?</td><td>Options 28, 29, 30 (Refurb suite)</td><td>Options 31, 35 then 23, 24</td></tr>
+  <tr><td>Boot failure</td><td>Option 1 (Advanced Diagnostic)</td><td>Option 6 (Boot Repair)</td></tr>
+  <tr><td>Slow performance</td><td>Option 16 (Performance Analyzer)</td><td>Option 9 (Software Cleanup)</td></tr>
+  <tr><td>POST beep code / BIOS error</td><td>Option 39 (POST Error Reader)</td><td>Refer to Lenovo HMM</td></tr>
+  <tr><td>Disk SMART errors / SSD wear</td><td>Option 40 (SMART Disk Analysis)</td><td>Replace disk (manual)</td></tr>
+  <tr><td>Clock resets / date wrong</td><td>Option 41 (CMOS Battery Check)</td><td>Replace CR2032 coin cell (manual)</td></tr>
+  <tr><td>Missing serial / bad UUID</td><td>Option 42 (Machine Identity Check)</td><td>Reprogram via VPD tool</td></tr>
+  <tr><td>TPM issues / ROCA vulnerability</td><td>Option 43 (TPM Health Check)</td><td>TPM firmware update / replace</td></tr>
+  <tr><td>Windows 11 upgrade eligibility</td><td>Option 44 (Win11 Readiness Check)</td><td>Address failing requirements</td></tr>
+  <tr><td>Lenovo Vantage missing</td><td>Option 45 (Lenovo Vantage Check)</td><td>Install Commercial Vantage</td></tr>
+  <tr><td>RAM errors / memory BSODs</td><td>Option 46 (Memory Error Log Check)</td><td>Reseat/replace DIMM (manual)</td></tr>
+  <tr><td>Display GPU issues</td><td>Option 47 (Display Pixel Check)</td><td>Update GPU driver / replace LCD</td></tr>
+  <tr><td>Enterprise health assessment</td><td>Option 48 (Enterprise Readiness)</td><td>Address low-scoring categories</td></tr>
+</table>
+
+<!-- SECTION 16 -->
+<h2 id="s16">16. Changelog</h2>
+
+<h3>v6.0.0 (February 2026)</h3>
+<ul>
+  <li><strong>Troubleshooter Functions Added:</strong> 5 new auto-fix functions (Options 31&ndash;35) with Y/N prompt per fix and verify-after-fix cycle</li>
+  <li><strong>Security Hardening (31):</strong> Auto-fix Defender, firewall, UAC, Windows Update, temp cleanup</li>
+  <li><strong>Network Troubleshooter (32):</strong> Wi-Fi, Bluetooth, VPN, mobile network with sub-menu</li>
+  <li><strong>BSOD Troubleshooter (33):</strong> Crash dump analysis &rarr; driver fix &rarr; system repair</li>
+  <li><strong>Input Troubleshooter (34):</strong> Accessibility keys, keyboard/pointing device drivers, Fn keys, Lenovo Thin Installer integration</li>
+  <li><strong>Driver Auto-Update (35):</strong> Windows Update COM API + Lenovo Thin Installer, with Safe/Caution/Blocked categorization</li>
+  <li><strong>Helper Functions:</strong> <code>Request-UserApproval</code> (consistent Y/N prompt), <code>Invoke-FixAndVerify</code> (fix + verify + clean error handling)</li>
+  <li><strong>Tools Directory:</strong> <code>Tools\LenovoThinInstaller\</code> and <code>Tools\VPNInstaller\</code> for bundled installers</li>
+  <li><strong>[AutoRemediation] Config:</strong> New config section with DNS, thresholds, driver update source, blocked categories</li>
+</ul>
+
+<h3>v6.0.0 Advanced Diagnostics (10 New Modules)</h3>
+<ul>
+  <li><strong>POST Error Reader (39):</strong> ThinkPad POST/BIOS error code detection from Event Logs with Lenovo error code database (0175&ndash;2201)</li>
+  <li><strong>SMART Disk Analysis (40):</strong> Deep SMART attribute analysis: temperature, wear, read errors, uncorrectable sectors, known bad SSD flagging</li>
+  <li><strong>CMOS Battery Check (41):</strong> RTC coin cell failure detection via NTP clock drift and Event Log time sync errors (does not use Win32_Battery)</li>
+  <li><strong>Machine Identity Check (42):</strong> Serial Number, UUID, Machine Type, Asset Tag integrity validation for fleet management</li>
+  <li><strong>TPM Health Check (43):</strong> TPM 2.0 assessment, ROCA vulnerability (CVE-2017-15361) detection, BitLocker integration with Home edition guard</li>
+  <li><strong>Win11 Readiness Check (44):</strong> Full Windows 11 hardware compatibility: TPM 2.0, CPU generation (Intel/AMD/Snapdragon), RAM, storage, Secure Boot, UEFI</li>
+  <li><strong>Lenovo Vantage Check (45):</strong> Commercial Vantage, Consumer Vantage, System Update, Thin Installer, ImController detection and conflict checking</li>
+  <li><strong>Memory Error Log Check (46):</strong> Cross-reference WMD results, WHEA events, BugCheck codes (0x1A/0x4E/0x50/0xD1/0x7A/0xF4) for RAM failure detection</li>
+  <li><strong>Display Pixel Check (47):</strong> GPU driver status, TDR events, monitor info, Lenovo 3-pixel defect policy reference</li>
+  <li><strong>Enterprise Readiness Report (48):</strong> Master 0&ndash;100 weighted health scorecard across 9 categories with lifecycle recommendation and custom HTML scorecard</li>
+  <li><strong>10 new config.ini sections</strong> with configurable thresholds for all new modules</li>
+  <li><strong>Coverage increase:</strong> 35 &rarr; 45 functions, ~85% of all ThinkPad enterprise issues now covered</li>
+</ul>
+
+<h3>v6.0.0 Bug Fixes</h3>
+<ul>
+  <li><strong>ThinkPad Detection Fixed:</strong> Now checks 3 WMI sources (Model, SystemFamily, ComputerSystemProduct.Version) instead of just Model. Resolves false "Non-ThinkPad" warnings on actual ThinkPads where Model returns machine type code instead of product name.</li>
+  <li><strong>HID Device False Positives Fixed:</strong> Input Troubleshooter no longer flags HID devices with "Unknown" status as problems. "Unknown" is normal for composite USB HID endpoints. Only "Error" and "Degraded" statuses trigger the fix prompt.</li>
+  <li><strong>Device Grouping:</strong> Duplicate HID devices (e.g., 3x "HID Keyboard Device") are now grouped into a single Y/N prompt per device type, instead of prompting for each instance separately.</li>
+  <li><strong>Sticky Keys Bitmask:</strong> Detection changed from string comparison (<code>Flags != "506"</code>) to bitmask check (<code>Flags &amp; 4 == 4</code>), which correctly detects only when Sticky Keys is actively ON.</li>
+  <li><strong>Error Suppression:</strong> <code>Invoke-FixAndVerify</code> now sets <code>$ErrorActionPreference = 'Stop'</code> so non-terminating CIM/PnP errors are caught cleanly instead of displaying raw red PowerShell error text.</li>
+  <li><strong>Lenovo Hotkey Fix:</strong> When the Hotkey driver is missing, the Input Troubleshooter now offers to run Lenovo Thin Installer from USB (if present) instead of just displaying a warning.</li>
+</ul>
+
+<hr style="margin-top:30px; border:1px solid #cce0f0;">
+<p style="text-align:center; color:#888; font-size:9pt; margin-top:10px;">
+  Laptop Diagnostic Toolkit v6.0.0 &bull; Team Reference Guide &bull; Generated February 2026
+</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+    "_comment":     "LDT Enterprise Configuration v7.0 — Engine-level config for Smart Diagnosis Engine enterprise features.",
+    "_description": "Diagnostic thresholds remain in config.ini. This file holds only engine-level configuration.",
+    "_governed_by": "Config/VersionManifest.json",
+
+    "engine": {
+        "trendRetentionSessions":    90,
+        "snapshotEnabled":           true,
+        "rollbackOnFailure":         true,
+        "reportFormat":              ["JSON", "HTML"],
+        "generateComplianceArtifacts": true,
+        "generateExecutionReceipt":  true,
+        "validatePlatformIntegrity": true,
+        "validatePreviousLogSeal":   true,
+        "sealLogOnClose":            true,
+        "haltOnCriticalPrecheck":    true,
+
+        "escalationThresholds": {
+            "HardStop":           4,
+            "SnapshotMandatory":  3,
+            "EnhancedLogging":    2
+        },
+
+        "scoring": {
+            "enabled": true,
+            "moduleWeights": {
+                "Hardware":    20,
+                "OS/Boot":     18,
+                "Driver":      15,
+                "Security":    15,
+                "Network":     10,
+                "Performance": 10,
+                "TPM":          5,
+                "Display":      5,
+                "Identity":     2
+            },
+            "declineAlertThreshold": 10
+        }
+    },
+
+    "modules": {
+        "OS/Boot":      { "autoRepair": true,  "description": "Boot repair, SFC, DISM, BCD" },
+        "Driver":       { "autoRepair": true,  "description": "Driver repair, auto-update" },
+        "Security":     { "autoRepair": true,  "description": "Defender, Firewall, UAC hardening" },
+        "Network":      { "autoRepair": true,  "description": "Network stack, Winsock, DNS reset" },
+        "Performance":  { "autoRepair": false, "description": "Diagnostic only — no auto-fix" },
+        "Hardware":     { "autoRepair": false, "description": "Detection and escalation only — NEVER auto-repairs" }
+    },
+
+    "paths": {
+        "trendStore":          "TrendStore",
+        "complianceArtifacts": "Reports"
+    },
+
+    "oem": {
+        "validationOutputPath":  "Reports",
+        "baselinePath":          "Data",
+        "win11ReadinessEnabled": true,
+        "driftDetectionEnabled": true
+    },
+
+    "governance": {
+        "classifiedAs":          "INTERNAL — FIELD SERVICE TOOL",
+        "changeControlRequired": true,
+        "prohibitedActions": [
+            "BIOS_Flash", "UEFI_Firmware_Modify", "BitLocker_Reset",
+            "SecureBoot_Disable", "TPM_Clear", "Internet_Call",
+            "Disk_Format", "DiskPart_Clean", "Group_Policy_Modify",
+            "Credential_Store_Access"
+        ]
+    }
+}

@@ -1,0 +1,27 @@
+# Temp and runtime files
+Temp/
+Logs/
+Backups/
+
+# Reports (machine-specific, generated at runtime)
+Reports/
+
+# Trend data (machine-specific)
+TrendStore/
+
+# Results (generated)
+Results/
+
+# Archive
+Archive/
+
+# Data collection
+Data/
+
+# WinDRE source (development reference, not part of LDT)
+21022026/
+
+# Windows/OS files
+Thumbs.db
+desktop.ini
+*.tmp
