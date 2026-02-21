@@ -21,6 +21,9 @@ Data/
 # WinDRE source (development reference, not part of LDT)
 21022026/
 
+# Third-party binaries (download separately, GitHub blocks these)
+Tools/CPU-Z/
+
 # Windows/OS files
 Thumbs.db
 desktop.ini
