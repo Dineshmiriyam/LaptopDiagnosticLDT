@@ -253,7 +253,7 @@ $expectedSections = @(
     'CMOSBatteryCheck', 'MachineIdentityCheck', 'TPMHealthCheck',
     'Win11ReadinessCheck', 'LenovoVantageCheck', 'MemoryErrorLogCheck',
     'DisplayPixelCheck', 'EnterpriseReadinessReport', 'LDT',
-    'QuickStart', 'SmartDiagnosis'
+    'QuickStart', 'SmartDiagnosis', 'Display'
 )
 
 if (Test-Path $configPath) {

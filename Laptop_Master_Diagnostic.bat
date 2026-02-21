@@ -7,7 +7,7 @@ setlocal EnableDelayedExpansion
 :: Architecture: Single-module (Laptop_Diagnostic_Suite.ps1)
 :: ============================================================
 
-title Laptop Diagnostic Toolkit v7.0.0
+title Laptop Diagnostic Toolkit v7.1.0
 
 :: ============================================================
 :: PATH DETECTION
@@ -95,7 +95,7 @@ if /I "%EXEC_POLICY%"=="Restricted" (
 :main_menu
 cls
 echo ============================================================
-echo   Laptop Diagnostic Toolkit v7.0.0
+echo   Laptop Diagnostic Toolkit v7.1.0
 echo   Location: %SCRIPT_DRIVE%\
 echo ============================================================
 echo.

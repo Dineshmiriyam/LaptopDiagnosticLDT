@@ -1,14 +1,14 @@
 ﻿{
     "_type":  "VERSION_MANIFEST",
     "_description":  "LDT Platform Version Governance Manifest. SHA256 hashes validated at engine startup by IntegrityEngine. Regenerate with Tools\\Update-VersionManifest.ps1",
-    "version":  "7.0.0",
+    "version":  "7.1.0",
     "releaseDate":  "2026-02-21",
     "releaseName":  "Enterprise Engine Edition",
     "minimumPSVersion":  "5.1",
     "minimumOSBuild":  19041,
     "changelog":  [
                       {
-                          "version":  "7.0.0",
+                          "version":  "7.1.0",
                           "date":  "2026-02-21",
                           "changes":  [
                                           "Added GuardEngine with 6-gate remediation authority and EscalationLevel hard-stop",
@@ -29,14 +29,14 @@
                       "critical":  true,
                       "role":  "ENGINE",
                       "description":  "9-phase orchestrated root cause analysis engine",
-                      "sha256":  "50CB3F9F21BED985E4F64549CB3A0A1CCB55C5ABAFFAB9A7D5D0DBB8B38D2F36"
+                      "sha256":  "79BCF4CE1ADDB280A17BCA15473B3C7C980981D7A3ADE9143F7A94A1209261FF"
                   },
                   {
                       "relativePath":  "Laptop_Diagnostic_Suite.ps1",
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "Core engine with 45 diagnostic and repair modules",
-                      "sha256":  "C7C5DD225BBB04CB4DBEE0A9882E708FC566D33CC39F238633227EB011EFB5D8"
+                      "sha256":  "BDEA028D793868CD8A3F11B8A45188D80CD0EC4FB300C6FE8B580D559CFA50BA"
                   },
                   {
                       "relativePath":  "Core\\LDT-EngineAdapter.psm1",
@@ -120,7 +120,7 @@
                       "critical":  false,
                       "role":  "CONFIG",
                       "description":  "Diagnostic threshold configuration (24 sections)",
-                      "sha256":  "0E3070A6A8CDD4ACF269C57AD0FC1D2155C1F17D72B09DD994251404311008B4"
+                      "sha256":  "C16564C85E09174A4441064552C714728E51899A169571A63B7534D683996897"
                   }
               ],
     "governance":  {
@@ -129,8 +129,8 @@
                        "changeControlRef":  "LDT-v7.0.0",
                        "validationMatrix":  "Docs\\ValidationTestMatrix.md"
                    },
-    "_selfHash":  "A9057F9CEEF5978CFD6F14982DD5FC6DE405E8F42733A5D707DE4B1D827BEA9F",
-    "_manifestUpdatedAt":  "2026-02-21T17:36:22.7465905+05:30",
+    "_selfHash":  "AA699EEEA423F61F7E390A6559D8264EE959D1731713D7987D8B65F178B9015A",
+    "_manifestUpdatedAt":  "2026-02-21T17:57:17.6444130+05:30",
     "_manifestUpdatedBy":  "DESKTOP-7G6HT08\\LENOVO"
 }
 

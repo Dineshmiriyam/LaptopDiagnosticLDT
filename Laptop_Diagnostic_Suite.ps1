@@ -6010,7 +6010,7 @@ function Invoke-DisplayPixelCheck {
     } catch { }
 
     # 1. GPU / Video Controller
-    Write-Host "  [1/7] Checking GPU / Video Controller..." -ForegroundColor Yellow
+    Write-Host "  [1/9] Checking GPU / Video Controller..." -ForegroundColor Yellow
     try {
         $gpus = Get-CimInstance Win32_VideoController -ErrorAction Stop
         foreach ($gpu in $gpus) {
@@ -6041,7 +6041,7 @@ function Invoke-DisplayPixelCheck {
     }
 
     # 2. Display PnP device status
-    Write-Host "  [2/7] Checking display device status..." -ForegroundColor Yellow
+    Write-Host "  [2/9] Checking display device status..." -ForegroundColor Yellow
     try {
         $displayDevices = Get-PnpDevice -Class Display -ErrorAction SilentlyContinue
         foreach ($dd in $displayDevices) {
@@ -6051,7 +6051,7 @@ function Invoke-DisplayPixelCheck {
     } catch { }
 
     # 3. GPU TDR/error events
-    Write-Host "  [3/7] Checking GPU error events (last 30 days)..." -ForegroundColor Yellow
+    Write-Host "  [3/9] Checking GPU error events (last 30 days)..." -ForegroundColor Yellow
     try {
         $startDate = (Get-Date).AddDays(-30)
         $tdrEvents = Get-WinEvent -FilterHashtable @{LogName='System'; Id=@(4101,4116); StartTime=$startDate} -MaxEvents 20 -ErrorAction SilentlyContinue
@@ -6067,7 +6067,7 @@ function Invoke-DisplayPixelCheck {
     }
 
     # 4. Monitor info + brightness
-    Write-Host "  [4/7] Checking monitor info..." -ForegroundColor Yellow
+    Write-Host "  [4/9] Checking monitor info..." -ForegroundColor Yellow
     try {
         $monitors = Get-CimInstance WmiMonitorBasicDisplayParams -Namespace root/wmi -ErrorAction SilentlyContinue
         foreach ($mon in $monitors) {
@@ -6086,7 +6086,7 @@ function Invoke-DisplayPixelCheck {
     }
 
     # 5. Native vs Current resolution comparison
-    Write-Host "  [5/7] Checking native resolution match..." -ForegroundColor Yellow
+    Write-Host "  [5/9] Checking native resolution match..." -ForegroundColor Yellow
     try {
         $gpuCheck = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($gpuCheck -and $gpuCheck.VideoModeDescription) {
@@ -6107,7 +6107,7 @@ function Invoke-DisplayPixelCheck {
     } catch { }
 
     # 6. Pixel defect policy - interactive inspection
-    Write-Host "  [6/7] Lenovo Pixel Defect Policy..." -ForegroundColor Yellow
+    Write-Host "  [6/9] Lenovo Pixel Defect Policy..." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "    === LENOVO LCD PIXEL DEFECT POLICY (ISO 9241-307 Class II) ===" -ForegroundColor Cyan
     Write-Host "    Threshold: $maxDeadPixels or more visible defective pixels = FAIL" -ForegroundColor White
@@ -6139,7 +6139,7 @@ function Invoke-DisplayPixelCheck {
     }
 
     # 7. Backlight bleed check
-    Write-Host "  [7/7] Backlight Bleed Inspection..." -ForegroundColor Yellow
+    Write-Host "  [7/9] Backlight Bleed Inspection..." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "    Set display to pure black background and inspect edges for light bleed." -ForegroundColor White
     Write-Host ""
@@ -6173,6 +6173,57 @@ function Invoke-DisplayPixelCheck {
         $null = $results.Add([PSCustomObject]@{ Component = "Backlight Bleed"; Status = "Info"; Details = "Non-interactive mode - Perform manual backlight bleed inspection" })
     }
 
+
+    # 8. Refresh Rate Baseline
+    Write-Host "  [8/9] Checking refresh rate..." -ForegroundColor Yellow
+    try {
+        $gpuForRefresh = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($gpuForRefresh -and $gpuForRefresh.CurrentRefreshRate) {
+            $rr = [int]$gpuForRefresh.CurrentRefreshRate
+            $standardRates = @(50, 59, 60, 75, 90, 100, 120, 144, 165, 240)
+            $isStandard = $false
+            foreach ($sr in $standardRates) {
+                if ([math]::Abs($rr - $sr) -le 2) { $isStandard = $true; break }
+            }
+            if ($isStandard) {
+                $null = $results.Add([PSCustomObject]@{ Component = "Refresh Rate"; Status = "Pass"; Details = "${rr}Hz (standard)" })
+                Write-Host "    Refresh rate: ${rr}Hz" -ForegroundColor Green
+            } else {
+                $null = $results.Add([PSCustomObject]@{ Component = "Refresh Rate"; Status = "Warning"; Details = "${rr}Hz (non-standard -- possible driver issue)" })
+                Write-Host "    Refresh rate: ${rr}Hz (NON-STANDARD)" -ForegroundColor Yellow
+            }
+        } else {
+            $null = $results.Add([PSCustomObject]@{ Component = "Refresh Rate"; Status = "Info"; Details = "Not available" })
+            Write-Host "    Refresh rate: Not available" -ForegroundColor Gray
+        }
+    } catch {
+        $null = $results.Add([PSCustomObject]@{ Component = "Refresh Rate"; Status = "Info"; Details = "Query failed" })
+    }
+
+    # 9. Brightness Control Test
+    Write-Host "  [9/9] Testing brightness control..." -ForegroundColor Yellow
+    try {
+        $brightnessObj = Get-CimInstance WmiMonitorBrightness -Namespace root/wmi -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($brightnessObj) {
+            $curBright = [int]$brightnessObj.CurrentBrightness
+            Write-Host "    Current brightness: ${curBright}%" -ForegroundColor Green
+
+            # Test if brightness control method is available
+            $brightMethods = Get-CimInstance WmiMonitorBrightnessMethods -Namespace root/wmi -ErrorAction SilentlyContinue
+            if ($brightMethods) {
+                $null = $results.Add([PSCustomObject]@{ Component = "Brightness Control"; Status = "Pass"; Details = "Current: ${curBright}%, ACPI control available" })
+                Write-Host "    ACPI brightness control: Available" -ForegroundColor Green
+            } else {
+                $null = $results.Add([PSCustomObject]@{ Component = "Brightness Control"; Status = "Warning"; Details = "Current: ${curBright}%, ACPI control method unavailable -- hotkeys may not work" })
+                Write-Host "    ACPI brightness control: NOT available" -ForegroundColor Yellow
+            }
+        } else {
+            $null = $results.Add([PSCustomObject]@{ Component = "Brightness Control"; Status = "Info"; Details = "N/A (desktop or external monitor)" })
+            Write-Host "    Brightness: N/A (desktop or external display)" -ForegroundColor Gray
+        }
+    } catch {
+        $null = $results.Add([PSCustomObject]@{ Component = "Brightness Control"; Status = "Info"; Details = "Query failed" })
+    }
 
     # Audit log
     $auditFailCount = @($results | Where-Object { $_.Status -eq 'Fail' }).Count

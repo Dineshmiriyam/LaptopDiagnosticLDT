@@ -2,6 +2,24 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [7.1.0] - 2026-02-21
+
+### Added
+- **Phase 4K: Refresh Rate Validation**: Detects anomalous refresh rates outside configurable Min/MaxRefreshRateHz range
+- **Phase 4L: Brightness / Backlight Diagnostics**: WmiMonitorBrightness + ACPI control method validation, detects 0% brightness (backlight failure)
+- **Phase 4M: Shell / Explorer Integrity**: Detects missing explorer.exe (black screen root cause) and custom shell (kiosk mode)
+- **Phase 4N: EDID / Native Resolution**: Panel manufacturer extraction via WmiMonitorID, native vs current resolution mismatch detection
+- **Phase 7 GPU Stress Test**: GDI+ bitmap stress with TDR event monitoring during load, catches driver instability
+- **Display Severity Classification** in Phase 8: Level 1 (auto-fixable) / Level 2 (component) / Level 3 (technician) per v11 taxonomy
+- **DisplayPixelCheck steps [8/9] and [9/9]**: Refresh rate baseline and brightness control test added to Option 47
+- **[Display] config section**: 8 new thresholds for GPU stress, refresh rate, brightness, EDID validation
+- `display_status` field added to JSON export
+
+### Changed
+- Smart Diagnosis Engine Phase 4 expanded from 10 checks (4A-4J) to 14 checks (4A-4N)
+- DisplayPixelCheck expanded from 7 steps to 9 steps
+- Version bumped to 7.1.0
+
 ## [7.0.1] - 2026-02-21
 
 ### Added

@@ -5,7 +5,7 @@
     rollback protection, post-fix stress validation, and enterprise engines.
 
 .VERSION
-    7.0.0
+    7.1.0
 
 .NOTES
     Architecture: Standalone PS1 (called by Laptop_Master_Diagnostic.bat)
@@ -1756,6 +1756,161 @@ function Invoke-Phase4-ServiceAndDriver {
         Write-Finding -Label "Display panel health" -Value "Query failed" -Color "DarkGray"
     }
 
+    # --- 4K: Refresh rate validation ---
+    Write-Host "    Checking display refresh rate..." -ForegroundColor DarkGray
+    try {
+        $gpuCtrl = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($gpuCtrl -and $gpuCtrl.CurrentRefreshRate) {
+            $refreshRate = [int]$gpuCtrl.CurrentRefreshRate
+            $DiagState.Machine["RefreshRate"] = $refreshRate
+
+            # Read thresholds from config
+            $minHz = 50; $maxHz = 240
+            if ($cfgRaw -and $cfgRaw -match 'MinRefreshRateHz=(\d+)') { $minHz = [int]$Matches[1] }
+            if ($cfgRaw -and $cfgRaw -match 'MaxRefreshRateHz=(\d+)') { $maxHz = [int]$Matches[1] }
+
+            if ($refreshRate -lt $minHz -or $refreshRate -gt $maxHz) {
+                $drvWarns++
+                Add-DiagFinding -DiagState $DiagState -Component "Refresh Rate" `
+                    -Status "Warning" -Category "Display" -Weight 20 `
+                    -Details "Refresh rate ${refreshRate}Hz is outside normal range (${minHz}-${maxHz}Hz). Possible driver issue or misconfigured display."
+                Write-Finding -Label "Refresh rate" -Value "${refreshRate}Hz (ANOMALY)" -Color "Yellow"
+            } else {
+                Write-Finding -Label "Refresh rate" -Value "${refreshRate}Hz" -Color "Green"
+            }
+        } else {
+            Write-Finding -Label "Refresh rate" -Value "Not available" -Color "DarkGray"
+        }
+    } catch {
+        Write-Finding -Label "Refresh rate" -Value "Query failed" -Color "DarkGray"
+    }
+
+    # --- 4L: Brightness / backlight diagnostics ---
+    Write-Host "    Checking brightness control..." -ForegroundColor DarkGray
+    try {
+        $brightness = Get-CimInstance WmiMonitorBrightness -Namespace root/wmi -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($brightness) {
+            $currentBrightness = [int]$brightness.CurrentBrightness
+            $DiagState.Machine["Brightness"] = $currentBrightness
+
+            $minBrightness = 10
+            if ($cfgRaw -and $cfgRaw -match 'BrightnessMinPercent=(\d+)') { $minBrightness = [int]$Matches[1] }
+
+            if ($currentBrightness -eq 0) {
+                $drvFails++
+                Add-DiagFinding -DiagState $DiagState -Component "Brightness Control" `
+                    -Status "Fail" -Category "Display" -Weight 40 `
+                    -Details "Brightness is 0%. Possible ACPI display driver failure or backlight circuit issue."
+                Write-Finding -Label "Brightness" -Value "0% (BACKLIGHT ISSUE)" -Color "Red"
+            } elseif ($currentBrightness -lt $minBrightness) {
+                $drvWarns++
+                Add-DiagFinding -DiagState $DiagState -Component "Brightness Control" `
+                    -Status "Warning" -Category "Display" -Weight 15 `
+                    -Details "Brightness at ${currentBrightness}% (below ${minBrightness}% threshold). Check power plan and ACPI driver."
+                Write-Finding -Label "Brightness" -Value "${currentBrightness}% (LOW)" -Color "Yellow"
+            } else {
+                Write-Finding -Label "Brightness" -Value "${currentBrightness}%" -Color "Green"
+            }
+
+            # Check if brightness control is functional (WmiSetBrightness available)
+            $brightnessMethods = Get-CimInstance WmiMonitorBrightnessMethods -Namespace root/wmi -ErrorAction SilentlyContinue
+            if (-not $brightnessMethods) {
+                $drvWarns++
+                Add-DiagFinding -DiagState $DiagState -Component "Brightness ACPI" `
+                    -Status "Warning" -Category "Display" -Weight 15 `
+                    -Details "WmiMonitorBrightnessMethods unavailable. Brightness hotkeys may not work. Check ACPI/monitor driver."
+                Write-Finding -Label "Brightness control" -Value "ACPI method unavailable" -Color "Yellow"
+            }
+        } else {
+            # No brightness WMI = desktop or external-only display (not a failure)
+            Write-Finding -Label "Brightness" -Value "N/A (desktop or external display)" -Color "DarkGray"
+        }
+    } catch {
+        Write-Finding -Label "Brightness" -Value "Query failed" -Color "DarkGray"
+    }
+
+    # --- 4M: Shell / explorer.exe integrity ---
+    Write-Host "    Checking Windows shell integrity..." -ForegroundColor DarkGray
+    try {
+        $explorerProc = Get-Process explorer -ErrorAction SilentlyContinue
+        $shellReg = $null
+        try {
+            $winlogon = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -ErrorAction SilentlyContinue
+            if ($winlogon) { $shellReg = $winlogon.Shell }
+        } catch { }
+
+        $isCustomShell = ($shellReg -and $shellReg -ne 'explorer.exe')
+        $explorerRunning = ($null -ne $explorerProc -and @($explorerProc).Count -gt 0)
+
+        if (-not $explorerRunning -and -not $isCustomShell) {
+            $drvFails++
+            Add-DiagFinding -DiagState $DiagState -Component "Windows Shell" `
+                -Status "Fail" -Category "OS/Boot" -Weight 60 `
+                -Details "explorer.exe is not running and no custom shell configured. This causes black screen after login. Auto-fix: restart explorer or repair shell registry."
+            Write-Finding -Label "Windows shell" -Value "explorer.exe NOT RUNNING" -Color "Red"
+        } elseif ($isCustomShell) {
+            Add-DiagFinding -DiagState $DiagState -Component "Windows Shell" `
+                -Status "Info" -Category "OS/Boot" -Weight 0 `
+                -Details "Custom shell configured: $shellReg (kiosk/domain policy). Not a defect."
+            Write-Finding -Label "Windows shell" -Value "Custom: $shellReg" -Color "Cyan"
+        } else {
+            Write-Finding -Label "Windows shell" -Value "explorer.exe running" -Color "Green"
+        }
+    } catch {
+        Write-Finding -Label "Windows shell" -Value "Check failed" -Color "DarkGray"
+    }
+
+    # --- 4N: EDID / native resolution validation ---
+    Write-Host "    Checking EDID / native resolution..." -ForegroundColor DarkGray
+    try {
+        $edidValidation = $true
+        if ($cfgRaw -and $cfgRaw -match 'EDIDValidation=(\d+)') { $edidValidation = $Matches[1] -eq '1' }
+
+        if ($edidValidation) {
+            $monitorIDs = @(Get-CimInstance WmiMonitorID -Namespace root/wmi -ErrorAction SilentlyContinue)
+            $panelInfo = @()
+
+            foreach ($mid in $monitorIDs) {
+                $mfr = ''
+                $prod = ''
+                if ($mid.ManufacturerName) {
+                    $mfr = -join ($mid.ManufacturerName | Where-Object { $_ -ne 0 } | ForEach-Object { [char]$_ })
+                }
+                if ($mid.ProductCodeID) {
+                    $prod = -join ($mid.ProductCodeID | Where-Object { $_ -ne 0 } | ForEach-Object { [char]$_ })
+                }
+                $panelInfo += @{ Manufacturer = $mfr; ProductCode = $prod }
+            }
+            $DiagState.Machine["PanelInfo"] = $panelInfo
+
+            if ($panelInfo.Count -gt 0) {
+                $panelDesc = ($panelInfo | ForEach-Object { "$($_.Manufacturer) $($_.ProductCode)" }) -join ', '
+                Write-Finding -Label "Panel EDID" -Value $panelDesc -Color "Green"
+            } else {
+                Write-Finding -Label "Panel EDID" -Value "No EDID data available" -Color "DarkGray"
+            }
+
+            # Compare native vs current resolution (if Phase 4J captured current)
+            if ($currentRes -and $gpuCtrl) {
+                $nativeRes = $null
+                $videoMode = $gpuCtrl.VideoModeDescription
+                if ($videoMode -and $videoMode -match '(\d{3,5})\s*x\s*(\d{3,5})') {
+                    $nativeW = [int]$Matches[1]; $nativeH = [int]$Matches[2]
+                    $nativeRes = "${nativeW}x${nativeH}"
+                }
+                if ($nativeRes -and $nativeRes -ne $currentRes) {
+                    $drvWarns++
+                    Add-DiagFinding -DiagState $DiagState -Component "Resolution Mismatch" `
+                        -Status "Warning" -Category "Display" -Weight 20 `
+                        -Details "Current resolution ($currentRes) does not match native ($nativeRes). Possible driver fallback or scaling issue."
+                    Write-Finding -Label "Resolution match" -Value "$currentRes vs native $nativeRes (MISMATCH)" -Color "Yellow"
+                }
+            }
+        }
+    } catch {
+        Write-Finding -Label "Panel EDID" -Value "Query failed" -Color "DarkGray"
+    }
+
     # Phase result
     $status = if ($drvFails -gt 0) { "FAIL" } elseif ($drvWarns -gt 0) { "WARN" } else { "PASS" }
     $DiagState.PhaseResults["Phase4"] = $status
@@ -2819,6 +2974,82 @@ function Invoke-Phase7-StressValidation {
         $stressFails++
     }
 
+    # --- 7-GPU: Graphics compute stress ---
+    Write-Host "    GPU graphics stress test..." -ForegroundColor DarkGray
+    try {
+        $gpuStressDuration = 15
+        $gpuMaxTempDelta = 20
+        try {
+            $cfgPath2 = Join-Path $ConfigPath "config.ini"
+            if (Test-Path $cfgPath2) {
+                $cfgDisplay = Get-Content $cfgPath2 -Raw -Encoding UTF8
+                if ($cfgDisplay -match 'GPUStressDurationSeconds=(\d+)') { $gpuStressDuration = [int]$Matches[1] }
+                if ($cfgDisplay -match 'GPUStressMaxTempDelta=(\d+)') { $gpuMaxTempDelta = [int]$Matches[1] }
+            }
+        } catch { }
+
+        # Count TDR events BEFORE stress
+        $tdrBefore = 0
+        try {
+            $tdrBefore = @(Get-WinEvent -FilterHashtable @{
+                LogName='System'; Id=@(4101,4116); StartTime=(Get-Date).AddMinutes(-5)
+            } -MaxEvents 100 -ErrorAction SilentlyContinue).Count
+        } catch { }
+
+        # GDI+ bitmap stress (stresses GPU display pipeline via driver)
+        Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+        $gpuStressStart = Get-Date
+        $gpuIterations = 0
+        $bmp = New-Object System.Drawing.Bitmap(960, 540)
+        $gfx = [System.Drawing.Graphics]::FromImage($bmp)
+        $rng = New-Object System.Random
+
+        while (((Get-Date) - $gpuStressStart).TotalSeconds -lt $gpuStressDuration) {
+            # Fill with random colored rectangles (forces GPU render ops)
+            $brush = New-Object System.Drawing.SolidBrush(
+                [System.Drawing.Color]::FromArgb($rng.Next(256), $rng.Next(256), $rng.Next(256))
+            )
+            $gfx.FillRectangle($brush, $rng.Next(960), $rng.Next(540), $rng.Next(100)+10, $rng.Next(100)+10)
+            $brush.Dispose()
+            $gpuIterations++
+
+            # Draw lines for additional GPU workload
+            $pen = New-Object System.Drawing.Pen(
+                [System.Drawing.Color]::FromArgb($rng.Next(256), $rng.Next(256), $rng.Next(256)), 2
+            )
+            $gfx.DrawLine($pen, $rng.Next(960), $rng.Next(540), $rng.Next(960), $rng.Next(540))
+            $pen.Dispose()
+        }
+        $gfx.Dispose()
+        $bmp.Dispose()
+
+        $gpuStressElapsed = [math]::Round(((Get-Date) - $gpuStressStart).TotalSeconds, 1)
+
+        # Count TDR events AFTER stress
+        $tdrAfter = 0
+        try {
+            $tdrAfter = @(Get-WinEvent -FilterHashtable @{
+                LogName='System'; Id=@(4101,4116); StartTime=(Get-Date).AddMinutes(-5)
+            } -MaxEvents 100 -ErrorAction SilentlyContinue).Count
+        } catch { }
+
+        $newTDR = $tdrAfter - $tdrBefore
+        $DiagState.StressResults["GPUIterations"] = $gpuIterations
+        $DiagState.StressResults["GPUNewTDR"] = $newTDR
+
+        if ($newTDR -gt 0) {
+            $stressFails++
+            Add-DiagFinding -DiagState $DiagState -Component "GPU Stress TDR" `
+                -Status "Fail" -Category "Driver" -Weight 65 `
+                -Details "GPU produced $newTDR TDR event(s) during ${gpuStressElapsed}s stress test. Display driver unstable under load."
+            Write-Finding -Label "GPU stress" -Value "$newTDR TDR events during stress (UNSTABLE)" -Color "Red"
+        } else {
+            Write-Finding -Label "GPU stress" -Value "OK ($gpuIterations ops in ${gpuStressElapsed}s, 0 TDR)" -Color "Green"
+        }
+    } catch {
+        Write-Finding -Label "GPU stress" -Value "Skipped (GDI+ unavailable)" -Color "DarkGray"
+    }
+
     # --- 7D: Post-stress event log check ---
     Write-Host "    Checking for new errors since remediation..." -ForegroundColor DarkGray
     $newErrors = 0
@@ -2968,6 +3199,32 @@ function Invoke-Phase8-FinalClassification {
             default   { "Gray" }
         }
         Write-Host "      [$pStatus] $($phaseLabels[$i])" -ForegroundColor $pColor
+    }
+    Write-Host ""
+
+    # Display severity classification (v11 taxonomy)
+    $displayFindings = @($DiagState.Findings | Where-Object {
+        $_.Category -eq 'Display' -or ($_.Category -eq 'Driver' -and $_.Component -match 'GPU|TDR|Display|Refresh|Brightness')
+    })
+    if ($displayFindings.Count -gt 0) {
+        $displayFails = @($displayFindings | Where-Object { $_.Status -eq 'Fail' })
+        $hasGPUHardware = @($displayFindings | Where-Object { $_.Component -match 'GPU.*hardware|panel.*cable|dead.*pixel' -and $_.Status -eq 'Fail' }).Count -gt 0
+        $hasDriverOnly = @($displayFindings | Where-Object { $_.Component -match 'driver|TDR|Refresh|Brightness|ACPI|Resolution' }).Count -gt 0
+
+        if ($hasGPUHardware) {
+            $displayLevel = "Level 3 (Technician)"
+            $displayColor = "Red"
+        } elseif ($displayFails.Count -gt 0 -and -not $hasDriverOnly) {
+            $displayLevel = "Level 2 (Component)"
+            $displayColor = "Yellow"
+        } else {
+            $displayLevel = "Level 1 (Auto-fixable)"
+            $displayColor = "Cyan"
+        }
+        $DiagState["DisplayStatus"] = $displayLevel
+        Write-Host "    Display Classification: $displayLevel ($($displayFindings.Count) finding(s))" -ForegroundColor $displayColor
+    } else {
+        $DiagState["DisplayStatus"] = "No display issues"
     }
     Write-Host ""
 
@@ -3370,6 +3627,7 @@ function Export-SmartDiagJSON {
         escalation_level    = $ranking.EscalationLevel
         recommended_action  = $ranking.RecommendedAction
         phase_results       = $DiagState.PhaseResults
+        display_status      = if ($DiagState.ContainsKey('DisplayStatus')) { $DiagState['DisplayStatus'] } else { 'N/A' }
     }
 
     # Add v7 enterprise engine data if available
