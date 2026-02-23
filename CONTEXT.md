@@ -3,7 +3,7 @@
 > This file is the single source of truth for the LDT project.
 > Every developer, AI assistant, and contributor must read this before making any changes.
 > For strict rules and prohibitions, see [GUARDRAILS.md](GUARDRAILS.md).
-> Last updated: 2026-02-21
+> Last updated: 2026-02-23
 
 ---
 
@@ -12,7 +12,7 @@
 | Field | Value |
 |-------|-------|
 | **Name** | Laptop Diagnostic Toolkit (LDT) |
-| **Version** | 7.0.0 |
+| **Version** | 7.2.0 |
 | **Purpose** | USB-portable diagnostic and repair automation for Lenovo ThinkPad fleets |
 | **Users** | IT technicians, field engineers, fleet managers (limited developer experience) |
 | **Platform** | Windows 10/11 on Lenovo ThinkPad hardware |
@@ -20,9 +20,9 @@
 | **Core Script** | `Laptop_Diagnostic_Suite.ps1` (378KB, PowerShell) |
 | **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (3,494 lines, 9-phase auto-detect + auto-fix) |
 | **Launcher** | `Laptop_Master_Diagnostic.bat` (right-click → Run as Administrator) |
-| **Config** | `Config\config.ini` (23 sections) + `Config\config.json` (enterprise engines) |
-| **Modules** | 45 diagnostic modules + 6 enterprise engines, 56 menu options (0-55) |
-| **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport |
+| **Config** | `Config\config.ini` (25 sections) + `Config\config.json` (enterprise engines) |
+| **Modules** | 45 diagnostic modules + 7 enterprise engines, 57 menu options (0-56) |
+| **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport, ClassificationEngine |
 | **Repository** | https://github.com/Dineshmiriyam/LaptopDiagnosticLDT |
 
 ---
@@ -69,6 +69,7 @@ E:\LDT-v6.0\
 │   ├── ScoringEngine.psm1          ← Weighted 0-100 health scoring
 │   ├── TrendEngine.psm1            ← 90-session historical tracking
 │   ├── ComplianceExport.psm1       ← ISO/SOC2/CIS artifact generation
+│   ├── ClassificationEngine.psm1   ← 3-Level diagnostic classification (L1/L2/L3)
 │   └── LDT-EngineAdapter.psm1      ← Bridge between LDT and engines
 ├── Docs\
 │   ├── fonts\                      ← Bebas Neue, DM Sans, JetBrains Mono (woff2)
@@ -207,6 +208,7 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 
 | Version | Date | What Changed |
 |---------|------|-------------|
+| 7.2.0 | 2026-02-23 | 3-Level Classification Engine: ClassificationEngine.psm1 (L1/L2/L3 decision tree), Option 56 ClassifyOnly mode, HTML triage panel, severity scoring (0-100), component health cards, TrendEngine escalation tracking, 7th compliance artifact |
 | 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 55), Phase 6A direct fixes, scoring/remediation overhaul |
 | 6.1.3 | 2026-02-20 | Display diagnostics: Phase 4H/4I/4J (GPU health, TDR events, panel health) |
 | 6.1.2 | 2026-02-20 | Phase 0 preflight, Phase 3/5 enrichment, backup expansion |

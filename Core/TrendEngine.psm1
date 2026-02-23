@@ -83,17 +83,27 @@ function Add-TrendEntry {
         $escalationCount = @($DiagState.Findings | Where-Object { $_.Status -eq 'Escalation' -or $_.Severity -match '^H' }).Count
     }
 
+    # v7.2: Determine escalation level from ClassificationEngine if available
+    $escalationLevel = 'None'
+    if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+        $escalationLevel = $DiagState['ClassificationReport'].escalation_level
+    }
+    elseif ($DiagState.ContainsKey('Ranking') -and $DiagState['Ranking']) {
+        $escalationLevel = $DiagState['Ranking'].EscalationLevel
+    }
+
     $entry = [ordered]@{
-        sessionId      = $SessionId
-        timestamp      = Get-Date -Format 'o'
-        mode           = if ($DiagState.OEMMode) { 'OEM_VALIDATION' } else { 'DIAGNOSTIC' }
-        score          = $ScoreResult.finalScore
-        band           = $ScoreResult.band
-        moduleStatuses = $moduleStatuses
-        hardStop       = if ($GuardStatus) { $GuardStatus.hardStopTriggered } else { $false }
-        escalations    = $escalationCount
-        repairs        = $repairsCount
-        findings       = $findingsCount
+        sessionId        = $SessionId
+        timestamp        = Get-Date -Format 'o'
+        mode             = if ($DiagState.OEMMode) { 'OEM_VALIDATION' } else { 'DIAGNOSTIC' }
+        score            = $ScoreResult.finalScore
+        band             = $ScoreResult.band
+        moduleStatuses   = $moduleStatuses
+        hardStop         = if ($GuardStatus) { $GuardStatus.hardStopTriggered } else { $false }
+        escalations      = $escalationCount
+        repairs          = $repairsCount
+        findings         = $findingsCount
+        escalation_level = $escalationLevel
     }
 
     $store.sessions = @($store.sessions) + @($entry)

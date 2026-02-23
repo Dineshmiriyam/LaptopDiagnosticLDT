@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>LDT v6.1.3 — Architecture & Field Guide</title>
+<title>LDT v7.2.0 — Architecture & Field Guide</title>
 <style>
   @font-face { font-family:'Bebas Neue'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/bebas-neue-latin.woff2) format('woff2'); }
   @font-face { font-family:'DM Sans'; font-style:normal; font-weight:300; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
@@ -290,7 +290,7 @@
 <a class="skip-link" href="#main">Skip to content</a>
 
 <nav class="sticky-nav" id="stickyNav" role="navigation" aria-label="Section navigation">
-  <span class="sticky-nav-brand">LDT <span>v6.1.3</span></span>
+  <span class="sticky-nav-brand">LDT <span>v7.2.0</span></span>
   <ul class="sticky-nav-links">
     <li><a href="#section-architecture">Architecture</a></li>
     <li><a href="#section-phases">Phases</a></li>
@@ -309,7 +309,7 @@
 <main id="main">
   <div class="header">
     <div class="header-eyebrow">Department-Wide Standard Edition</div>
-    <h1>LAPTOP DIAGNOSTIC<br><span>TOOLKIT v6.1.3</span></h1>
+    <h1>LAPTOP DIAGNOSTIC<br><span>TOOLKIT v7.2.0</span></h1>
     <p class="header-sub">Production-Grade &nbsp;·&nbsp; Fully Offline &nbsp;·&nbsp; USB-Portable &nbsp;·&nbsp; Windows 10 &amp; 11</p>
     <div class="header-pills">
       <span class="pill blue">9-Phase Engine</span>
@@ -328,12 +328,13 @@
     <div class="intro-card reveal">
       <h2>Core Objective -- Understand This First</h2>
       <p>
-        Laptop Diagnostic Toolkit v6.1.3 is a <strong>deterministic, state-driven diagnostic and remediation engine</strong>
+        Laptop Diagnostic Toolkit v7.2.0 is a <strong>deterministic, state-driven diagnostic and remediation engine</strong>
         for Windows 10 and Windows 11 laptops. Runs 100% from a USB drive — no installation, no internet, no cloud,
         no telemetry. The <strong>Smart Diagnosis Engine (Option 54)</strong> runs a 9-phase analysis with decision tree logic,
         creates rollback backups before any fix, validates fixes under stress, and produces
-        structured <strong>JSON + HTML reports</strong>. Includes <strong>45 core diagnostic modules</strong>,
-        fleet scanning, and guided quick-start workflows.
+        structured <strong>JSON + HTML reports</strong>. The <strong>Classification Engine (Option 56)</strong> adds formal
+        3-level L1/L2/L3 diagnostic triage with a 5-branch decision tree. Includes <strong>45 core diagnostic modules</strong>,
+        <strong>7 enterprise engine modules</strong>, fleet scanning, and guided quick-start workflows.
       </p>
       <div class="constraint-grid">
         <div class="constraint-item"><div class="ci-dot"></div>100% Offline -- No Internet</div>
@@ -343,7 +344,7 @@
         <div class="constraint-item"><div class="ci-dot"></div>PowerShell 5.1+ Required</div>
         <div class="constraint-item"><div class="ci-dot"></div>All Logs on USB Only</div>
         <div class="constraint-item"><div class="ci-dot"></div>Lenovo - Dell - HP - Multi-Vendor</div>
-        <div class="constraint-item"><div class="ci-dot"></div>12,921 Lines Across 6 Scripts</div>
+        <div class="constraint-item"><div class="ci-dot"></div>14,000+ Lines Across 8 Scripts + 7 Modules</div>
         <div class="constraint-item red-dot"><div class="ci-dot"></div>Never Flashes Firmware Unsafely</div>
         <div class="constraint-item red-dot"><div class="ci-dot"></div>Never Deletes User Data</div>
         <div class="constraint-item red-dot"><div class="ci-dot"></div>Never Modifies Without Rollback</div>
@@ -357,7 +358,7 @@
       <div class="section-number">01</div>
       <div class="section-title-block">
         <div class="section-label">Core Architecture</div>
-        <div class="section-title">THE 8-LAYER TOOLKIT ARCHITECTURE</div>
+        <div class="section-title">THE 9-LAYER TOOLKIT ARCHITECTURE</div>
       </div>
     </div>
 
@@ -366,7 +367,7 @@
         <div class="layer-badge" style="background:rgba(26,93,204,0.12)"><div class="lb-num" style="color:var(--blue-light)">0</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">LAUNCHER -- Laptop_Master_Diagnostic.bat</div>
-          <div class="layer-desc">Single-click entry point. Checks admin privileges, auto-elevates via UAC, validates PowerShell version (5.1+), sets USB drive path. Presents a <strong>55-option menu</strong> (Options 0-54) organized by category. Dispatches to the appropriate PS1 script based on selection.</div>
+          <div class="layer-desc">Single-click entry point. Checks admin privileges, auto-elevates via UAC, validates PowerShell version (5.1+), sets USB drive path. Presents a <strong>57-option menu</strong> (Options 0-56) organized by category. Dispatches to the appropriate PS1 script based on selection.</div>
         </div>
       </div>
       <div class="layer-row reveal">
@@ -405,10 +406,17 @@
         </div>
       </div>
       <div class="layer-row reveal">
+        <div class="layer-badge" style="background:rgba(226,35,26,0.08)"><div class="lb-num" style="color:#FF9999">5b</div><div class="lb-label">Layer</div></div>
+        <div class="layer-content">
+          <div class="layer-name">ENTERPRISE ENGINES -- Core\ (7 modules)</div>
+          <div class="layer-desc">Reusable .psm1 modules: <strong>GuardEngine</strong> (6-gate remediation authority), <strong>IntegrityEngine</strong> (SHA256 tamper detection), <strong>ScoringEngine</strong> (weighted 0-100 health score), <strong>TrendEngine</strong> (90-session historical tracking), <strong>ComplianceExport</strong> (ISO/SOC2/CIS artifacts), <strong>ClassificationEngine</strong> (3-level L1/L2/L3 diagnostic triage with 5-branch decision tree), and <strong>LDT-EngineAdapter</strong> (bridge module). Loaded at Phase 0 with graceful degradation if absent.</div>
+        </div>
+      </div>
+      <div class="layer-row reveal">
         <div class="layer-badge" style="background:rgba(139,92,246,0.12)"><div class="lb-num" style="color:#C4B5FD">6</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
-          <div class="layer-name">CONFIGURATION -- Config\config.ini (24 sections)</div>
-          <div class="layer-desc">All thresholds, paths, and behavior switches in one INI file. <strong>24 configurable sections</strong> including: General, Diagnostics, HardwareTests, Repair, Fleet, Security, SMART thresholds, Refurbishment, AutoRemediation, SmartDiagnosis, QuickStart scoring weights, and more. No code changes needed to tune behavior.</div>
+          <div class="layer-name">CONFIGURATION -- Config\config.ini (25 sections)</div>
+          <div class="layer-desc">All thresholds, paths, and behavior switches in one INI file. <strong>25 configurable sections</strong> including: General, Diagnostics, HardwareTests, Repair, Fleet, Security, SMART thresholds, Refurbishment, AutoRemediation, SmartDiagnosis, Display, ClassificationEngine, QuickStart scoring weights, and more. No code changes needed to tune behavior.</div>
         </div>
       </div>
       <div class="layer-row reveal">
@@ -700,12 +708,15 @@
         <div class="esc-level">Level 2</div>
         <div class="esc-title">REPLACEABLE COMPONENT</div>
         <ul class="esc-items">
-          <li>Battery wear &gt;60% — replace battery pack</li>
+          <li>Battery wear &gt;40% (critical &gt;60%) — replace battery pack</li>
           <li>SMART critical / drive Unhealthy — replace SSD or HDD</li>
-          <li>NVMe wear &gt;80% — drive replacement required</li>
+          <li>NVMe wear &gt;80% (critical &gt;90%) — drive replacement required</li>
+          <li>SSD wear &gt;70% — drive replacement recommended</li>
           <li>WHEA correctable RAM errors — reseat or replace DIMM</li>
-          <li>CMOS battery dead — replace CR2032 coin cell</li>
+          <li>CMOS battery dead (clock drift &gt;120s) — replace CR2032 coin cell</li>
+          <li>Display dead pixels &gt;3 — panel replacement per pixel policy</li>
           <li>Display artifacts (no physical damage) — reseat eDP cable or replace LCD panel</li>
+          <li>Power-on hours &gt;5 years — proactive replacement recommended</li>
         </ul>
       </div>
       <div class="esc-card l3">
@@ -717,6 +728,8 @@
           <li>BIOS corruption — external programmer or Crisis Recovery</li>
           <li>TPM absent on TPM 2.0-required machine</li>
           <li>Storage controller failure — NAND unreadable</li>
+          <li>SMART failure — immediate drive replacement</li>
+          <li>L2 escalation triggers: uncorrectable memory, storage controller fail, firmware corruption, TPM hardware fail</li>
         </ul>
       </div>
     </div>
@@ -727,12 +740,12 @@
       <div class="section-number">05</div>
       <div class="section-title-block">
         <div class="section-label">Structured Report Output</div>
-        <div class="section-title">REPORT FORMAT — final_report.json v6.1.3 SCHEMA</div>
+        <div class="section-title">REPORT FORMAT — final_report.json v7.2.0 SCHEMA</div>
       </div>
     </div>
-    <p class="step-desc reveal" style="margin-bottom:20px;max-width:820px;">Three files are generated per run: <strong>snapshot.json</strong> (Phase 1), <strong>final_report.json</strong> (Phase 8), and an <strong>HTML summary report</strong> (Phase 8). The JSON files are structured for fleet aggregation and can be imported into dashboards or ticketing systems.</p>
+    <p class="step-desc reveal" style="margin-bottom:20px;max-width:820px;">Multiple files are generated per run: <strong>snapshot.json</strong> (Phase 1), <strong>final_report.json</strong> (Phase 8), an <strong>HTML summary report</strong> (Phase 8), and when enterprise engines are present, <strong>7 compliance artifacts</strong> including ClassificationReport.json. The JSON files are structured for fleet aggregation and can be imported into dashboards or ticketing systems.</p>
     <div class="json-block reveal">
-<span class="jc">// final_report.json — v6.1.3 schema — generated by Export-SmartDiagJSON at Phase 8</span><br>
+<span class="jc">// final_report.json — v7.2.0 schema — generated by Export-SmartDiagJSON at Phase 8</span><br>
 {<br>
 &nbsp;&nbsp;<span class="jk">"device"</span>: {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"serial"</span>: <span class="js">"PF3XXXXX"</span>,<br>
@@ -771,6 +784,16 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"Phase0"</span>: <span class="js">"PASS"</span>, <span class="jk">"Phase1"</span>: <span class="js">"PASS"</span>, <span class="jk">"Phase2"</span>: <span class="js">"PASS"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"Phase3"</span>: <span class="js">"WARNING"</span>, <span class="jk">"Phase4"</span>: <span class="js">"FAIL"</span>, <span class="jk">"Phase5"</span>: <span class="js">"WARNING"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"Phase6"</span>: <span class="js">"REMEDIATED"</span>, <span class="jk">"Phase7"</span>: <span class="js">"PASS"</span>, <span class="jk">"Phase8"</span>: <span class="js">"COMPLETE"</span><br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="jk">"classification"</span>: {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="jc">// v7.2.0 — ClassificationEngine output</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"escalation_level"</span>: <span class="js">"L1"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"severity_score"</span>: <span class="jn">55</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"branch"</span>: <span class="js">"SOFTWARE"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"decision_path"</span>: <span class="js">"Power OK → Windows OK → Software Errors → L1 AUTO-FIXABLE"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"component_health"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="jk">"component"</span>: <span class="js">"Security"</span>, <span class="jk">"classification"</span>: <span class="js">"SOFTWARE"</span>, <span class="jk">"level"</span>: <span class="js">"L1"</span> }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"l1_count"</span>: <span class="jn">3</span>, <span class="jk">"l2_count"</span>: <span class="jn">0</span>, <span class="jk">"l3_count"</span>: <span class="jn">0</span><br>
 &nbsp;&nbsp;}<br>
 }
     </div>
@@ -781,24 +804,36 @@
       <div class="section-number">06</div>
       <div class="section-title-block">
         <div class="section-label">USB Directory Structure</div>
-        <div class="section-title">OFFLINE USB LAYOUT — v6.1.3</div>
+        <div class="section-title">OFFLINE USB LAYOUT — v7.2.0</div>
       </div>
     </div>
     <div class="usb-tree reveal">
 <span class="ut-dir">E:\LDT-v6.0\</span>  <span class="ut-note">(USB Drive Root — drive letter detected automatically by BAT launcher)</span><br>
 <br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Master_Diagnostic.bat</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 0: Launcher (Options 0-54, admin elevation, PS check)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Master_Diagnostic.bat</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 0: Launcher (Options 0-56, admin elevation, PS check)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Diagnostic_Suite.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 1: Core engine (45 modules, 7,002 lines, Options 1-48)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Smart_Diagnosis_Engine.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 2: 9-phase diagnosis (2,643 lines, Option 54)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Smart_Diagnosis_Engine.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 2: 9-phase diagnosis + ClassifyOnly mode (Options 54, 56)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Quick_Start.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 3: Guided workflows (Options 51-53)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Team_Issue_Detector.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 4: Fleet BSOD + Reset + VPN scanner (Option 49)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Fleet_Aggregator.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 5: CSV merge + HTML dashboard (Option 50)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── OEM_Validation.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← OEM read-only validation mode (Option 55)</span><br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Core\</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 5b: Enterprise engine modules (.psm1)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── GuardEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 6-gate remediation authority</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── IntegrityEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← SHA256 tamper detection + log sealing</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ScoringEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Weighted 0-100 health score</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── TrendEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 90-session historical tracking</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ComplianceExport.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← ISO/SOC2/CIS artifact generation (7 artifacts)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ClassificationEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 3-Level L1/L2/L3 diagnostic classification</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">└── LDT-EngineAdapter.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Bridge between LDT conventions and engines</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── CHANGELOG.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Version history</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── CONTEXT.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Project context and architecture notes</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Config\</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">└── config.ini</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 6: 24 sections, all thresholds configurable</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── config.ini</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 6: 25 sections, all thresholds configurable</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── config.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Enterprise engine configuration</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">└── VersionManifest.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← SHA256 integrity baseline for all platform files</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Docs\</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 7: This guide + fonts (offline rendering)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── LDT_Step_by_Step_Guide.html</span><br>
@@ -819,7 +854,7 @@
       <div class="section-number">07</div>
       <div class="section-title-block">
         <div class="section-label">Enterprise Acceptance Targets</div>
-        <div class="section-title">PERFORMANCE TARGETS — v6.1.3 ACCEPTANCE CRITERIA</div>
+        <div class="section-title">PERFORMANCE TARGETS — v7.2.0 ACCEPTANCE CRITERIA</div>
       </div>
     </div>
     <div class="targets-grid reveal">
@@ -859,7 +894,7 @@
       <div class="section-number">—</div>
       <div class="section-title-block">
         <div class="section-label">What Every Run Produces</div>
-        <div class="section-title">6 OUTPUTS FROM ONE EXECUTION</div>
+        <div class="section-title">7 OUTPUTS FROM ONE EXECUTION</div>
       </div>
     </div>
     <div class="achieve-grid reveal">
@@ -871,7 +906,7 @@
       <div class="achieve-card blue">
         <div class="achieve-icon">📊</div>
         <div class="achieve-title">final_report.json</div>
-        <div class="achieve-desc">Full structured findings in v6.1.3 schema. Contains findings[], primary_cause, severity_score, confidence_pct, enterprise_score, actions_taken[], phase_results, rollback_tokens. <strong>Phase 8 output.</strong></div>
+        <div class="achieve-desc">Full structured findings in v7.2.0 schema. Contains findings[], primary_cause, severity_score, confidence_pct, enterprise_score, actions_taken[], phase_results, rollback_tokens, and <strong>classification{}</strong> block with L1/L2/L3 breakdown. <strong>Phase 8 output.</strong></div>
       </div>
       <div class="achieve-card purple">
         <div class="achieve-icon">🌐</div>
@@ -892,6 +927,11 @@
         <div class="achieve-icon">⚡</div>
         <div class="achieve-title">Stress Validation Result</div>
         <div class="achieve-desc">PASS/FAIL from Phase 7 — CPU stress, memory allocation, disk I/O throughput, thermal delta observation. Confirms fixes held under load, not just that commands completed.</div>
+      </div>
+      <div class="achieve-card red">
+        <div class="achieve-icon">🏥</div>
+        <div class="achieve-title">ClassificationReport.json</div>
+        <div class="achieve-desc">7th compliance artifact from ClassificationEngine. Contains escalation_level (L1/L2/L3), severity_score, decision tree path, component health breakdown, and L2-to-L3 escalation triggers. <strong>ComplianceExport output.</strong></div>
       </div>
     </div>
 
@@ -939,10 +979,10 @@
     <div class="bottom-card reveal">
       <h2>⚙️ THE BOTTOM LINE</h2>
       <p>
-        Laptop Diagnostic Toolkit v6.1.3 is a <strong>deterministic, state-driven, 9-phase diagnostic engine</strong> that
-        collects a complete system snapshot, classifies hardware vs software faults before touching anything,
-        creates rollback backups before every fix, validates repairs under stress, and produces
-        <strong>structured JSON + HTML reports</strong> — all from a USB drive with zero installation, zero internet, and zero telemetry.
+        Laptop Diagnostic Toolkit v7.2.0 is a <strong>deterministic, state-driven, 9-phase diagnostic engine</strong> with a formal
+        <strong>3-level classification system (L1/L2/L3)</strong> that collects a complete system snapshot, classifies hardware vs software faults
+        using a 5-branch decision tree, creates rollback backups before every fix, validates repairs under stress, and produces
+        <strong>structured JSON + HTML reports</strong> with visual triage panels — all from a USB drive with zero installation, zero internet, and zero telemetry.
       </p>
       <div class="big-stats">
         <div class="big-stat"><div class="big-stat-num green">≥70%</div><div class="big-stat-label">Software Auto-Resolution</div></div>

@@ -224,11 +224,69 @@ function ConvertTo-WinDRESeverity {
     }
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# ConvertTo-ClassificationFindings -- Bridge for ClassificationEngine
+# ─────────────────────────────────────────────────────────────────────────────
+
+function ConvertTo-ClassificationFindings {
+    <#
+    .SYNOPSIS
+        Groups DiagState.Findings by classification level (L1/L2/L3) using
+        the ClassificationEngine. Returns a summary suitable for fleet
+        aggregation, compliance, and trend reporting.
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$DiagState,
+        [hashtable]$ClassConfig = @{}
+    )
+
+    $l1 = [System.Collections.ArrayList]::new()
+    $l2 = [System.Collections.ArrayList]::new()
+    $l3 = [System.Collections.ArrayList]::new()
+
+    $findings = $DiagState.Findings
+    if (-not $findings) { $findings = @() }
+
+    foreach ($f in $findings) {
+        if ($f.Status -eq 'Pass' -or $f.Status -eq 'Info') { continue }
+
+        $health = $null
+        if (Get-Command 'Get-ComponentHealth' -ErrorAction SilentlyContinue) {
+            $health = Get-ComponentHealth -Finding $f -Config $ClassConfig
+        }
+
+        if ($health) {
+            switch ($health.Classification) {
+                'FATAL'    { [void]$l3.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details; reason = $health.Reason; recommendation = $health.ReplacementRecommendation }) }
+                'WEAR'     { [void]$l2.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details; reason = $health.Reason; recommendation = $health.ReplacementRecommendation }) }
+                'SOFTWARE' { [void]$l1.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details; reason = $health.Reason }) }
+            }
+        }
+        else {
+            # Fallback: use severity code
+            if ($f.Severity -match '^H[23]') { [void]$l3.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details }) }
+            elseif ($f.Severity -match '^H')  { [void]$l2.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details }) }
+            else                               { [void]$l1.Add([ordered]@{ component = $f.Component; severity = $f.Severity; details = $f.Details }) }
+        }
+    }
+
+    return @{
+        L1 = @($l1)
+        L2 = @($l2)
+        L3 = @($l3)
+        Summary = "L1:$($l1.Count) L2:$($l2.Count) L3:$($l3.Count)"
+    }
+}
+
 Export-ModuleMember -Function @(
     'Initialize-EngineAdapter',
     'Write-EngineLog',
     'Start-LogTimer',
     'ConvertTo-ModuleResults',
     'Get-LDTEscalationAsInt',
-    'ConvertTo-WinDRESeverity'
+    'ConvertTo-WinDRESeverity',
+    'ConvertTo-ClassificationFindings'
 )

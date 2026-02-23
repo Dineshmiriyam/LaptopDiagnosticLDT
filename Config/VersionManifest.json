@@ -1,14 +1,14 @@
 ﻿{
     "_type":  "VERSION_MANIFEST",
     "_description":  "LDT Platform Version Governance Manifest. SHA256 hashes validated at engine startup by IntegrityEngine. Regenerate with Tools\\Update-VersionManifest.ps1",
-    "version":  "7.1.0",
+    "version":  "7.2.0",
     "releaseDate":  "2026-02-21",
     "releaseName":  "Enterprise Engine Edition",
     "minimumPSVersion":  "5.1",
     "minimumOSBuild":  19041,
     "changelog":  [
                       {
-                          "version":  "7.1.0",
+                          "version":  "7.2.0",
                           "date":  "2026-02-21",
                           "changes":  [
                                           "Added GuardEngine with 6-gate remediation authority and EscalationLevel hard-stop",
@@ -119,8 +119,15 @@
                       "relativePath":  "Config\\config.ini",
                       "critical":  false,
                       "role":  "CONFIG",
-                      "description":  "Diagnostic threshold configuration (24 sections)",
-                      "sha256":  "C16564C85E09174A4441064552C714728E51899A169571A63B7534D683996897"
+                      "description":  "Diagnostic threshold configuration (25 sections)",
+                      "sha256":  "181B4A59040B89020A35E424CA1F26B4917B0C2A516837F6B0943D48FF4DAC15"
+                  },
+                  {
+                      "relativePath":  "Core\\ClassificationEngine.psm1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "3-Level diagnostic classification engine (L1/L2/L3)",
+                      "sha256":  "268F026FDFC389CFA8F74875F03E06A30AB92152812AC3AD5E8ECFFECF3BE9B8"
                   }
               ],
     "governance":  {

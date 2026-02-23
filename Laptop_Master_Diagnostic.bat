@@ -180,6 +180,7 @@ echo   49. Team Issue Detector      (BSOD + Resets + VPN scan + auto-fix)
 echo   50. Fleet CSV Aggregator     (merge all USB CSV data + deduplicate)
 echo   54. Smart Diagnosis Engine   (9-phase root cause analysis + auto-fix)
 echo   55. OEM Validation Mode     (Read-only hardware baseline check)
+echo   56. Classification Engine   (3-Level diagnostic triage + report)
 echo.
 echo   OTHER
 echo   -----
@@ -189,7 +190,7 @@ echo   38. Open Reports Folder
 echo    0. Exit
 echo.
 echo ============================================================
-set /p "CHOICE=  Select option (0-55): "
+set /p "CHOICE=  Select option (0-56): "
 
 :: Validate input
 if "%CHOICE%"=="" goto main_menu
@@ -251,6 +252,7 @@ if "%CHOICE%"=="52" ( set "QS_MODE=SymptomFix" & goto run_quickstart )
 if "%CHOICE%"=="53" ( set "QS_MODE=ScoreMachine" & goto run_quickstart )
 if "%CHOICE%"=="54" goto run_smartdiag
 if "%CHOICE%"=="55" goto run_oemvalidation
+if "%CHOICE%"=="56" goto run_classification
 
 echo.
 echo  Invalid selection. Press any key to try again...
@@ -452,6 +454,41 @@ if !errorlevel! neq 0 (
     call :log_message "OEM Validation completed with error code !errorlevel!"
 ) else (
     call :log_message "OEM Validation completed successfully"
+)
+
+echo.
+echo  Press any key to return to the main menu...
+pause >nul
+goto main_menu
+
+:: ============================================================
+:: RUN CLASSIFICATION ENGINE (Option 56) -- ClassifyOnly mode
+:: ============================================================
+:run_classification
+cls
+echo ============================================================
+echo  Running: 3-Level Classification Engine (Scan + Classify Only)
+echo ============================================================
+echo.
+call :log_message "Running Classification Engine (ClassifyOnly mode)"
+
+set "SMARTDIAG_FILE=%SCRIPT_DIR%Smart_Diagnosis_Engine.ps1"
+if not exist "%SMARTDIAG_FILE%" (
+    echo.
+    echo  ERROR: Smart_Diagnosis_Engine.ps1 not found!
+    echo  Expected: %SMARTDIAG_FILE%
+    echo.
+    call :log_message "CRITICAL: Smart_Diagnosis_Engine.ps1 not found"
+    pause
+    goto main_menu
+)
+
+powershell -NoProfile %PS_POLICY% -File "%SMARTDIAG_FILE%" -LogPath "%LOGS_DIR%" -ReportPath "%REPORTS_DIR%" -ConfigPath "%SCRIPT_DIR%Config" -BackupPath "%SCRIPT_DIR%Backups" -TempPath "%TEMP_DIR%" -DataPath "%SCRIPT_DIR%Data" -ScriptRoot "%SCRIPT_DIR:~0,-1%" -Mode "ClassifyOnly"
+
+if !errorlevel! neq 0 (
+    call :log_message "Classification Engine completed with error code !errorlevel!"
+) else (
+    call :log_message "Classification Engine completed successfully"
 )
 
 echo.

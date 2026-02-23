@@ -44,7 +44,8 @@
         "Security":     { "autoRepair": true,  "description": "Defender, Firewall, UAC hardening" },
         "Network":      { "autoRepair": true,  "description": "Network stack, Winsock, DNS reset" },
         "Performance":  { "autoRepair": false, "description": "Diagnostic only — no auto-fix" },
-        "Hardware":     { "autoRepair": false, "description": "Detection and escalation only — NEVER auto-repairs" }
+        "Hardware":     { "autoRepair": false, "description": "Detection and escalation only — NEVER auto-repairs" },
+        "Classification": { "autoRepair": false, "description": "3-Level diagnostic classification engine (L1/L2/L3)" }
     },
 
     "paths": {

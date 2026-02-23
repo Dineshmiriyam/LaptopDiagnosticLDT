@@ -148,6 +148,34 @@ function Export-ComplianceArtifacts {
         -SessionId $SessionId -GuardStatus $GuardStatus `
         -GuardDecisionLog $GuardDecisionLog -OutputDir $complianceDir
 
+    # ── Artifact 7: Classification Report (v7.2) ──────────────────────────
+    if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+        $classReport = $DiagState['ClassificationReport']
+        $classRecord = [ordered]@{
+            _type              = 'CLASSIFICATION_REPORT'
+            sessionId          = $SessionId
+            generatedAt        = Get-Date -Format 'o'
+            computername       = $env:COMPUTERNAME
+            escalation_level   = $classReport.escalation_level
+            severity_score     = $classReport.severity_score
+            confidence_pct     = $classReport.confidence_pct
+            branch             = $classReport.classification_branch
+            reasoning          = $classReport.classification_reasoning
+            decision_path      = $classReport.decision_tree_path
+            primary_cause      = $classReport.primary_cause
+            component_health   = $classReport.component_health
+            l1_count           = $classReport.l1_count
+            l2_count           = $classReport.l2_count
+            l3_count           = $classReport.l3_count
+            auto_fix_allowed   = $classReport.auto_fix_allowed
+            stress_validation  = $classReport.stress_validation
+            enterprise_score   = $classReport.enterprise_score
+        }
+        $classPath = Join-Path $complianceDir 'ClassificationReport.json'
+        $classRecord | ConvertTo-Json -Depth 10 | Set-Content $classPath -Encoding UTF8
+        $artifacts['ClassificationReport'] = $classPath
+    }
+
     Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'ComplianceExport' `
         -Message "Compliance artifacts generated" `
         -Data @{ artifactCount = $artifacts.Count; outputDir = $complianceDir }

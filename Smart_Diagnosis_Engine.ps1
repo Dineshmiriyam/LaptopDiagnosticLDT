@@ -5,7 +5,7 @@
     rollback protection, post-fix stress validation, and enterprise engines.
 
 .VERSION
-    7.1.0
+    7.2.0
 
 .NOTES
     Architecture: Standalone PS1 (called by Laptop_Master_Diagnostic.bat)
@@ -22,7 +22,8 @@ param(
     [string]$BackupPath  = ".\Backups",
     [string]$TempPath    = ".\Temp",
     [string]$DataPath    = ".\Data",
-    [string]$ScriptRoot  = ""
+    [string]$ScriptRoot  = "",
+    [string]$Mode        = "Full"
 )
 
 # ============================================================
@@ -55,6 +56,7 @@ if (Test-Path $coreDir) {
         Import-Module (Join-Path $coreDir "ScoringEngine.psm1") -Force -ErrorAction Stop
         Import-Module (Join-Path $coreDir "TrendEngine.psm1") -Force -ErrorAction Stop
         Import-Module (Join-Path $coreDir "ComplianceExport.psm1") -Force -ErrorAction Stop
+        Import-Module (Join-Path $coreDir "ClassificationEngine.psm1") -Force -ErrorAction Stop
         $v7EnginesAvailable = $true
     }
     catch {
@@ -71,6 +73,13 @@ if ($v7EnginesAvailable -and (Test-Path $v7ConfigPath)) {
         $v7Config = Get-Content $v7ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch { }
+}
+
+# Load classification engine config
+$classConfig = @{}
+if ($v7EnginesAvailable) {
+    try { $classConfig = Get-ClassificationConfig -ConfigPath $ConfigPath }
+    catch { $classConfig = @{} }
 }
 
 # Machine info
@@ -2287,9 +2296,37 @@ function Invoke-Phase6-AutoRemediation {
     $ranking = Get-RootCauseRanking -DiagState $DiagState
     $escalation = $ranking.EscalationLevel
 
-    # Check max auto level
-    $levelOrder = @{ "None" = 0; "L1" = 1; "L2" = 2; "L3" = 3 }
-    $currentLevel = if ($levelOrder.ContainsKey($escalation)) { $levelOrder[$escalation] } else { 0 }
+    # v7.2: Use ClassificationEngine for formal level determination if available
+    $classLevel = $null
+    if ($v7EnginesAvailable -and (Get-Command 'Get-DiagnosticLevel' -ErrorAction SilentlyContinue)) {
+        try {
+            $classResult = Get-DiagnosticLevel -Findings $DiagState.Findings -DiagState $DiagState -Config $classConfig
+            $classLevel = $classResult.Level
+            # L2/L3 from classification engine overrides: skip remediation
+            if ($classLevel -eq 'L3') {
+                Write-ScanHeader -Name "PHASE 6: AUTOMATED REMEDIATION" -Icon "[6/8]"
+                Write-Host "    Skipped - Classification Engine: L3 TECHNICIAN REQUIRED" -ForegroundColor Red
+                Write-Host "    Reason: $($classResult.Reasoning)" -ForegroundColor DarkGray
+                $DiagState.PhaseResults["Phase6"] = "SKIP"
+                Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "L3 classification: $($classResult.Branch)"
+                Write-Log "Phase 6 skipped: ClassificationEngine L3 ($($classResult.Branch)): $($classResult.Reasoning)"
+                $DiagState["ClassificationResult"] = $classResult
+                return
+            }
+            if ($classLevel -eq 'L2') {
+                Write-Host "    Classification: L2 REPLACEABLE COMPONENT ($($classResult.L2Count) wear item(s))" -ForegroundColor Yellow
+                Write-Log "Phase 6: ClassificationEngine L2 -- $($classResult.Reasoning). Proceeding with L1 software fixes only."
+            }
+        }
+        catch {
+            Write-Log "ClassificationEngine not available in Phase 6, using legacy escalation: $($_.Exception.Message)"
+        }
+    }
+
+    # Check max auto level (legacy path, still applies)
+    $levelOrder = @{ "None" = 0; "L1" = 1; "L2" = 2; "L3" = 3; "CLEAR" = 0 }
+    $escLevel = if ($classLevel) { $classLevel } else { $escalation }
+    $currentLevel = if ($levelOrder.ContainsKey($escLevel)) { $levelOrder[$escLevel] } else { 0 }
     $maxLevel = if ($levelOrder.ContainsKey($cfgMaxAutoLevel)) { $levelOrder[$cfgMaxAutoLevel] } else { 1 }
 
     if ($currentLevel -gt $maxLevel) {
@@ -3228,6 +3265,59 @@ function Invoke-Phase8-FinalClassification {
     }
     Write-Host ""
 
+    # v7.2: Classification Engine -- formal 3-level classification
+    if ($v7EnginesAvailable -and (Get-Command 'Get-ClassificationReport' -ErrorAction SilentlyContinue)) {
+        try {
+            $classReport = Get-ClassificationReport -DiagState $DiagState -Config $classConfig -RootCauseRanking $ranking
+            $DiagState["ClassificationReport"] = $classReport
+
+            # Display 3-level triage summary
+            Write-Host "    3-Level Classification:" -ForegroundColor White
+            $levelColor = switch ($classReport.escalation_level) {
+                'L1'    { 'Green' }
+                'L2'    { 'Yellow' }
+                'L3'    { 'Red' }
+                'CLEAR' { 'Cyan' }
+                default { 'Gray' }
+            }
+            $levelDesc = switch ($classReport.escalation_level) {
+                'L1'    { 'AUTO-FIXABLE (Software)' }
+                'L2'    { 'REPLACEABLE COMPONENT (Wear)' }
+                'L3'    { 'TECHNICIAN REQUIRED (Critical)' }
+                'CLEAR' { 'ALL CLEAR' }
+                default { 'Unknown' }
+            }
+            Write-Host "      Level: $($classReport.escalation_level) -- $levelDesc" -ForegroundColor $levelColor
+            Write-Host "      Branch: $($classReport.classification_branch)" -ForegroundColor DarkGray
+            Write-Host "      Severity Score: $($classReport.severity_score)/100" -ForegroundColor $(if ($classReport.severity_score -ge 90) { 'Red' } elseif ($classReport.severity_score -ge 65) { 'Yellow' } else { 'Green' })
+            Write-Host "      Issues: L1=$($classReport.l1_count) | L2=$($classReport.l2_count) | L3=$($classReport.l3_count)" -ForegroundColor DarkGray
+
+            # Decision tree path
+            if ($classReport.decision_tree_path) {
+                $pathStr = $classReport.decision_tree_path -join ' -> '
+                Write-Host "      Path: $pathStr" -ForegroundColor DarkGray
+            }
+
+            # L2 component health cards
+            if ($classReport.component_health -and $classReport.component_health.Count -gt 0) {
+                Write-Host ""
+                Write-Host "    Replaceable Components (L2):" -ForegroundColor Yellow
+                foreach ($ch in $classReport.component_health) {
+                    Write-Host "      - $($ch.component): $($ch.reason)" -ForegroundColor Yellow
+                    if ($ch.recommendation) {
+                        Write-Host "        Recommendation: $($ch.recommendation)" -ForegroundColor DarkGray
+                    }
+                }
+            }
+            Write-Host ""
+            Write-Log "ClassificationEngine: $($classReport.escalation_level) ($($classReport.classification_branch)), Severity=$($classReport.severity_score)"
+        }
+        catch {
+            Write-Host "    [WARN] ClassificationEngine: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Log "ClassificationEngine failed in Phase 8: $($_.Exception.Message)"
+        }
+    }
+
     $DiagState.PhaseResults["Phase8"] = "DONE"
 
     # Store ranking for report
@@ -3438,6 +3528,87 @@ function New-SmartDiagReport {
         default    { "#777" }
     }
 
+    # v7.2: Build 3-Level Classification Triage Panel
+    $triagePanelHTML = ""
+    $decisionPathHTML = ""
+    $componentCardsHTML = ""
+    $classReport = $null
+    if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+        $classReport = $DiagState['ClassificationReport']
+        $activeLevel = $classReport.escalation_level
+
+        # L1 column
+        $l1Active = if ($activeLevel -eq 'L1') { 'triage-active' } else { 'triage-dimmed' }
+        $l1Items = ""
+        if ($classReport.l1_count -gt 0) {
+            $swFindings = @($DiagState.Findings | Where-Object { $_.Severity -match '^S' -and ($_.Status -eq 'Fail' -or $_.Status -eq 'Warning') } | Select-Object -First 5)
+            foreach ($sf in $swFindings) { $l1Items += "<li>$($sf.Component)</li>" }
+        }
+
+        # L2 column
+        $l2Active = if ($activeLevel -eq 'L2') { 'triage-active' } else { 'triage-dimmed' }
+        $l2Items = ""
+        if ($classReport.component_health) {
+            foreach ($ch in $classReport.component_health) { $l2Items += "<li>$($ch.component)</li>" }
+        }
+
+        # L3 column
+        $l3Active = if ($activeLevel -eq 'L3') { 'triage-active' } else { 'triage-dimmed' }
+        $l3Items = ""
+        $hwCritFindings = @($DiagState.Findings | Where-Object { $_.Severity -eq 'H3' -and $_.Status -eq 'Fail' } | Select-Object -First 5)
+        foreach ($hf in $hwCritFindings) { $l3Items += "<li>$($hf.Component)</li>" }
+
+        $triagePanelHTML = @"
+  <h2>3-Level Classification</h2>
+  <div class="triage-panel">
+    <div class="triage-col triage-l1 $l1Active">
+      <div class="triage-title" style="color:#00C875">L1 — AUTO-FIXABLE</div>
+      <span class="triage-count" style="color:#00C875">$($classReport.l1_count)</span>
+      <div class="triage-desc">Software-layer issues that can be remediated automatically</div>
+      <ul class="triage-items">$l1Items</ul>
+    </div>
+    <div class="triage-col triage-l2 $l2Active">
+      <div class="triage-title" style="color:#F59E0B">L2 — REPLACEABLE</div>
+      <span class="triage-count" style="color:#F59E0B">$($classReport.l2_count)</span>
+      <div class="triage-desc">Hardware wear requiring component replacement</div>
+      <ul class="triage-items">$l2Items</ul>
+    </div>
+    <div class="triage-col triage-l3 $l3Active">
+      <div class="triage-title" style="color:#E2231A">L3 — TECHNICIAN</div>
+      <span class="triage-count" style="color:#E2231A">$($classReport.l3_count)</span>
+      <div class="triage-desc">Critical hardware faults — no auto-fix possible</div>
+      <ul class="triage-items">$l3Items</ul>
+    </div>
+  </div>
+"@
+
+        # Decision tree path
+        if ($classReport.decision_tree_path) {
+            $pathNodes = ""
+            $pathArr = @($classReport.decision_tree_path)
+            for ($pi = 0; $pi -lt $pathArr.Count; $pi++) {
+                $nodeClass = if ($pi -eq ($pathArr.Count - 1)) { 'decision-node decision-node-active' } else { 'decision-node' }
+                $pathNodes += "<span class='$nodeClass'>$($pathArr[$pi])</span>"
+                if ($pi -lt ($pathArr.Count - 1)) { $pathNodes += "<span class='decision-arrow'>&#8594;</span>" }
+            }
+            $decisionPathHTML = "<div class='decision-path'>$pathNodes</div>"
+        }
+
+        # L2 Component health cards
+        if ($classReport.component_health -and $classReport.component_health.Count -gt 0) {
+            $componentCardsHTML = "<h2>Replaceable Components (L2)</h2>"
+            foreach ($ch in $classReport.component_health) {
+                $componentCardsHTML += @"
+<div class="component-card">
+  <div class="comp-name">$($ch.component)</div>
+  <div class="comp-detail">$($ch.reason)</div>
+  <div class="comp-rec">Recommendation: $($ch.recommendation)</div>
+</div>
+"@
+            }
+        }
+    }
+
     $html = @"
 <!DOCTYPE html>
 <html lang="en">
@@ -3471,6 +3642,27 @@ function New-SmartDiagReport {
   .row-pass td { border-left:3px solid #00C875; }
   .muted { color:#7A8BA8; font-style:italic; }
   .footer { margin-top:30px; padding-top:10px; border-top:1px solid #1A2744; color:#7A8BA8; font-size:11px; text-align:center; }
+  /* 3-Level Classification Triage Panel */
+  .triage-panel { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px; }
+  .triage-col { border-radius:8px; padding:16px; border:2px solid; }
+  .triage-l1 { border-color:#00C875; background:rgba(0,200,117,0.05); }
+  .triage-l2 { border-color:#F59E0B; background:rgba(245,158,11,0.05); }
+  .triage-l3 { border-color:#E2231A; background:rgba(226,35,26,0.05); }
+  .triage-active { box-shadow:0 0 15px rgba(74,139,239,0.3); }
+  .triage-dimmed { opacity:0.35; }
+  .triage-title { font-size:13px; font-weight:bold; margin-bottom:8px; }
+  .triage-count { font-size:28px; font-weight:bold; display:block; margin:6px 0; }
+  .triage-desc { font-size:11px; color:#7A8BA8; }
+  .triage-items { margin-top:8px; font-size:11px; }
+  .triage-items li { margin:3px 0; list-style:none; }
+  .decision-path { display:flex; align-items:center; gap:6px; margin:12px 0; flex-wrap:wrap; }
+  .decision-node { padding:4px 10px; border-radius:4px; font-size:11px; background:#0F1E35; border:1px solid #1A2744; }
+  .decision-node-active { background:#1A5DCC; border-color:#4A8BEF; color:#fff; }
+  .decision-arrow { color:#7A8BA8; font-size:12px; }
+  .component-card { background:#0F1E35; border:1px solid #F59E0B; border-radius:6px; padding:10px 12px; margin:6px 0; }
+  .component-card .comp-name { font-weight:bold; color:#F59E0B; font-size:12px; }
+  .component-card .comp-detail { color:#7A8BA8; font-size:11px; margin-top:3px; }
+  .component-card .comp-rec { color:#F5F7FA; font-size:11px; margin-top:3px; }
   @media print {
     body { background:#fff; color:#000; }
     .exec-summary { border-color:#ccc; }
@@ -3480,6 +3672,12 @@ function New-SmartDiagReport {
     .data-table td { border-color:#ddd; }
     h1, h2 { color:#003; }
     .muted { color:#555; }
+    .triage-panel { grid-template-columns:1fr 1fr 1fr; }
+    .triage-col { border-color:#ccc; background:#f9f9f9; }
+    .triage-dimmed { opacity:0.5; }
+    .component-card { border-color:#ccc; background:#f5f5f5; }
+    .decision-node { background:#eee; border-color:#ccc; }
+    .decision-node-active { background:#036; color:#fff; }
   }
 </style>
 </head>
@@ -3503,6 +3701,10 @@ function New-SmartDiagReport {
     <div class="exec-row"><span class="exec-label">Escalation Level:</span><span class="exec-value" style="color:$escalColor">$($ranking.EscalationLevel)</span></div>
     <div class="exec-row"><span class="exec-label">Health Score:</span><span class="exec-value" style="color:$esColor"><div class="conf-bar"><div class="conf-fill" style="width:${esScore}%;background:$esColor"></div></div> $esScore/100$esBand</span></div>
   </div>
+
+  $triagePanelHTML
+  $decisionPathHTML
+  $componentCardsHTML
 
   <h2>Phase Results</h2>
   <div class="phase-grid">
@@ -3649,6 +3851,28 @@ function Export-SmartDiagJSON {
         $finalReport['compliance_dir']   = $DiagState.ComplianceDir
     }
 
+    # v7.2: ClassificationEngine data
+    if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+        $cr = $DiagState['ClassificationReport']
+        $finalReport['classification'] = @{
+            escalation_level  = $cr.escalation_level
+            severity_score    = $cr.severity_score
+            branch            = $cr.classification_branch
+            reasoning         = $cr.classification_reasoning
+            decision_path     = $cr.decision_tree_path
+            component_health  = $cr.component_health
+            l1_count          = $cr.l1_count
+            l2_count          = $cr.l2_count
+            l3_count          = $cr.l3_count
+            auto_fix_allowed  = $cr.auto_fix_allowed
+        }
+        # Override legacy fields with classification values
+        $finalReport['severity_score']    = $cr.severity_score
+        $finalReport['escalation_level']  = $cr.escalation_level
+        $finalReport['rollback_tokens']   = $cr.rollback_tokens
+        $finalReport['stress_validation'] = $cr.stress_validation
+    }
+
     $reportJsonFile = Join-Path $ReportDir "SmartDiag_${Timestamp}_report.json"
     $finalReport | ConvertTo-Json -Depth 4 | Out-File -FilePath $reportJsonFile -Encoding UTF8 -Force
     Write-Log "Final report JSON saved: $reportJsonFile"
@@ -3660,7 +3884,7 @@ function Export-SmartDiagJSON {
 # MAIN EXECUTION
 # ============================================================
 
-Write-Banner "SMART DIAGNOSIS ENGINE v7.0.0"
+Write-Banner "SMART DIAGNOSIS ENGINE v7.2.0"
 
 Write-Host "  Machine:  $computerName" -ForegroundColor White
 Write-Host "  Model:    $manufacturer $model" -ForegroundColor White
@@ -3708,10 +3932,22 @@ Invoke-Phase4-ServiceAndDriver -DiagState $diagState
 Invoke-Phase5-PerformanceProfile -DiagState $diagState
 
 # ---- Phase 6: Auto Remediation (gates checked internally) ----
-Invoke-Phase6-AutoRemediation -DiagState $diagState
+if ($Mode -eq 'ClassifyOnly') {
+    Write-Host "  [ClassifyOnly] Skipping Phase 6 (Remediation)" -ForegroundColor DarkGray
+    Write-Log "Phase 6 skipped: ClassifyOnly mode"
+    $diagState.PhaseResults["Phase6"] = "SKIP"
+} else {
+    Invoke-Phase6-AutoRemediation -DiagState $diagState
+}
 
 # ---- Phase 7: Stress Validation (skips if HW/thermal critical) ----
-Invoke-Phase7-StressValidation -DiagState $diagState
+if ($Mode -eq 'ClassifyOnly') {
+    Write-Host "  [ClassifyOnly] Skipping Phase 7 (Stress Validation)" -ForegroundColor DarkGray
+    Write-Log "Phase 7 skipped: ClassifyOnly mode"
+    $diagState.PhaseResults["Phase7"] = "SKIP"
+} else {
+    Invoke-Phase7-StressValidation -DiagState $diagState
+}
 
 # ---- Phase 8: Final Classification (always runs) ----
 Invoke-Phase8-FinalClassification -DiagState $diagState

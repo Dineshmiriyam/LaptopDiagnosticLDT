@@ -2,6 +2,34 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [7.2.0] - 2026-02-23
+
+### Added
+- **ClassificationEngine.psm1** (`Core/`): Formal 3-level diagnostic classification engine with 6 exported functions
+  - `Get-DiagnosticLevel`: Master classification returning L1/L2/L3/CLEAR with reasoning
+  - `Invoke-DecisionTree`: 5-branch decision tree (No Power → No Windows → Fatal HW → Wear HW → Software)
+  - `Get-SeverityScore`: 0-100 severity scoring with configurable weight map
+  - `Get-ComponentHealth`: Maps findings to SOFTWARE/WEAR/FATAL classifications
+  - `Get-ClassificationReport`: Generates mandatory structured JSON report
+  - `Get-ClassificationConfig`: Reads [ClassificationEngine] thresholds from config.ini
+- **Option 56: Classification Engine** (ClassifyOnly mode): Runs Phases 0-5 + Phase 8 (scan + classify), skips Phase 6/7 (no remediation)
+- **HTML Triage Panel**: 3-column L1/L2/L3 visual panel in Smart Diagnosis reports with active level highlighting
+- **Decision Tree Path**: Visual breadcrumb showing classification path (Power OK → Windows OK → L1 AUTO-FIXABLE)
+- **L2 Component Health Cards**: Per-component cards with wear details and replacement recommendations
+- **`[ClassificationEngine]` config section**: 30+ configurable thresholds for L1/L2/L3 classification
+- **7th Compliance Artifact**: `ClassificationReport.json` added to ComplianceExport
+- **TrendEngine escalation tracking**: `escalation_level` field added to trend entries for fleet L3 frequency analysis
+- **`ConvertTo-ClassificationFindings`** bridge function in LDT-EngineAdapter.psm1
+- `-Mode` parameter on Smart_Diagnosis_Engine.ps1 (supports "Full" and "ClassifyOnly")
+
+### Changed
+- Smart Diagnosis Engine Phase 6 now uses ClassificationEngine for formal L1/L2/L3 gating (with legacy fallback)
+- Smart Diagnosis Engine Phase 8 displays 3-level classification summary with severity score and decision path
+- JSON export includes `classification` block with full L1/L2/L3 breakdown
+- config.json updated with Classification module entry
+- VersionManifest.json updated with ClassificationEngine.psm1 entry
+- Version bumped to 7.2.0
+
 ## [7.1.0] - 2026-02-21
 
 ### Added
