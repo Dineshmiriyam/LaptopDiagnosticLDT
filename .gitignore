@@ -1,28 +1,21 @@
-# Temp and runtime files
+# Runtime directories (generated per session, machine-specific)
 Temp/
 Logs/
 Backups/
-
-# Reports (machine-specific, generated at runtime)
 Reports/
-
-# Trend data (machine-specific)
-TrendStore/
-
-# Results (generated)
 Results/
-
-# Archive
+Data/
+TrendStore/
 Archive/
 
-# Data collection
-Data/
+# Development artifacts
+prompt*.txt
+*.bak
 
-# WinDRE source (development reference, not part of LDT)
-21022026/
-
-# Third-party binaries (download separately, GitHub blocks these)
+# Third-party binaries (download separately, GitHub blocks large binaries)
 Tools/CPU-Z/
+Tools/LenovoThinInstaller/
+Tools/VPNInstaller/
 
 # Windows/OS files
 Thumbs.db

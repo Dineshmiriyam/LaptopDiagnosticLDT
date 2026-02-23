@@ -50,7 +50,7 @@ function Add-TrendEntry {
         Output from Invoke-SystemScoring.
 
     .PARAMETER PlatformRoot
-        USB root path (e.g., E:\LDT-v6.0) for resolving TrendStore directory.
+        USB root path (e.g., E:\LDT-v9.0) for resolving TrendStore directory.
     #>
     [CmdletBinding()]
     param(

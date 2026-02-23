@@ -23,7 +23,7 @@
 
 .EXAMPLE
     .\Test-LDTPlatform.ps1
-    .\Test-LDTPlatform.ps1 -PlatformRoot "E:\LDT-v6.0" -Fix
+    .\Test-LDTPlatform.ps1 -PlatformRoot "E:\LDT-v9.0" -Fix
 #>
 
 [CmdletBinding()]

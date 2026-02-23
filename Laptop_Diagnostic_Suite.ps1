@@ -449,7 +449,7 @@ function New-SafeRestorePoint {
             return $false
         }
         # Create the restore point
-        Checkpoint-Computer -Description "LDT v6.0 - Before $ModuleName $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -RestorePointType MODIFY_SETTINGS -ErrorAction Stop
+        Checkpoint-Computer -Description "LDT v9.0 - Before $ModuleName $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -RestorePointType MODIFY_SETTINGS -ErrorAction Stop
         Write-Host " done" -ForegroundColor Green
         Write-Log "Restore point created successfully before $ModuleName" -Level Success
         return $true

@@ -36,7 +36,7 @@
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "Core engine with 45 diagnostic and repair modules",
-                      "sha256":  "BDEA028D793868CD8A3F11B8A45188D80CD0EC4FB300C6FE8B580D559CFA50BA"
+                      "sha256":  "9A7B656A832DF5E2C3C9B59250D700B500FAC3C4A06B2F13D98F4EF3303344E3"
                   },
                   {
                       "relativePath":  "Core\\LDT-EngineAdapter.psm1",
@@ -71,7 +71,7 @@
                       "critical":  false,
                       "role":  "CORE",
                       "description":  "Historical session trend storage and drift analysis",
-                      "sha256":  "D038F3172232F81C8A88F85E7178641131AB3CD194DBE8F1B45CEEC32BE10AB4"
+                      "sha256":  "3C01B4003C10DCEE686D07CB04833E01CCEBA2D02B9B929D1B06CFC77D200282"
                   },
                   {
                       "relativePath":  "Core\\ComplianceExport.psm1",
@@ -99,7 +99,7 @@
                       "critical":  false,
                       "role":  "SCRIPT",
                       "description":  "Fleet-wide BSOD/Reset/VPN detector (Option 49)",
-                      "sha256":  "39EABF105183DEF2EB2D7D1334381E5FFA99AA869B1E20B0BC3774549F9856FB"
+                      "sha256":  "4DF0F638E6130B5AA5A7A58BFD3CA9701FB0DDB693557B85779E631A15374C81"
                   },
                   {
                       "relativePath":  "Fleet_Aggregator.ps1",
@@ -150,8 +150,8 @@
                        "changeControlRef":  "LDT-v9.0.0",
                        "validationMatrix":  "Docs\\ValidationTestMatrix.md"
                    },
-    "_selfHash":  "4780C991BF536173B3ACC30CD86AB179DA607EF4342B36EA7A6CE47A47FF87A4",
-    "_manifestUpdatedAt":  "2026-02-23T15:43:58.6822831+05:30",
+    "_selfHash":  "FE133D8D751AEAE326FD466E8E2A09823249DE79CCD37452B01BE8FF2E69CC20",
+    "_manifestUpdatedAt":  "2026-02-23T17:20:00.9149314+05:30",
     "_manifestUpdatedBy":  "DESKTOP-7G6HT08\\LENOVO"
 }
 

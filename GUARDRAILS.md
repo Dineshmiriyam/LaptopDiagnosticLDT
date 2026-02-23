@@ -340,7 +340,7 @@ $configPath = Join-Path $PSScriptRoot "Config\config.ini"
 $toolPath   = Join-Path $PSScriptRoot "Tools\CPU-Z\cpuz.exe"
 
 # WRONG -- hardcoded drive letters:
-$configPath = "E:\LDT-v6.0\Config\config.ini"
+$configPath = "E:\LDT-v9.0\Config\config.ini"
 $toolPath   = "C:\Tools\CPU-Z\cpuz.exe"
 ```
 
@@ -434,7 +434,7 @@ The USB drive requires a safe directory exception to avoid Git's
 ownership security check:
 
 ```bash
-git config --global --add safe.directory E:/LDT-v6.0
+git config --global --add safe.directory E:/LDT-v9.0
 ```
 
 ---

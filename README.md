@@ -66,20 +66,20 @@ Optimized for Lenovo ThinkPad fleets but compatible with any Windows 10/11 lapto
 
 There is no installation. LDT runs directly from the USB drive.
 
-1. Copy the entire `LDT-v6.0` folder to a USB drive
+1. Copy the entire `LDT-v9.0` folder to a USB drive
 2. Plug the USB drive into the target laptop
 3. Right-click **`Laptop_Master_Diagnostic.bat`** and select **Run as Administrator**
 4. Select an option from the menu (0--57)
 5. Reports are saved to the `Reports/` folder on the USB drive
 
-> **Note:** The folder name `LDT-v6.0` is the distribution folder. The toolkit version is 9.0.0.
+> **Note:** The folder name `LDT-v9.0` is the distribution folder. The toolkit version is 9.0.0.
 
 ---
 
 ## Directory Structure
 
 ```
-LDT-v6.0/
+LDT-v9.0/
 |
 |-- Laptop_Master_Diagnostic.bat        Launcher (right-click -> Run as Administrator)
 |-- Laptop_Diagnostic_Suite.ps1         Core engine (45 diagnostic modules, Options 1-48)

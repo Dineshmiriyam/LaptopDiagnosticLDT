@@ -47,7 +47,7 @@ These rules define what LDT is. Violating any of these breaks the product.
 ## 3. File Structure
 
 ```
-E:\LDT-v6.0\
+E:\LDT-v9.0\
 ├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-57)
 ├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules, Options 1-48)
 ├── Smart_Diagnosis_Engine.ps1      ← Option 54: 9-phase auto-detect + auto-fix
@@ -260,16 +260,16 @@ Before deploying any change, manually verify ALL of the following.
 1. Make changes to files on development machine
 2. Run through Testing Checklist (Section 9)
 3. Update Version History (Section 8 of this file)
-4. Copy changed files to USB drive (`E:\LDT-v6.0\`)
+4. Copy changed files to USB drive (`E:\LDT-v9.0\`)
 5. Verify files on USB with hash comparison
 6. Test from USB on a real Lenovo ThinkPad
 
 ### File Locations (Keep in Sync)
 | File | Development Location | USB Location |
 |------|---------------------|-------------|
-| Step-by-Step Guide | `C:\Users\LENOVO\Downloads\LDT_Step_by_Step_Guide.html` | `E:\LDT-v6.0\Docs\LDT_Step_by_Step_Guide.html` |
-| Core Script | — | `E:\LDT-v6.0\Laptop_Diagnostic_Suite.ps1` |
-| Config | — | `E:\LDT-v6.0\Config\config.ini` |
+| Step-by-Step Guide | `C:\Users\LENOVO\Downloads\LDT_Step_by_Step_Guide.html` | `E:\LDT-v9.0\Docs\LDT_Step_by_Step_Guide.html` |
+| Core Script | — | `E:\LDT-v9.0\Laptop_Diagnostic_Suite.ps1` |
+| Config | — | `E:\LDT-v9.0\Config\config.ini` |
 
 ### Future Process (Target)
 1. All files in a Git repository

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Team Issue Detector - LDT v6.0 Option 49
+    Team Issue Detector - LDT v9.0 Option 49
     Scans for BSOD, Unexpected Resets, and VPN/Network issues.
     Displays live terminal results, generates HTML report, auto-launches fix modules.
 
@@ -626,7 +626,7 @@ function New-HTMLReport {
 <body>
 <div class="container">
   <h1>ISSUE DETECTOR <span>REPORT</span></h1>
-  <div class="subtitle">LDT v6.0 - Team Issue Detector v1.0.0 - Generated $dateDisplay</div>
+  <div class="subtitle">LDT v9.0 - Team Issue Detector v1.0.0 - Generated $dateDisplay</div>
 
   <div class="machine-info">
     <div><strong>$computerName</strong> Computer</div>
@@ -683,7 +683,7 @@ function New-HTMLReport {
 "@ })
 
   <div class="footer">
-    LDT v6.0 &middot; Team Issue Detector v1.0.0 &middot; Report: IssueDetector_$timestamp.html
+    LDT v9.0 &middot; Team Issue Detector v1.0.0 &middot; Report: IssueDetector_$timestamp.html
   </div>
 </div>
 </body>
