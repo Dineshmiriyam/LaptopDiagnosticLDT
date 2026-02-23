@@ -38,7 +38,7 @@
       - Any action in OEM Validation Mode
 
 .NOTES
-    Version : 7.0.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 GuardEngine with LDT adaptations
 #>
@@ -93,6 +93,9 @@ $script:_GuardState = @{
     SessionId         = $null
     Config            = $null
     DecisionLog       = [System.Collections.Generic.List[PSCustomObject]]::new()
+    # v8.5 Enterprise Hardening
+    DeduplicationRegistry = @{}
+    RollbackTokens        = [System.Collections.ArrayList]::new()
 }
 
 #endregion
@@ -335,6 +338,167 @@ function Test-ProhibitedAction {
     return ($ActionId -in $script:_AbsoluteProhibitions)
 }
 
+function Invoke-GuardedRemediation {
+    <#
+    .SYNOPSIS
+        Wraps a remediation action with full Guard protection, deduplication,
+        BeforeState/AfterState capture, rollback token generation, and ledger entry creation.
+        All fixes MUST flow through this wrapper.
+    .OUTPUTS
+        [PSCustomObject] Structured remediation result for the RemediationLedger.
+    #>
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param(
+        [Parameter(Mandatory)] [string]      $ActionId,
+        [Parameter(Mandatory)] [string]      $ModuleName,
+        [Parameter(Mandatory)] [int]         $EscalationLevel,
+        [Parameter(Mandatory)] [string]      $ActionDescription,
+        [Parameter(Mandatory)] [string]      $Category,
+        [Parameter(Mandatory)] [scriptblock] $FixAction,
+        [scriptblock] $BeforeStateCapture = $null,
+        [scriptblock] $AfterStateCapture  = $null,
+        [string]      $RootCause          = "",
+        [string]      $Evidence           = "",
+        [int]         $SeverityScore      = 0
+    )
+
+    Assert-GuardInitialized
+    $sessionId = $script:_GuardState.SessionId
+    $timestamp = Get-Date -Format 'o'
+
+    # Build structured result
+    $result = [ordered]@{
+        IssueID                = "$ActionId`_$(Get-Date -Format 'HHmmss')"
+        Category               = $Category
+        SeverityScore          = $SeverityScore
+        Classification         = ""
+        RootCause              = $RootCause
+        Evidence               = $Evidence
+        Location               = $ModuleName
+        BusinessImpact         = ""
+        FixEligible            = $true
+        FixApplied             = $false
+        RollbackToken          = ""
+        BeforeState            = ""
+        AfterState             = ""
+        VerificationMethod     = "StressValidation"
+        VerificationResult     = "PENDING"
+        StressValidationResult = "PENDING"
+        FinalStatus            = "PENDING"
+        ConfidenceScore        = 0
+        Timestamp              = $timestamp
+        ActionDescription      = $ActionDescription
+    }
+
+    # Deduplication check
+    if ($script:_GuardState.DeduplicationRegistry.ContainsKey($ActionId)) {
+        $result.FixEligible = $false
+        $result.FinalStatus = "SKIPPED"
+        $result.VerificationResult = "DEDUPLICATED"
+        Write-EngineLog -SessionId $sessionId -Level 'INFO' -Source 'GuardEngine' `
+            -Message "DEDUP: $ActionId already executed this session -- skipping" `
+            -Data @{ actionId = $ActionId }
+        return [PSCustomObject]$result
+    }
+
+    # Guard clearance (6-gate check)
+    $cleared = $false
+    try {
+        $cleared = Test-GuardClearance -ActionId $ActionId -ModuleName $ModuleName `
+            -EscalationLevel $EscalationLevel -ActionDescription $ActionDescription
+    }
+    catch {
+        $result.FixEligible = $false
+        $result.FinalStatus = "BLOCKED"
+        $result.VerificationResult = "PROHIBITED"
+        return [PSCustomObject]$result
+    }
+
+    if (-not $cleared) {
+        $result.FixEligible = $false
+        $result.FinalStatus = "BLOCKED"
+        $result.VerificationResult = "GUARD_DENIED"
+        return [PSCustomObject]$result
+    }
+
+    # Capture BeforeState
+    if ($null -ne $BeforeStateCapture) {
+        try {
+            $result.BeforeState = & $BeforeStateCapture | Out-String
+        }
+        catch {
+            $result.BeforeState = "CaptureError: $($_.Exception.Message)"
+        }
+    }
+
+    # Generate rollback token
+    $rollbackToken = "RBK_$($ActionId)_$([guid]::NewGuid().ToString('N').Substring(0,8))"
+    $result.RollbackToken = $rollbackToken
+    $script:_GuardState.RollbackTokens.Add([PSCustomObject]@{
+        Token     = $rollbackToken
+        ActionId  = $ActionId
+        Module    = $ModuleName
+        Timestamp = $timestamp
+    }) | Out-Null
+
+    # Execute the fix
+    $fixSuccess = $false
+    try {
+        & $FixAction
+        $fixSuccess = $true
+        $result.FixApplied = $true
+    }
+    catch {
+        $result.FixApplied = $false
+        $result.FinalStatus = "FAILED"
+        $result.VerificationResult = "EXECUTION_ERROR"
+        $result.AfterState = "Error: $($_.Exception.Message)"
+        Write-EngineLog -SessionId $sessionId -Level 'ERROR' -Source 'GuardEngine' `
+            -Message "FIX FAILED: $ActionId -- $($_.Exception.Message)" `
+            -Data @{ actionId = $ActionId; error = $_.Exception.Message }
+    }
+
+    # Capture AfterState
+    if ($fixSuccess -and $null -ne $AfterStateCapture) {
+        try {
+            $result.AfterState = & $AfterStateCapture | Out-String
+        }
+        catch {
+            $result.AfterState = "CaptureError: $($_.Exception.Message)"
+        }
+    }
+
+    # Register in deduplication registry
+    $script:_GuardState.DeduplicationRegistry[$ActionId] = $timestamp
+
+    # Set provisional status (final status determined after Phase 7 stress)
+    if ($fixSuccess) {
+        $result.FinalStatus = "PARTIAL"
+    }
+
+    Write-EngineLog -SessionId $sessionId -Level 'AUDIT' -Source 'GuardEngine' `
+        -Message "REMEDIATION: $ActionId -- Applied=$fixSuccess Token=$rollbackToken" `
+        -Data @{
+            actionId      = $ActionId
+            module        = $ModuleName
+            applied       = $fixSuccess
+            rollbackToken = $rollbackToken
+        }
+
+    return [PSCustomObject]$result
+}
+
+function Get-RollbackTokens {
+    <#
+    .SYNOPSIS
+        Returns all rollback tokens generated in this session.
+    #>
+    [OutputType([array])]
+    param()
+    return $script:_GuardState.RollbackTokens.ToArray()
+}
+
 #endregion
 
 #region -- Private Functions
@@ -369,8 +533,10 @@ function _Record-GuardDecision {
 Export-ModuleMember -Function @(
     'Initialize-GuardEngine',
     'Test-GuardClearance',
+    'Invoke-GuardedRemediation',
     'Set-EscalationLevel',
     'Get-GuardStatus',
     'Get-GuardDecisionLog',
+    'Get-RollbackTokens',
     'Test-ProhibitedAction'
 )

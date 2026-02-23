@@ -24,7 +24,7 @@
     Output is suitable for trend tracking (stored per-session in TrendStore).
 
 .NOTES
-    Version : 7.0.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 ScoringEngine with LDT adaptations
 #>
@@ -223,8 +223,59 @@ function Get-ScoreBand {
     }
 }
 
+function Invoke-HealthDeltaScoring {
+    <#
+    .SYNOPSIS
+        Computes HealthBefore, HealthAfter, and RiskReduction percentage.
+        Call with pre-remediation and post-remediation module results.
+    .OUTPUTS
+        [PSCustomObject] with HealthBefore, HealthAfter, RiskReductionPct, Improvements, BandBefore, BandAfter
+    #>
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param(
+        [Parameter(Mandatory)] [PSCustomObject] $ScoreBefore,
+        [Parameter(Mandatory)] [PSCustomObject] $ScoreAfter
+    )
+
+    $before = [double]$ScoreBefore.finalScore
+    $after  = [double]$ScoreAfter.finalScore
+    $delta  = $after - $before
+    $pct    = if ($before -gt 0) { [math]::Round(($delta / $before) * 100, 1) } else { 0 }
+
+    $improvements = [System.Collections.ArrayList]::new()
+    if ($null -ne $ScoreBefore.moduleScores -and $null -ne $ScoreAfter.moduleScores) {
+        foreach ($modName in $ScoreAfter.moduleScores.Keys) {
+            $beforeMod = if ($ScoreBefore.moduleScores.ContainsKey($modName)) { $ScoreBefore.moduleScores[$modName] } else { 0 }
+            $afterMod  = $ScoreAfter.moduleScores[$modName]
+            if ($afterMod -gt $beforeMod) {
+                [void]$improvements.Add([PSCustomObject]@{
+                    Module      = $modName
+                    ScoreBefore = $beforeMod
+                    ScoreAfter  = $afterMod
+                    Delta       = $afterMod - $beforeMod
+                })
+            }
+        }
+    }
+
+    $bandBefore = Get-ScoreBand -Score $before
+    $bandAfter  = Get-ScoreBand -Score $after
+
+    return [PSCustomObject]@{
+        HealthBefore     = [math]::Round($before, 1)
+        HealthAfter      = [math]::Round($after, 1)
+        RiskReductionPct = $pct
+        AbsoluteDelta    = [math]::Round($delta, 1)
+        BandBefore       = $bandBefore.Label
+        BandAfter        = $bandAfter.Label
+        Improvements     = @($improvements)
+    }
+}
+
 #endregion
 
 Export-ModuleMember -Function @(
-    'Invoke-SystemScoring'
+    'Invoke-SystemScoring',
+    'Invoke-HealthDeltaScoring'
 )

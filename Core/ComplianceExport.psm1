@@ -10,16 +10,20 @@
       - SOC 2 Type II (Availability, Integrity, Confidentiality criteria)
       - CIS Controls (CIS v8: Controls 2, 4, 7, 10, 13)
 
-    Generated Artifacts (6 per session):
+    Generated Artifacts (up to 10 per session):
       1. ComplianceReport.json     -- Master audit record with control mappings
       2. ChangeRecord.json         -- What changed, when, by what module
       3. RisksAccepted.json        -- Unresolved issues with review dates
       4. OperationalBoundary.json  -- canDo/cannotDo declaration
       5. EscalationRegister.json   -- Hardware/critical escalation records
       6. GuardAuditTrail.json      -- Full guard decision log
+      7. ClassificationReport.json  -- 3-level classification report (v7.2)
+      8. RemediationLedger.json     -- Per-fix audit trail with rollback tokens (v8.5)
+      9. RiskReduction.json         -- HealthBefore/HealthAfter scoring delta (v8.5)
+     10. PhaseTiming.json           -- Per-phase execution timing and memory (v8.5)
 
 .NOTES
-    Version : 7.0.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 ComplianceExport with LDT adaptations
 #>
@@ -30,7 +34,7 @@ Set-StrictMode -Version Latest
 
 $script:_OperationalBoundary = [ordered]@{
     platformName    = 'LDT -- Laptop Diagnostic Toolkit'
-    version         = '7.0.0'
+    version         = '8.5.0'
     classification  = 'INTERNAL -- FIELD SERVICE TOOL'
 
     canDo = @(
@@ -176,6 +180,74 @@ function Export-ComplianceArtifacts {
         $artifacts['ClassificationReport'] = $classPath
     }
 
+    # ── Artifact 8: Remediation Ledger (v8.5) ──────────────────────────────
+    if ($DiagState.ContainsKey('RemediationLedger') -and $DiagState['RemediationLedger'] -and $DiagState['RemediationLedger'].Count -gt 0) {
+        $ledgerRecord = [ordered]@{
+            _type            = 'REMEDIATION_LEDGER'
+            sessionId        = $SessionId
+            generatedAt      = Get-Date -Format 'o'
+            computername     = $env:COMPUTERNAME
+            totalEntries     = $DiagState['RemediationLedger'].Count
+            resolvedCount    = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'RESOLVED' }).Count
+            partialCount     = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'PARTIAL' }).Count
+            failedCount      = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'FAILED' }).Count
+            unstableCount    = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'UNSTABLE' }).Count
+            blockedCount     = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'BLOCKED' }).Count
+            skippedCount     = @($DiagState['RemediationLedger'] | Where-Object { $_.FinalStatus -eq 'SKIPPED' }).Count
+            entries          = @($DiagState['RemediationLedger'])
+        }
+        $ledgerPath = Join-Path $complianceDir 'RemediationLedger.json'
+        $ledgerRecord | ConvertTo-Json -Depth 10 | Set-Content $ledgerPath -Encoding UTF8
+        $artifacts['RemediationLedger'] = $ledgerPath
+    }
+
+    # ── Artifact 9: Risk Reduction (v8.5) ──────────────────────────────────
+    if ($DiagState.ContainsKey('HealthBefore') -and $DiagState['HealthBefore'] -and
+        $DiagState.ContainsKey('HealthAfter') -and $DiagState['HealthAfter']) {
+        $riskRecord = [ordered]@{
+            _type             = 'RISK_REDUCTION'
+            sessionId         = $SessionId
+            generatedAt       = Get-Date -Format 'o'
+            computername      = $env:COMPUTERNAME
+            healthBefore      = $DiagState['HealthBefore'].finalScore
+            bandBefore        = $DiagState['HealthBefore'].band
+            healthAfter       = $DiagState['HealthAfter'].finalScore
+            bandAfter         = $DiagState['HealthAfter'].band
+            absoluteDelta     = [math]::Round($DiagState['HealthAfter'].finalScore - $DiagState['HealthBefore'].finalScore, 1)
+            riskReductionPct  = if ($DiagState['HealthBefore'].finalScore -gt 0) {
+                [math]::Round(($DiagState['HealthAfter'].finalScore - $DiagState['HealthBefore'].finalScore) / $DiagState['HealthBefore'].finalScore * 100, 1)
+            } else { 0 }
+        }
+        $riskPath = Join-Path $complianceDir 'RiskReduction.json'
+        $riskRecord | ConvertTo-Json -Depth 10 | Set-Content $riskPath -Encoding UTF8
+        $artifacts['RiskReduction'] = $riskPath
+    }
+
+    # ── Artifact 10: Phase Timing (v8.5) ──────────────────────────────────
+    if ($DiagState.ContainsKey('PhaseTiming') -and $DiagState['PhaseTiming'] -and $DiagState['PhaseTiming'].Count -gt 0) {
+        $timingRecord = [ordered]@{
+            _type        = 'PHASE_TIMING'
+            sessionId    = $SessionId
+            generatedAt  = Get-Date -Format 'o'
+            computername = $env:COMPUTERNAME
+            phases       = [ordered]@{}
+        }
+        foreach ($phase in $DiagState['PhaseTiming'].Keys) {
+            $pt = $DiagState['PhaseTiming'][$phase]
+            $timingRecord.phases[$phase] = [ordered]@{
+                startTime        = if ($pt.StartTime) { $pt.StartTime } else { '' }
+                endTime          = if ($pt.EndTime) { $pt.EndTime } else { '' }
+                durationMs       = if ($pt.DurationMs) { $pt.DurationMs } else { 0 }
+                memoryStartBytes = if ($pt.MemoryStart) { $pt.MemoryStart } else { 0 }
+                memoryEndBytes   = if ($pt.MemoryEnd) { $pt.MemoryEnd } else { 0 }
+                memoryDeltaBytes = if ($pt.MemoryDeltaBytes) { $pt.MemoryDeltaBytes } else { 0 }
+            }
+        }
+        $timingPath = Join-Path $complianceDir 'PhaseTiming.json'
+        $timingRecord | ConvertTo-Json -Depth 10 | Set-Content $timingPath -Encoding UTF8
+        $artifacts['PhaseTiming'] = $timingPath
+    }
+
     Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'ComplianceExport' `
         -Message "Compliance artifacts generated" `
         -Data @{ artifactCount = $artifacts.Count; outputDir = $complianceDir }
@@ -220,11 +292,11 @@ function New-ComplianceReport {
     $report = [ordered]@{
         _type             = 'COMPLIANCE_REPORT'
         sessionId         = $SessionId
-        reportVersion     = '7.0.0'
+        reportVersion     = '8.5.0'
         generatedAt       = Get-Date -Format 'o'
         computername      = $env:COMPUTERNAME
         username          = "$env:USERDOMAIN\$env:USERNAME"
-        platformVersion   = '7.0.0'
+        platformVersion   = '8.5.0'
         manifestHash      = $manifestHash
         mode              = if ($DiagState.OEMMode) { 'OEM_VALIDATION' } else { 'DIAGNOSTIC' }
         healthScore       = $ScoreResult.finalScore

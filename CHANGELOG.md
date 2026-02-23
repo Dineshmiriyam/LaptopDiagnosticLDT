@@ -2,6 +2,34 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [8.5.0] - 2026-02-23
+
+### Added
+- **Invoke-GuardedRemediation** (`Core/GuardEngine.psm1`): Central remediation wrapper with 6-gate guard check, deduplication registry, BeforeState/AfterState capture, per-fix rollback tokens (GUID-based), and automatic RemediationLedger entry creation
+- **RemediationLedger**: Structured per-fix audit trail with FinalStatus rules (RESOLVED/PARTIAL/UNSTABLE/ESCALATED/SKIPPED/BLOCKED), exported as `RemediationLedger.json`
+- **HealthBefore/HealthAfter scoring**: Pre-remediation score captured at end of Phase 5, post-remediation at Phase 8; `Invoke-HealthDeltaScoring` computes risk reduction percentage
+- **ManagementSummary.html**: Executive one-page HTML report with KPI cards, health score before/after bars, classification breakdown (L1/L2/L3), resolved issues table, pending risks table, business impact summary
+- **Phase timing instrumentation**: `Start-PhaseTimer`/`Stop-PhaseTimer` on all 9 phases with Stopwatch + memory delta tracking, exported as `phase_timing.json`
+- **Test-PreRemediationIntegrity** (`Core/IntegrityEngine.psm1`): Re-validates critical file hashes before Phase 6 remediation
+- **Enhanced confidence formula**: 3-factor calculation (SeverityWeight x FrequencyWeight x PhaseConsistencyFactor) replaces simple weight ratio
+- **Recurrence escalation**: `-TrendData` parameter on `Get-DiagnosticLevel` and `Get-ClassificationReport`; issues recurring >3 sessions escalate one classification level
+- **Stress override**: Phase 7 failures mark RemediationLedger entries as UNSTABLE and set StressOverride flag for Phase 8 classification escalation
+- **ConvertTo-RemediationEntry** (`Core/LDT-EngineAdapter.psm1`): Bridge function for structured ledger entry creation
+- **4 new config.ini sections**: `[RemediationLedger]`, `[PhaseTiming]`, `[ManagementSummary]`, `[EnterpriseHardening]`
+- **3 new config.json blocks**: `remediationLedger`, `managementSummary`, `phaseTiming` under engine
+- **RiskReduction.json**: Health delta artifact with before/after scores, band changes, improvement list
+- **ClassificationReport.json**: Separate file export (was only embedded in final_report.json)
+- **ComplianceExport expanded to 10 artifacts**: Added RemediationLedger, RiskReduction, PhaseTiming
+- **Driver baseline export**: `driver_baseline.csv` captured in Phase 0 preflight
+- **Get-RollbackTokens** (`Core/GuardEngine.psm1`): Returns all rollback tokens generated in session
+- **Backup verification check**: Validates backup before proceeding with remediation
+
+### Changed
+- Phase 6A direct fixes (BITS, DISM, SFC, DisplayDriver) now create RemediationLedger entries with rollback tokens
+- Phase 6B suite dispatches create ledger entries for blocked, prohibited, and executed fixes
+- ClassificationEngine confidence formula enhanced from simple ratio to 3-factor calculation
+- Version bumped to 8.5.0 across all Core modules, Smart Diagnosis Engine, and config files
+
 ## [7.2.0] - 2026-02-23
 
 ### Added

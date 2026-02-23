@@ -11,7 +11,7 @@
     engines find Write-EngineLog in scope without modification.
 
 .NOTES
-    Version : 7.0.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
 #>
 
@@ -281,6 +281,55 @@ function ConvertTo-ClassificationFindings {
     }
 }
 
+function ConvertTo-RemediationEntry {
+    <#
+    .SYNOPSIS
+        Converts a finding + fix result into a structured RemediationLedger entry.
+        Bridges the gap between DiagState.Findings format and the ledger schema.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [PSCustomObject] $Finding,
+        [string] $FixStatus    = "PENDING",
+        [string] $FixMethod    = "",
+        [string] $BeforeState  = "",
+        [string] $AfterState   = "",
+        [string] $RollbackToken = "",
+        [int]    $ConfidenceScore = 0
+    )
+
+    $businessImpact = switch -Wildcard ($Finding.Category) {
+        'Hardware'    { "Hardware failure may cause data loss or system unavailability" }
+        'Security'    { "Security exposure increases risk of unauthorized access" }
+        'OS/Boot'     { "Boot/OS instability may prevent normal system operation" }
+        'Driver'      { "Driver issues may cause crashes or peripheral malfunction" }
+        'Network'     { "Network issues prevent connectivity and remote access" }
+        'Performance' { "Performance degradation impacts user productivity" }
+        default       { "System reliability affected" }
+    }
+
+    return [ordered]@{
+        IssueID                = "$($Finding.Component)_$(Get-Date -Format 'HHmmss')"
+        Category               = $Finding.Category
+        SeverityScore          = $Finding.Weight
+        Classification         = ""
+        RootCause              = $Finding.Details
+        Evidence               = "Phase: $($Finding.Component), Status: $($Finding.Status)"
+        Location               = $Finding.Component
+        BusinessImpact         = $businessImpact
+        FixEligible            = ($Finding.Status -ne 'Info')
+        FixApplied             = ($FixStatus -eq 'Applied')
+        RollbackToken          = $RollbackToken
+        BeforeState            = $BeforeState
+        AfterState             = $AfterState
+        VerificationMethod     = "StressValidation"
+        VerificationResult     = "PENDING"
+        StressValidationResult = "PENDING"
+        FinalStatus            = $FixStatus
+        ConfidenceScore        = $ConfidenceScore
+    }
+}
+
 Export-ModuleMember -Function @(
     'Initialize-EngineAdapter',
     'Write-EngineLog',
@@ -288,5 +337,6 @@ Export-ModuleMember -Function @(
     'ConvertTo-ModuleResults',
     'Get-LDTEscalationAsInt',
     'ConvertTo-WinDRESeverity',
-    'ConvertTo-ClassificationFindings'
+    'ConvertTo-ClassificationFindings',
+    'ConvertTo-RemediationEntry'
 )

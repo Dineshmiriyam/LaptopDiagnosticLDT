@@ -35,6 +35,26 @@
                 "Identity":     2
             },
             "declineAlertThreshold": 10
+        },
+
+        "remediationLedger": {
+            "enabled": true,
+            "maxEntriesPerSession": 50,
+            "includeBeforeAfterState": true,
+            "requireStressValidation": true
+        },
+
+        "managementSummary": {
+            "enabled": true,
+            "includeRiskReduction": true,
+            "includeTrend": true,
+            "maxFindingsToShow": 10
+        },
+
+        "phaseTiming": {
+            "enabled": true,
+            "logToConsole": true,
+            "slowPhaseThresholdSec": 120
         }
     },
 

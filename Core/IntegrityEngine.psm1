@@ -32,7 +32,7 @@
     }
 
 .NOTES
-    Version : 7.0.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 IntegrityEngine with LDT adaptations
 #>
@@ -310,7 +310,7 @@ function Seal-SessionLog {
             entryCount    = $entryCount
             logHash       = $logHash
             manifestHash  = $manifestHash
-            sealVersion   = '7.0.0'
+            sealVersion   = '8.5.0'
         }
 
         $sealJson = $seal | ConvertTo-Json -Compress -Depth 5
@@ -388,7 +388,7 @@ function New-ExecutionReceipt {
         _type              = 'EXECUTION_RECEIPT'
         sessionId          = $SessionId
         issuedAt           = Get-Date -Format 'o'
-        platformVersion    = '7.0.0'
+        platformVersion    = '8.5.0'
         manifestVersion    = $manifestVer
         computername       = $env:COMPUTERNAME
         username           = "$env:USERDOMAIN\$env:USERNAME"
@@ -421,6 +421,66 @@ function New-ExecutionReceipt {
     return $outFile
 }
 
+function Test-PreRemediationIntegrity {
+    <#
+    .SYNOPSIS
+        Lightweight pre-remediation integrity check. Re-hashes critical platform files
+        and config.ini against the VersionManifest.json baseline.
+        Called at Phase 6 entry to detect mid-session tampering.
+    .OUTPUTS
+        [PSCustomObject] with properties: overallStatus, filesChecked, filesPassed, failures
+    #>
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param(
+        [Parameter(Mandatory)] [string] $SessionId,
+        [Parameter(Mandatory)] [string] $PlatformRoot
+    )
+
+    $manifestPath = Join-Path $PlatformRoot "Config\VersionManifest.json"
+    if (-not (Test-Path $manifestPath)) {
+        return [PSCustomObject]@{ overallStatus = 'SKIP'; filesChecked = 0; filesPassed = 0; failures = @() }
+    }
+
+    $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+    $criticalFiles = @($manifest.files | Where-Object { $_.critical -eq $true })
+    $failures = @()
+    $passed   = 0
+
+    foreach ($entry in $criticalFiles) {
+        $filePath = Join-Path $PlatformRoot $entry.relativePath.Replace('\\', [System.IO.Path]::DirectorySeparatorChar)
+        if (-not (Test-Path $filePath)) {
+            $failures += [PSCustomObject]@{ file = $entry.relativePath; reason = 'FILE_MISSING' }
+            continue
+        }
+        $sha = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
+        $stream = [System.IO.File]::OpenRead($filePath)
+        $hashBytes = $sha.ComputeHash($stream)
+        $stream.Close()
+        $sha.Dispose()
+        $hashStr = ($hashBytes | ForEach-Object { $_.ToString('X2') }) -join ''
+        if ($hashStr -ne $entry.sha256) {
+            $failures += [PSCustomObject]@{ file = $entry.relativePath; reason = 'HASH_MISMATCH' }
+        } else {
+            $passed++
+        }
+    }
+
+    $status = if ($failures.Count -eq 0) { 'PASS' } else { 'TAMPER_DETECTED' }
+
+    Write-EngineLog -SessionId $SessionId -Level $(if ($failures.Count -gt 0) { 'ERROR' } else { 'INFO' }) `
+        -Source 'IntegrityEngine' `
+        -Message "Pre-remediation integrity: $status ($passed/$($criticalFiles.Count) critical files)" `
+        -Data @{ failures = $failures.Count; status = $status }
+
+    return [PSCustomObject]@{
+        overallStatus = $status
+        filesChecked  = $criticalFiles.Count
+        filesPassed   = $passed
+        failures      = $failures
+    }
+}
+
 #endregion
 
 #region -- Private Helpers
@@ -438,6 +498,7 @@ function Get-StringHash {
 
 Export-ModuleMember -Function @(
     'Test-PlatformIntegrity',
+    'Test-PreRemediationIntegrity',
     'Invoke-LogIntegrityCheck',
     'Seal-SessionLog',
     'New-ExecutionReceipt'

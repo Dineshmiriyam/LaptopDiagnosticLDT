@@ -23,7 +23,7 @@
       - Fleet_Aggregator.ps1
 
 .NOTES
-    Version : 7.2.0
+    Version : 8.5.0
     Platform: PowerShell 5.1+
     Config  : Config\config.ini [ClassificationEngine] section
 #>
@@ -667,7 +667,8 @@ function Get-DiagnosticLevel {
         [Parameter(Mandatory)]
         $Findings,
         [hashtable]$DiagState = @{},
-        [hashtable]$Config = @{}
+        [hashtable]$Config = @{},
+        [hashtable]$TrendData = @{}
     )
 
     $tree  = Invoke-DecisionTree -Findings $Findings -DiagState $DiagState -Config $Config
@@ -691,6 +692,18 @@ function Get-DiagnosticLevel {
         $autoFixCats = @($Config['L1_AutoFixCategories'] -split ',')
     }
 
+    # v8.5: Recurrence escalation -- if TrendData shows same issue >3 sessions, escalate one level
+    $recurrenceEscalated = $false
+    if ($TrendData.Count -gt 0 -and $TrendData.ContainsKey('RecurrenceCount')) {
+        $recurrenceThreshold = if ($Config.ContainsKey('RecurrenceEscalationThreshold')) { [int]$Config['RecurrenceEscalationThreshold'] } else { 3 }
+        if ([int]$TrendData['RecurrenceCount'] -gt $recurrenceThreshold) {
+            $recurrenceEscalated = $true
+            if ($tree.Level -eq 'CLEAR') { $tree.Level = 'L1'; $tree.Reasoning += ' [Recurrence escalation: CLEAR->L1]' }
+            elseif ($tree.Level -eq 'L1') { $tree.Level = 'L2'; $tree.Reasoning += ' [Recurrence escalation: L1->L2]' }
+            elseif ($tree.Level -eq 'L2') { $tree.Level = 'L3'; $tree.Reasoning += ' [Recurrence escalation: L2->L3]' }
+        }
+    }
+
     return @{
         Level              = $tree.Level
         Branch             = $tree.Branch
@@ -705,6 +718,8 @@ function Get-DiagnosticLevel {
         AutoFixAllowed     = ($tree.Level -eq 'L1')
         AutoFixCategories  = $autoFixCats
         ConfidenceRequired = if ($Config.ContainsKey('L1_RequireConfidenceForFix')) { $Config['L1_RequireConfidenceForFix'] } else { 60 }
+        RecurrenceEscalated = $recurrenceEscalated
+        TrendData           = $TrendData
     }
 }
 
@@ -734,13 +749,14 @@ function Get-ClassificationReport {
         [Parameter(Mandatory)]
         [hashtable]$DiagState,
         [hashtable]$Config = @{},
-        [PSCustomObject]$RootCauseRanking = $null
+        [PSCustomObject]$RootCauseRanking = $null,
+        [hashtable]$TrendData = @{}
     )
 
     $findings = $DiagState.Findings
 
     # Run classification
-    $classification = Get-DiagnosticLevel -Findings $findings -DiagState $DiagState -Config $Config
+    $classification = Get-DiagnosticLevel -Findings $findings -DiagState $DiagState -Config $Config -TrendData $TrendData
     $severityScore  = $classification.SeverityScore
 
     # Root cause (from ranking if provided, else from heaviest finding)
@@ -777,11 +793,24 @@ function Get-ClassificationReport {
                     }
                 })
             }
+            # v8.5: Enhanced confidence = SeverityWeight × FrequencyWeight × PhaseConsistencyFactor
             $totalWeight = 0
             foreach ($f in $sorted) { $totalWeight += $f.Weight }
             if ($totalWeight -gt 0) {
-                $confidence = [math]::Round($top.Weight / $totalWeight * 100)
-                if ($confidence -gt 95) { $confidence = 95 }
+                # Factor 1: SeverityWeight (primary cause weight vs total)
+                $severityWeight = $top.Weight / $totalWeight
+
+                # Factor 2: FrequencyWeight (how many findings share same category as primary)
+                $primaryCat = if ($top.Category) { $top.Category } else { 'Unknown' }
+                $sameCategory = @($sorted | Where-Object { $_.Category -eq $primaryCat }).Count
+                $frequencyWeight = [math]::Min($sameCategory / [math]::Max($sorted.Count, 1), 1.0)
+
+                # Factor 3: PhaseConsistencyFactor (1.0 if all findings agree on category, 0.8 if mixed)
+                $uniqueCategories = @($sorted | Select-Object -ExpandProperty Category -Unique).Count
+                $phaseConsistencyFactor = if ($uniqueCategories -le 2) { 1.0 } else { 0.8 }
+
+                $rawConfidence = $severityWeight * $frequencyWeight * $phaseConsistencyFactor * 100
+                $confidence = [math]::Round([math]::Max(10, [math]::Min(95, $rawConfidence)))
             }
             # Enterprise score (health inverse)
             $enterpriseScore = 100
@@ -897,7 +926,7 @@ function Get-ClassificationReport {
     # Build the mandatory report
     $report = [ordered]@{
         _type                    = 'CLASSIFICATION_REPORT'
-        _version                 = '7.2.0'
+        _version                 = '8.5.0'
         device                   = $device
         snapshot_time            = if ($machine.ContainsKey('ScanTime')) { $machine['ScanTime'] } else { (Get-Date -Format 'o') }
         findings                 = $findingsArray
@@ -912,6 +941,7 @@ function Get-ClassificationReport {
         enterprise_score         = $enterpriseScore
         classification_branch    = $classification.Branch
         classification_reasoning = $classification.Reasoning
+        recurrence_escalated     = if ($classification.ContainsKey('RecurrenceEscalated')) { $classification['RecurrenceEscalated'] } else { $false }
         decision_tree_path       = $classification.Path
         component_health         = $componentHealth
         l1_count                 = $classification.L1Count

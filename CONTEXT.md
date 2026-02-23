@@ -1,4 +1,4 @@
-# LDT v7.0 — Project Context
+# LDT v8.5 — Project Context
 
 > This file is the single source of truth for the LDT project.
 > Every developer, AI assistant, and contributor must read this before making any changes.
@@ -12,15 +12,15 @@
 | Field | Value |
 |-------|-------|
 | **Name** | Laptop Diagnostic Toolkit (LDT) |
-| **Version** | 7.2.0 |
+| **Version** | 8.5.0 |
 | **Purpose** | USB-portable diagnostic and repair automation for Lenovo ThinkPad fleets |
 | **Users** | IT technicians, field engineers, fleet managers (limited developer experience) |
 | **Platform** | Windows 10/11 on Lenovo ThinkPad hardware |
 | **Deployment** | USB drive (8GB+), fully offline, zero installation on target machine |
 | **Core Script** | `Laptop_Diagnostic_Suite.ps1` (378KB, PowerShell) |
-| **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (3,494 lines, 9-phase auto-detect + auto-fix) |
+| **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (~4,582 lines, 9-phase auto-detect + auto-fix) |
 | **Launcher** | `Laptop_Master_Diagnostic.bat` (right-click → Run as Administrator) |
-| **Config** | `Config\config.ini` (25 sections) + `Config\config.json` (enterprise engines) |
+| **Config** | `Config\config.ini` (29 sections) + `Config\config.json` (enterprise engines) |
 | **Modules** | 45 diagnostic modules + 7 enterprise engines, 57 menu options (0-56) |
 | **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport, ClassificationEngine |
 | **Repository** | https://github.com/Dineshmiriyam/LaptopDiagnosticLDT |
@@ -208,6 +208,7 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 
 | Version | Date | What Changed |
 |---------|------|-------------|
+| 8.5.0 | 2026-02-23 | Enterprise Hardened: Invoke-GuardedRemediation wrapper, RemediationLedger per-fix audit trail, HealthBefore/HealthAfter risk reduction scoring, ManagementSummary.html executive report, phase timing instrumentation, pre-remediation integrity revalidation, enhanced confidence formula (3-factor), recurrence escalation, stress override classification, 10 compliance artifacts |
 | 7.2.0 | 2026-02-23 | 3-Level Classification Engine: ClassificationEngine.psm1 (L1/L2/L3 decision tree), Option 56 ClassifyOnly mode, HTML triage panel, severity scoring (0-100), component health cards, TrendEngine escalation tracking, 7th compliance artifact |
 | 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 55), Phase 6A direct fixes, scoring/remediation overhaul |
 | 6.1.3 | 2026-02-20 | Display diagnostics: Phase 4H/4I/4J (GPU health, TDR events, panel health) |

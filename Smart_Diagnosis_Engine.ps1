@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Smart Diagnosis Engine - LDT v7.0 Option 54
+    Smart Diagnosis Engine - LDT v8.5 Option 54
     9-phase orchestrated diagnostic with decision tree, root cause ranking,
     rollback protection, post-fix stress validation, and enterprise engines.
 
 .VERSION
-    7.2.0
+    8.5.0
 
 .NOTES
     Architecture: Standalone PS1 (called by Laptop_Master_Diagnostic.bat)
@@ -342,6 +342,42 @@ $diagState = @{
     LogSealApplied   = $false
     ExecutionReceipt = ""
     OEMMode          = $false
+    # v8.5 Enterprise Hardening fields
+    RemediationLedger = [System.Collections.ArrayList]::new()
+    PhaseTiming       = @{}
+    HealthBefore      = $null
+    HealthAfter       = $null
+    StressOverride    = $false
+}
+
+# ============================================================
+# PHASE TIMING HELPERS (v8.5)
+# ============================================================
+
+function Start-PhaseTimer {
+    param([hashtable]$DiagState, [string]$PhaseName)
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $DiagState.PhaseTiming[$PhaseName] = @{
+        StartTime = Get-Date -Format 'o'
+        Stopwatch = $sw
+        MemoryStart = [GC]::GetTotalMemory($false)
+    }
+}
+
+function Stop-PhaseTimer {
+    param([hashtable]$DiagState, [string]$PhaseName)
+    $entry = $DiagState.PhaseTiming[$PhaseName]
+    if ($null -ne $entry -and $null -ne $entry.Stopwatch) {
+        $entry.Stopwatch.Stop()
+        $entry.EndTime    = Get-Date -Format 'o'
+        $entry.DurationMs = $entry.Stopwatch.ElapsedMilliseconds
+        $entry.MemoryEnd  = [GC]::GetTotalMemory($false)
+        $entry.MemoryDeltaBytes = $entry.MemoryEnd - $entry.MemoryStart
+        $entry.Remove('Stopwatch')
+        if ($entry.DurationMs -gt 120000) {
+            Write-Log "WARNING: $PhaseName took $([math]::Round($entry.DurationMs / 1000, 1))s (exceeds 120s threshold)"
+        }
+    }
 }
 
 # ============================================================
@@ -484,6 +520,7 @@ function Get-RootCauseRanking {
 
 function Invoke-Phase0-Preflight {
     param([hashtable]$DiagState)
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase0"
     Write-ScanHeader -Name "PHASE 0: PREFLIGHT" -Icon "[0/8]"
     Write-Log "--- Phase 0: Preflight ---"
 
@@ -551,6 +588,17 @@ function Invoke-Phase0-Preflight {
         Write-Finding -Label "  BCD export" -Value "Failed" -Color "Yellow"
     }
 
+    # Driver version baseline export
+    try {
+        $driverCsv = Join-Path $preflightDir "driver_baseline.csv"
+        Get-CimInstance Win32_PnPSignedDriver -ErrorAction SilentlyContinue |
+            Select-Object DeviceName, DriverVersion, Manufacturer, DriverDate, DeviceClass |
+            Export-Csv -Path $driverCsv -NoTypeInformation -Encoding UTF8
+        Write-Finding -Label "  Driver baseline" -Value "Exported" -Color "Green"
+    } catch {
+        Write-Finding -Label "  Driver baseline" -Value "Failed" -Color "Yellow"
+    }
+
     # Preflight manifest
     $manifest = @(
         "Smart Diagnosis Engine - Preflight Backup"
@@ -560,7 +608,7 @@ function Invoke-Phase0-Preflight {
         "Machine:    $computerName"
         "Admin:      $isAdmin"
         "PS Version: $psVerStr"
-        "Contents:   SYSTEM.reg, SOFTWARE.reg, bcd_preflight"
+        "Contents:   SYSTEM.reg, SOFTWARE.reg, bcd_preflight, driver_baseline.csv"
     )
     $manifest | Out-File (Join-Path $preflightDir "manifest.txt") -Encoding UTF8
 
@@ -623,6 +671,7 @@ function Invoke-Phase0-Preflight {
         Write-Host "    Phase 0: PREFLIGHT FAILED -- aborting" -ForegroundColor Red
     }
     Write-Host ""
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase0"
     return $phase0Pass
 }
 
@@ -634,6 +683,7 @@ function Invoke-Phase1-SystemSnapshot {
     param([hashtable]$DiagState)
     Write-ScanHeader -Name "PHASE 1: SYSTEM SNAPSHOT" -Icon "[1/8]"
     Write-Log "--- Phase 1: System Snapshot ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase1"
 
     $totalRAM = 0
     if ($csInfo) { $totalRAM = [math]::Round($csInfo.TotalPhysicalMemory / 1GB, 1) }
@@ -804,6 +854,7 @@ function Invoke-Phase1-SystemSnapshot {
     $DiagState.PhaseResults["Phase1"] = "PASS"
     Write-PhaseResult -Phase "Phase 1: System Snapshot" -Status "PASS" -Details "Machine info collected"
     Write-Log "Phase 1 complete: $computerName, $manufacturer $model, RAM=${totalRAM}GB, Disks=$diskCount"
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase1"
 }
 
 # ============================================================
@@ -814,6 +865,7 @@ function Invoke-Phase2-HardwareIntegrity {
     param([hashtable]$DiagState)
     Write-ScanHeader -Name "PHASE 2: HARDWARE INTEGRITY" -Icon "[2/8]"
     Write-Log "--- Phase 2: Hardware Integrity ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase2"
 
     $hwFails = 0
     $hwWarns = 0
@@ -1010,6 +1062,7 @@ function Invoke-Phase2-HardwareIntegrity {
     if ($DiagState.ThermalCritical) { $detail += " [THERMAL CRITICAL]" }
     Write-PhaseResult -Phase "Phase 2: Hardware Integrity" -Status $status -Details $detail
     Write-Log "Phase 2 complete: $detail"
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase2"
 }
 
 # ============================================================
@@ -1020,16 +1073,19 @@ function Invoke-Phase3-BootAndOS {
     param([hashtable]$DiagState)
 
     if ($DiagState.HardwareCritical) {
+        Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase3"
         Write-ScanHeader -Name "PHASE 3: BOOT & OS VALIDATION" -Icon "[3/8]"
         Write-Host "    Skipped - hardware critical issue detected" -ForegroundColor DarkGray
         $DiagState.PhaseResults["Phase3"] = "SKIP"
         Write-PhaseResult -Phase "Phase 3: Boot & OS" -Status "SKIP" -Details "Hardware critical - OS repair pointless"
         Write-Log "Phase 3 skipped: HardwareCritical=true"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase3"
         return
     }
 
     Write-ScanHeader -Name "PHASE 3: BOOT & OS VALIDATION" -Icon "[3/8]"
     Write-Log "--- Phase 3: Boot & OS Validation ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase3"
 
     $osFails = 0
     $osWarns = 0
@@ -1348,6 +1404,7 @@ function Invoke-Phase3-BootAndOS {
     if ($osFails -gt 0) { $DiagState.BootIssues = $true }
     Write-PhaseResult -Phase "Phase 3: Boot & OS" -Status $status -Details "$osFails failures, $osWarns warnings"
     Write-Log "Phase 3 complete: $osFails failures, $osWarns warnings"
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase3"
 }
 
 # ============================================================
@@ -1358,16 +1415,19 @@ function Invoke-Phase4-ServiceAndDriver {
     param([hashtable]$DiagState)
 
     if ($DiagState.HardwareCritical) {
+        Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase4"
         Write-ScanHeader -Name "PHASE 4: SERVICE & DRIVER INTEGRITY" -Icon "[4/8]"
         Write-Host "    Skipped - hardware critical issue detected" -ForegroundColor DarkGray
         $DiagState.PhaseResults["Phase4"] = "SKIP"
         Write-PhaseResult -Phase "Phase 4: Service & Driver" -Status "SKIP" -Details "Hardware critical"
         Write-Log "Phase 4 skipped: HardwareCritical=true"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase4"
         return
     }
 
     Write-ScanHeader -Name "PHASE 4: SERVICE & DRIVER INTEGRITY" -Icon "[4/8]"
     Write-Log "--- Phase 4: Service & Driver Integrity ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase4"
 
     $drvFails = 0
     $drvWarns = 0
@@ -1925,6 +1985,7 @@ function Invoke-Phase4-ServiceAndDriver {
     $DiagState.PhaseResults["Phase4"] = $status
     Write-PhaseResult -Phase "Phase 4: Service & Driver" -Status $status -Details "$drvFails failures, $drvWarns warnings"
     Write-Log "Phase 4 complete: $drvFails failures, $drvWarns warnings"
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase4"
 }
 
 # ============================================================
@@ -1935,16 +1996,19 @@ function Invoke-Phase5-PerformanceProfile {
     param([hashtable]$DiagState)
 
     if ($DiagState.HardwareCritical) {
+        Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase5"
         Write-ScanHeader -Name "PHASE 5: PERFORMANCE PROFILING" -Icon "[5/8]"
         Write-Host "    Skipped - hardware critical issue detected" -ForegroundColor DarkGray
         $DiagState.PhaseResults["Phase5"] = "SKIP"
         Write-PhaseResult -Phase "Phase 5: Performance" -Status "SKIP" -Details "Hardware critical"
         Write-Log "Phase 5 skipped: HardwareCritical=true"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase5"
         return
     }
 
     Write-ScanHeader -Name "PHASE 5: PERFORMANCE PROFILING" -Icon "[5/8]"
     Write-Log "--- Phase 5: Performance Profiling ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase5"
 
     $perfFails = 0
     $perfWarns = 0
@@ -2150,6 +2214,21 @@ function Invoke-Phase5-PerformanceProfile {
     $DiagState.PhaseResults["Phase5"] = $status
     Write-PhaseResult -Phase "Phase 5: Performance" -Status $status -Details "$perfFails failures, $perfWarns warnings"
     Write-Log "Phase 5 complete: CPU=$cpuScore, Mem=${memUsedPct}%, DiskW=${diskWriteMBs}MB/s, DiskR=${diskReadMBs}MB/s"
+
+    # v8.5: Compute HealthBefore score (pre-remediation baseline)
+    if ($v7EnginesAvailable) {
+        try {
+            $moduleResults = ConvertTo-ModuleResults -DiagState $DiagState
+            $beforeScore = Invoke-SystemScoring -ModuleResults $moduleResults -Config $v7Config -SessionId $DiagState.SessionId
+            $DiagState.HealthBefore = $beforeScore
+            Write-Log "HealthBefore score: $($beforeScore.finalScore)"
+        }
+        catch {
+            Write-Log "HealthBefore scoring failed: $($_.Exception.Message)"
+        }
+    }
+
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase5"
 }
 
 # ============================================================
@@ -2282,6 +2361,7 @@ function Invoke-SmartDiagRollback {
 
 function Invoke-Phase6-AutoRemediation {
     param([hashtable]$DiagState)
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
 
     if ($DiagState.HardwareCritical) {
         Write-ScanHeader -Name "PHASE 6: AUTOMATED REMEDIATION" -Icon "[6/8]"
@@ -2289,6 +2369,7 @@ function Invoke-Phase6-AutoRemediation {
         $DiagState.PhaseResults["Phase6"] = "SKIP"
         Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "L3 hardware escalation"
         Write-Log "Phase 6 skipped: HardwareCritical=true"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
         return
     }
 
@@ -2311,6 +2392,7 @@ function Invoke-Phase6-AutoRemediation {
                 Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "L3 classification: $($classResult.Branch)"
                 Write-Log "Phase 6 skipped: ClassificationEngine L3 ($($classResult.Branch)): $($classResult.Reasoning)"
                 $DiagState["ClassificationResult"] = $classResult
+                Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
                 return
             }
             if ($classLevel -eq 'L2') {
@@ -2335,6 +2417,7 @@ function Invoke-Phase6-AutoRemediation {
         $DiagState.PhaseResults["Phase6"] = "SKIP"
         Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "Escalation $escalation > max $cfgMaxAutoLevel"
         Write-Log "Phase 6 skipped: Escalation $escalation > MaxAutoLevel $cfgMaxAutoLevel"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
         return
     }
 
@@ -2352,6 +2435,7 @@ function Invoke-Phase6-AutoRemediation {
             $DiagState.PhaseResults["Phase6"] = "SKIP"
             Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "Confidence $($ranking.Confidence)% < $cfgConfidenceThresh%, no obvious fixes"
             Write-Log "Phase 6 skipped: Confidence $($ranking.Confidence)% < threshold $cfgConfidenceThresh%, no obvious fixes"
+            Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
             return
         }
         Write-Host "    Note: Confidence is $($ranking.Confidence)% (below $cfgConfidenceThresh%) but $($obviousIssues.Count) fixable issue(s) detected -- proceeding" -ForegroundColor Yellow
@@ -2371,6 +2455,7 @@ function Invoke-Phase6-AutoRemediation {
         $DiagState.PhaseResults["Phase6"] = "SKIP"
         Write-PhaseResult -Phase "Phase 6: Remediation" -Status "SKIP" -Details "No fixable issues"
         Write-Log "Phase 6 skipped: No fixable findings"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
         return
     }
 
@@ -2381,6 +2466,29 @@ function Invoke-Phase6-AutoRemediation {
     # Create backup first
     Write-Host ""
     $backupOk = New-SmartDiagBackup -BackupDir $BackupPath -DiagState $DiagState
+
+    # v8.5: Pre-remediation integrity revalidation
+    if ($v7EnginesAvailable -and (Get-Command 'Test-PreRemediationIntegrity' -ErrorAction SilentlyContinue)) {
+        try {
+            $integrityCheck = Test-PreRemediationIntegrity -SessionId $DiagState.SessionId -Config $v7Config
+            if ($integrityCheck.Status -ne 'PASS') {
+                Write-Host "    WARNING: Integrity check detected tampering -- proceeding with caution" -ForegroundColor Red
+                Write-Log "Pre-remediation integrity: $($integrityCheck.Status) -- $($integrityCheck.Details)"
+            } else {
+                Write-Host "    Pre-remediation integrity: PASS" -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Log "Pre-remediation integrity check skipped: $($_.Exception.Message)"
+        }
+    }
+
+    # v8.5: Verify backup before proceeding
+    if (-not $backupOk) {
+        Write-Host "    WARNING: Backup verification failed -- remediation will proceed without verified backup" -ForegroundColor Yellow
+        Write-Log "Backup verification warning: backup may be incomplete"
+    }
+
     Write-Host ""
 
     # ================================================================
@@ -2747,6 +2855,53 @@ function Invoke-Phase6-AutoRemediation {
         Write-Host "    Phase 6A: $directFixFailed fix(es) need manual action" -ForegroundColor Yellow
     }
     Write-Log "Phase 6A complete: $directFixCount applied, $directFixFailed failed"
+
+    # v8.5: Create RemediationLedger entries for Phase 6A direct fixes
+    if ($v7EnginesAvailable) {
+        $guardEscLevel = 0
+        if (Get-Command 'Get-LDTEscalationAsInt' -ErrorAction SilentlyContinue) {
+            $guardEscLevel = Get-LDTEscalationAsInt -EscalationLevel $escalation
+        }
+
+        $phase6AFixMap = @(
+            @{ Key = 'BITS';          Category = 'Security';  Desc = 'BITS Service Restart'; Root = 'BITS service not running' }
+            @{ Key = 'DISM';          Category = 'OS/Boot';   Desc = 'DISM Component Store Repair'; Root = 'Component store corruption' }
+            @{ Key = 'SFC';           Category = 'OS/Boot';   Desc = 'System File Checker'; Root = 'System file integrity violation' }
+            @{ Key = 'DisplayDriver'; Category = 'Driver';    Desc = 'Display Driver Update'; Root = 'Display driver outdated' }
+        )
+
+        foreach ($fixDef in $phase6AFixMap) {
+            if ($directResults.ContainsKey($fixDef.Key)) {
+                $wasApplied = ($directResults[$fixDef.Key] -eq $true)
+                $matchFinding = @($fixableFindings | Where-Object { $_.Component -match $fixDef.Key -or $_.Category -eq $fixDef.Category }) | Select-Object -First 1
+                $sevScore = if ($matchFinding -and $matchFinding.Weight) { [int]$matchFinding.Weight } else { 20 }
+
+                $ledgerEntry = [ordered]@{
+                    IssueID                = "$($fixDef.Key)_$(Get-Date -Format 'HHmmss')"
+                    Category               = $fixDef.Category
+                    SeverityScore          = $sevScore
+                    Classification         = if ($classLevel) { $classLevel } else { "" }
+                    RootCause              = $fixDef.Root
+                    Evidence               = if ($matchFinding) { "Component: $($matchFinding.Component), Details: $($matchFinding.Details)" } else { "Phase 6A direct fix" }
+                    Location               = $fixDef.Desc
+                    BusinessImpact         = ""
+                    FixEligible            = $true
+                    FixApplied             = $wasApplied
+                    RollbackToken          = "RBK_$($fixDef.Key)_$([guid]::NewGuid().ToString('N').Substring(0,8))"
+                    BeforeState            = "Pre-Phase6A"
+                    AfterState             = if ($wasApplied) { "Applied" } else { "Failed" }
+                    VerificationMethod     = "StressValidation"
+                    VerificationResult     = "PENDING"
+                    StressValidationResult = "PENDING"
+                    FinalStatus            = if ($wasApplied) { "PARTIAL" } else { "FAILED" }
+                    ConfidenceScore        = 0
+                }
+                $DiagState.RemediationLedger.Add([PSCustomObject]$ledgerEntry) | Out-Null
+            }
+        }
+        Write-Log "Phase 6A: $($DiagState.RemediationLedger.Count) ledger entries created"
+    }
+
     Write-Host ""
 
     # ================================================================
@@ -2802,6 +2957,17 @@ function Invoke-Phase6-AutoRemediation {
                     Write-Host ""
                     Write-Host "    GuardEngine BLOCKED: $($fix.Name)" -ForegroundColor Yellow
                     Write-Log "GuardEngine blocked fix: $($fix.Func)"
+                    # v8.5: Ledger entry for blocked fix
+                    $blockedEntry = [ordered]@{
+                        IssueID = "$($fix.Func)_$(Get-Date -Format 'HHmmss')"; Category = "Suite"
+                        SeverityScore = $fix.Weight; Classification = ""; RootCause = "Suite fix: $($fix.Name)"
+                        Evidence = "GuardEngine blocked"; Location = $fix.Name; BusinessImpact = ""
+                        FixEligible = $false; FixApplied = $false; RollbackToken = ""
+                        BeforeState = ""; AfterState = "BLOCKED"; VerificationMethod = "StressValidation"
+                        VerificationResult = "GUARD_DENIED"; StressValidationResult = "PENDING"
+                        FinalStatus = "BLOCKED"; ConfidenceScore = 0
+                    }
+                    $DiagState.RemediationLedger.Add([PSCustomObject]$blockedEntry) | Out-Null
                     continue
                 }
             }
@@ -2809,6 +2975,17 @@ function Invoke-Phase6-AutoRemediation {
                 Write-Host ""
                 Write-Host "    GuardEngine PROHIBITED: $($fix.Name)" -ForegroundColor Red
                 Write-Log "GuardEngine prohibited: $($fix.Func) - $($_.Exception.Message)"
+                # v8.5: Ledger entry for prohibited fix
+                $prohibEntry = [ordered]@{
+                    IssueID = "$($fix.Func)_$(Get-Date -Format 'HHmmss')"; Category = "Suite"
+                    SeverityScore = $fix.Weight; Classification = ""; RootCause = "Suite fix: $($fix.Name)"
+                    Evidence = "GuardEngine prohibited: $($_.Exception.Message)"; Location = $fix.Name
+                    BusinessImpact = ""; FixEligible = $false; FixApplied = $false; RollbackToken = ""
+                    BeforeState = ""; AfterState = "PROHIBITED"; VerificationMethod = "StressValidation"
+                    VerificationResult = "PROHIBITED"; StressValidationResult = "PENDING"
+                    FinalStatus = "BLOCKED"; ConfidenceScore = 0
+                }
+                $DiagState.RemediationLedger.Add([PSCustomObject]$prohibEntry) | Out-Null
                 continue
             }
         }
@@ -2819,6 +2996,8 @@ function Invoke-Phase6-AutoRemediation {
         Write-Host "    ------------------------------------------------" -ForegroundColor DarkCyan
         Write-Log "Launching fix: $($fix.Func)"
 
+        $suiteFixApplied = $false
+        $suiteExitCode = -1
         try {
             & powershell -NoProfile -ExecutionPolicy Bypass -File $mainPS1 `
                 -RunFunction $fix.Func `
@@ -2829,21 +3008,47 @@ function Invoke-Phase6-AutoRemediation {
                 -TempPath $TempPath `
                 -DataPath $DataPath
 
-            $exitCode = $LASTEXITCODE
-            if ($exitCode -ne 0) {
-                Write-Host "    $($fix.Name) completed with warnings (exit: $exitCode)" -ForegroundColor Yellow
-                $DiagState.FixesApplied.Add("$($fix.Name) (exit: $exitCode)") | Out-Null
+            $suiteExitCode = $LASTEXITCODE
+            $suiteFixApplied = $true
+            if ($suiteExitCode -ne 0) {
+                Write-Host "    $($fix.Name) completed with warnings (exit: $suiteExitCode)" -ForegroundColor Yellow
+                $DiagState.FixesApplied.Add("$($fix.Name) (exit: $suiteExitCode)") | Out-Null
             } else {
                 Write-Host "    $($fix.Name) completed successfully" -ForegroundColor Green
                 $DiagState.FixesApplied.Add($fix.Name) | Out-Null
             }
             $fixCount++
-            Write-Log "$($fix.Func) completed (exit: $exitCode)"
+            Write-Log "$($fix.Func) completed (exit: $suiteExitCode)"
         } catch {
             Write-Host "    ERROR: $($fix.Name) failed - $($_.Exception.Message)" -ForegroundColor Red
             $DiagState.FixesFailed.Add("$($fix.Name): $($_.Exception.Message)") | Out-Null
             $failCount++
             Write-Log "ERROR: $($fix.Func) failed - $($_.Exception.Message)"
+        }
+
+        # v8.5: Ledger entry for suite fix
+        if ($v7EnginesAvailable) {
+            $suiteEntry = [ordered]@{
+                IssueID                = "$($fix.Func)_$(Get-Date -Format 'HHmmss')"
+                Category               = "Suite"
+                SeverityScore          = $fix.Weight
+                Classification         = if ($classLevel) { $classLevel } else { "" }
+                RootCause              = "Suite remediation: $($fix.Name)"
+                Evidence               = "Exit code: $suiteExitCode"
+                Location               = $fix.Name
+                BusinessImpact         = ""
+                FixEligible            = $true
+                FixApplied             = $suiteFixApplied
+                RollbackToken          = "RBK_$($fix.Func)_$([guid]::NewGuid().ToString('N').Substring(0,8))"
+                BeforeState            = "Pre-suite-dispatch"
+                AfterState             = if ($suiteFixApplied) { "Exit: $suiteExitCode" } else { "FAILED" }
+                VerificationMethod     = "StressValidation"
+                VerificationResult     = "PENDING"
+                StressValidationResult = "PENDING"
+                FinalStatus            = if ($suiteFixApplied) { "PARTIAL" } else { "FAILED" }
+                ConfidenceScore        = 0
+            }
+            $DiagState.RemediationLedger.Add([PSCustomObject]$suiteEntry) | Out-Null
         }
     }
 
@@ -2855,6 +3060,7 @@ function Invoke-Phase6-AutoRemediation {
     $DiagState.PhaseTimestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
     Write-PhaseResult -Phase "Phase 6: Remediation" -Status $status -Details "$totalFixed applied ($directFixCount direct + $fixCount suite), $totalFailed failed"
     Write-Log "Phase 6 complete: $totalFixed applied ($directFixCount direct, $fixCount suite), $totalFailed failed"
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
 }
 
 # ============================================================
@@ -2863,6 +3069,7 @@ function Invoke-Phase6-AutoRemediation {
 
 function Invoke-Phase7-StressValidation {
     param([hashtable]$DiagState)
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase7"
 
     if ($DiagState.HardwareCritical -or $DiagState.ThermalCritical) {
         Write-ScanHeader -Name "PHASE 7: STRESS VALIDATION" -Icon "[7/8]"
@@ -2871,6 +3078,7 @@ function Invoke-Phase7-StressValidation {
         $DiagState.PhaseResults["Phase7"] = "SKIP"
         Write-PhaseResult -Phase "Phase 7: Stress Validation" -Status "SKIP" -Details $reason
         Write-Log "Phase 7 skipped: $reason"
+        Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase7"
         return
     }
 
@@ -3167,6 +3375,33 @@ function Invoke-Phase7-StressValidation {
     $DiagState.PhaseResults["Phase7"] = $status
     Write-PhaseResult -Phase "Phase 7: Stress Validation" -Status $status -Details "$stressFails stress test failures"
     Write-Log "Phase 7 complete: $stressFails failures"
+
+    # v8.5: Stress failure overrides classification upward
+    if ($stressFails -gt 0) {
+        $DiagState.StressOverride = $true
+        Write-Log "StressOverride: Stress failures detected -- classification may be escalated in Phase 8"
+        # Patch remediation ledger entries with stress results
+        foreach ($entry in $DiagState.RemediationLedger) {
+            if ($entry.FixApplied -eq $true) {
+                $entry.StressValidationResult = "FAIL"
+                if ($entry.FinalStatus -eq "PARTIAL") {
+                    $entry.FinalStatus = "UNSTABLE"
+                }
+            }
+        }
+    } else {
+        # Mark successful stress validation on all ledger entries
+        foreach ($entry in $DiagState.RemediationLedger) {
+            if ($entry.FixApplied -eq $true) {
+                $entry.StressValidationResult = "PASS"
+                if ($entry.FinalStatus -eq "PARTIAL") {
+                    $entry.FinalStatus = "RESOLVED"
+                }
+            }
+        }
+    }
+
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase7"
 }
 
 # ============================================================
@@ -3177,6 +3412,7 @@ function Invoke-Phase8-FinalClassification {
     param([hashtable]$DiagState)
     Write-ScanHeader -Name "PHASE 8: FINAL CLASSIFICATION" -Icon "[8/8]"
     Write-Log "--- Phase 8: Final Classification ---"
+    Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase8"
 
     $ranking = Get-RootCauseRanking -DiagState $DiagState
     $totalFindings = @($DiagState.Findings | Where-Object { $_.Status -eq 'Fail' -or $_.Status -eq 'Warning' }).Count
@@ -3412,7 +3648,120 @@ function Invoke-Phase8-FinalClassification {
                 Write-Log "ComplianceExport failed: $($_.Exception.Message)"
             }
         }
+
+        # v8.5: HealthAfter computation + Risk Reduction
+        if ($scoreResult) {
+            $DiagState.HealthAfter = $scoreResult
+            if ($DiagState.HealthBefore) {
+                try {
+                    $healthDelta = Invoke-HealthDeltaScoring -ScoreBefore $DiagState.HealthBefore -ScoreAfter $scoreResult
+                    $DiagState['HealthDelta'] = $healthDelta
+                    Write-Host ""
+                    $deltaColor = if ($healthDelta.AbsoluteDelta -ge 0) { 'Green' } else { 'Red' }
+                    $arrow = if ($healthDelta.AbsoluteDelta -gt 0) { '+' } else { '' }
+                    Write-Finding -Label "Risk Reduction" -Value "$($healthDelta.HealthBefore) -> $($healthDelta.HealthAfter) ($arrow$($healthDelta.AbsoluteDelta) pts, $($healthDelta.RiskReductionPct)%)" -Color $deltaColor
+                    Write-Finding -Label "Band Change" -Value "$($healthDelta.BandBefore) -> $($healthDelta.BandAfter)" -Color $deltaColor
+                    Write-Log "HealthDelta: $($healthDelta.HealthBefore)->$($healthDelta.HealthAfter), RiskReduction=$($healthDelta.RiskReductionPct)%"
+                }
+                catch {
+                    Write-Log "HealthDelta scoring failed: $($_.Exception.Message)"
+                }
+            }
+        }
+
+        # v8.5: Finalize RemediationLedger FinalStatus
+        if ($DiagState.RemediationLedger -and $DiagState.RemediationLedger.Count -gt 0) {
+            foreach ($entry in $DiagState.RemediationLedger) {
+                if ($entry.FinalStatus -eq 'PARTIAL') {
+                    # PARTIAL entries that have stress PASS become RESOLVED
+                    if ($entry.StressValidationResult -eq 'PASS') {
+                        $entry.FinalStatus = 'RESOLVED'
+                    }
+                }
+            }
+            $resolved = @($DiagState.RemediationLedger | Where-Object { $_.FinalStatus -eq 'RESOLVED' }).Count
+            $total = $DiagState.RemediationLedger.Count
+            Write-Finding -Label "Remediation Ledger" -Value "$total entries ($resolved resolved)" -Color "Cyan"
+            Write-Log "RemediationLedger: $total entries, $resolved resolved"
+        }
+
+        # v8.5: Export new JSON artifacts to Reports directory
+        $v85ReportDir = $ReportPath
+        $v85Timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+
+        # RemediationLedger.json
+        if ($DiagState.RemediationLedger -and $DiagState.RemediationLedger.Count -gt 0) {
+            try {
+                $ledgerExport = [ordered]@{
+                    _type         = 'REMEDIATION_LEDGER'
+                    sessionId     = $DiagState.SessionId
+                    generatedAt   = Get-Date -Format 'o'
+                    computername  = $env:COMPUTERNAME
+                    totalEntries  = $DiagState.RemediationLedger.Count
+                    entries       = @($DiagState.RemediationLedger)
+                }
+                $ledgerFile = Join-Path $v85ReportDir "RemediationLedger_$v85Timestamp.json"
+                $ledgerExport | ConvertTo-Json -Depth 10 | Out-File -FilePath $ledgerFile -Encoding UTF8 -Force
+                Write-Host "  Ledger: $ledgerFile" -ForegroundColor Green
+                Write-Log "RemediationLedger.json exported"
+            }
+            catch { Write-Log "RemediationLedger export failed: $($_.Exception.Message)" }
+        }
+
+        # RiskReduction.json
+        if ($DiagState.ContainsKey('HealthDelta') -and $DiagState['HealthDelta']) {
+            try {
+                $riskExport = [ordered]@{
+                    _type             = 'RISK_REDUCTION'
+                    sessionId         = $DiagState.SessionId
+                    generatedAt       = Get-Date -Format 'o'
+                    computername      = $env:COMPUTERNAME
+                    healthBefore      = $DiagState['HealthDelta'].HealthBefore
+                    healthAfter       = $DiagState['HealthDelta'].HealthAfter
+                    bandBefore        = $DiagState['HealthDelta'].BandBefore
+                    bandAfter         = $DiagState['HealthDelta'].BandAfter
+                    absoluteDelta     = $DiagState['HealthDelta'].AbsoluteDelta
+                    riskReductionPct  = $DiagState['HealthDelta'].RiskReductionPct
+                    improvements      = $DiagState['HealthDelta'].Improvements
+                }
+                $riskFile = Join-Path $v85ReportDir "RiskReduction_$v85Timestamp.json"
+                $riskExport | ConvertTo-Json -Depth 10 | Out-File -FilePath $riskFile -Encoding UTF8 -Force
+                Write-Host "  RiskReduction: $riskFile" -ForegroundColor Green
+                Write-Log "RiskReduction.json exported"
+            }
+            catch { Write-Log "RiskReduction export failed: $($_.Exception.Message)" }
+        }
+
+        # phase_timing.json
+        if ($DiagState.PhaseTiming -and $DiagState.PhaseTiming.Count -gt 0) {
+            try {
+                $timingExport = [ordered]@{
+                    _type        = 'PHASE_TIMING'
+                    sessionId    = $DiagState.SessionId
+                    generatedAt  = Get-Date -Format 'o'
+                    computername = $env:COMPUTERNAME
+                    phases       = $DiagState.PhaseTiming
+                }
+                $timingFile = Join-Path $v85ReportDir "phase_timing_$v85Timestamp.json"
+                $timingExport | ConvertTo-Json -Depth 10 | Out-File -FilePath $timingFile -Encoding UTF8 -Force
+                Write-Host "  PhaseTiming: $timingFile" -ForegroundColor Green
+                Write-Log "phase_timing.json exported"
+            }
+            catch { Write-Log "phase_timing export failed: $($_.Exception.Message)" }
+        }
+
+        # ClassificationReport.json (separate file)
+        if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+            try {
+                $classFile = Join-Path $v85ReportDir "ClassificationReport_$v85Timestamp.json"
+                $DiagState['ClassificationReport'] | ConvertTo-Json -Depth 10 | Out-File -FilePath $classFile -Encoding UTF8 -Force
+                Write-Host "  Classification: $classFile" -ForegroundColor Green
+                Write-Log "ClassificationReport.json exported"
+            }
+            catch { Write-Log "ClassificationReport export failed: $($_.Exception.Message)" }
+        }
     }
+    Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase8"
 }
 
 # ============================================================
@@ -3881,10 +4230,239 @@ function Export-SmartDiagJSON {
 }
 
 # ============================================================
+# MANAGEMENT SUMMARY GENERATOR (v8.5)
+# ============================================================
+
+function New-ManagementSummary {
+    param([hashtable]$DiagState, [string]$OutputPath)
+    Write-Log "Generating Management Summary..."
+
+    $computerName = $DiagState.Machine["ComputerName"]
+    $model = $DiagState.Machine["Model"]
+    $serial = $DiagState.Machine["Serial"]
+    $dateDisplay = Get-Date -Format "yyyy-MM-dd HH:mm"
+
+    # Gather data
+    $totalFindings = @($DiagState.Findings | Where-Object { $_.Status -eq 'Fail' -or $_.Status -eq 'Warning' }).Count
+    $fixCount = $DiagState.FixesApplied.Count
+    $failCount = $DiagState.FixesFailed.Count
+
+    # Classification data
+    $classReport = $null
+    $l1Count = 0; $l2Count = 0; $l3Count = 0
+    $escalLevel = "N/A"
+    if ($DiagState.ContainsKey('ClassificationReport') -and $DiagState['ClassificationReport']) {
+        $classReport = $DiagState['ClassificationReport']
+        $l1Count = if ($classReport.l1_count) { $classReport.l1_count } else { 0 }
+        $l2Count = if ($classReport.l2_count) { $classReport.l2_count } else { 0 }
+        $l3Count = if ($classReport.l3_count) { $classReport.l3_count } else { 0 }
+        $escalLevel = if ($classReport.escalation_level) { $classReport.escalation_level } else { "N/A" }
+    }
+
+    # Health scores
+    $healthBefore = "N/A"; $healthAfter = "N/A"; $riskDelta = "N/A"
+    $bandBefore = ""; $bandAfter = ""
+    if ($DiagState.ContainsKey('HealthDelta') -and $DiagState['HealthDelta']) {
+        $hd = $DiagState['HealthDelta']
+        $healthBefore = "$($hd.HealthBefore)"
+        $healthAfter = "$($hd.HealthAfter)"
+        $riskDelta = "$($hd.RiskReductionPct)%"
+        $bandBefore = $hd.BandBefore
+        $bandAfter = $hd.BandAfter
+    } elseif ($DiagState.ScoreResult) {
+        $healthAfter = "$($DiagState.ScoreResult.finalScore)"
+        $bandAfter = $DiagState.ScoreResult.band
+    }
+
+    # Ledger summary
+    $resolvedItems = @()
+    $pendingRisks = @()
+    if ($DiagState.RemediationLedger -and $DiagState.RemediationLedger.Count -gt 0) {
+        $resolvedItems = @($DiagState.RemediationLedger | Where-Object { $_.FinalStatus -eq 'RESOLVED' -or $_.FinalStatus -eq 'PARTIAL' })
+        $pendingRisks = @($DiagState.RemediationLedger | Where-Object { $_.FinalStatus -in @('FAILED','UNSTABLE','BLOCKED','ESCALATED') })
+    }
+
+    # L1 auto-fixed list
+    $l1FixedHTML = ""
+    foreach ($fix in $DiagState.FixesApplied) {
+        $fixName = if ($fix -is [string]) { $fix } else { "$fix" }
+        $l1FixedHTML += "<li>$([System.Web.HttpUtility]::HtmlEncode($fixName))</li>`n"
+    }
+    if (-not $l1FixedHTML) { $l1FixedHTML = "<li class='muted'>None</li>" }
+
+    # L2 advisory list
+    $l2HTML = ""
+    if ($classReport -and $classReport.component_health) {
+        foreach ($ch in $classReport.component_health) {
+            $l2HTML += "<li>$([System.Web.HttpUtility]::HtmlEncode($ch.component)): $([System.Web.HttpUtility]::HtmlEncode($ch.reason))</li>`n"
+        }
+    }
+    if (-not $l2HTML) { $l2HTML = "<li class='muted'>None</li>" }
+
+    # L3 escalated list
+    $l3HTML = ""
+    $hwCrit = @($DiagState.Findings | Where-Object { $_.Severity -eq 'H3' -and $_.Status -eq 'Fail' })
+    foreach ($hf in $hwCrit) {
+        $l3HTML += "<li>$([System.Web.HttpUtility]::HtmlEncode($hf.Component)): $([System.Web.HttpUtility]::HtmlEncode($hf.Details))</li>`n"
+    }
+    if (-not $l3HTML) { $l3HTML = "<li class='muted'>None</li>" }
+
+    # Resolved issues table
+    $resolvedTableHTML = ""
+    foreach ($r in $resolvedItems) {
+        $resolvedTableHTML += "<tr><td>$($r.IssueID)</td><td>$($r.Category)</td><td>$($r.Location)</td><td style='color:#00C875'>$($r.FinalStatus)</td></tr>`n"
+    }
+    if (-not $resolvedTableHTML) { $resolvedTableHTML = "<tr><td colspan='4' class='muted'>No resolved items</td></tr>" }
+
+    # Pending risks table
+    $pendingTableHTML = ""
+    foreach ($p in $pendingRisks) {
+        $riskColor = if ($p.FinalStatus -eq 'FAILED') { '#E2231A' } else { '#F59E0B' }
+        $pendingTableHTML += "<tr><td>$($p.IssueID)</td><td>$($p.Category)</td><td style='color:$riskColor'>$($p.FinalStatus)</td><td>$($p.RootCause)</td></tr>`n"
+    }
+    if (-not $pendingTableHTML) { $pendingTableHTML = "<tr><td colspan='4' class='muted'>No pending risks</td></tr>" }
+
+    # Score bar widths
+    $beforeWidth = if ($healthBefore -ne 'N/A') { $healthBefore } else { '0' }
+    $afterWidth = if ($healthAfter -ne 'N/A') { $healthAfter } else { '0' }
+    $beforeColor = if ([double]$beforeWidth -ge 75) { '#00C875' } elseif ([double]$beforeWidth -ge 60) { '#F59E0B' } else { '#E2231A' }
+    $afterColor = if ([double]$afterWidth -ge 75) { '#00C875' } elseif ([double]$afterWidth -ge 60) { '#F59E0B' } else { '#E2231A' }
+
+    # Business impact
+    $bizImpact = "System diagnosed with $totalFindings issue(s). "
+    if ($fixCount -gt 0) { $bizImpact += "$fixCount fix(es) applied automatically. " }
+    if ($l3Count -gt 0) { $bizImpact += "$l3Count critical hardware issue(s) require technician intervention. " }
+    elseif ($l2Count -gt 0) { $bizImpact += "$l2Count component(s) showing wear -- schedule replacement. " }
+    else { $bizImpact += "No critical hardware issues detected. " }
+
+    $html = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Management Summary - $computerName</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0A0F1A; color:#F5F7FA; font-family:'Segoe UI',Consolas,monospace; font-size:14px; padding:20px; }
+  .container { max-width:900px; margin:0 auto; }
+  h1 { color:#4A8BEF; font-size:22px; margin-bottom:3px; letter-spacing:1px; }
+  h2 { color:#4A8BEF; font-size:15px; margin:20px 0 8px 0; border-bottom:1px solid #1A2744; padding-bottom:4px; }
+  .subtitle { color:#7A8BA8; font-size:12px; }
+  .header-bar { border-bottom:2px solid #4A8BEF; padding-bottom:10px; margin-bottom:15px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:15px; }
+  .kpi-card { background:#0F1E35; border:1px solid #1A2744; border-radius:8px; padding:14px; text-align:center; }
+  .kpi-value { font-size:26px; font-weight:bold; }
+  .kpi-label { font-size:11px; color:#7A8BA8; margin-top:4px; }
+  .score-section { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:15px; }
+  .score-card { background:#0F1E35; border:1px solid #1A2744; border-radius:8px; padding:14px; text-align:center; }
+  .score-big { font-size:32px; font-weight:bold; }
+  .score-label { font-size:11px; color:#7A8BA8; }
+  .score-band { font-size:12px; margin-top:4px; }
+  .bar { background:#1A2744; border-radius:4px; height:8px; margin-top:6px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:4px; }
+  .class-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:15px; }
+  .class-card { border-radius:8px; padding:12px; border:2px solid; }
+  .class-l1 { border-color:#00C875; background:rgba(0,200,117,0.08); }
+  .class-l2 { border-color:#F59E0B; background:rgba(245,158,11,0.08); }
+  .class-l3 { border-color:#E2231A; background:rgba(226,35,26,0.08); }
+  .class-title { font-size:12px; font-weight:bold; }
+  .class-count { font-size:22px; font-weight:bold; display:block; margin:4px 0; }
+  .class-list { font-size:11px; margin-top:6px; }
+  .class-list li { margin:2px 0; list-style:none; }
+  .biz-impact { background:#0F1E35; border-left:3px solid #4A8BEF; padding:12px 14px; margin-bottom:15px; font-size:13px; border-radius:0 6px 6px 0; }
+  .data-table { width:100%; border-collapse:collapse; margin-bottom:12px; }
+  .data-table th { background:#0F1E35; color:#4A8BEF; padding:6px 8px; text-align:left; border-bottom:2px solid #1A2744; font-size:11px; }
+  .data-table td { padding:5px 8px; border-bottom:1px solid #1A2744; font-size:12px; }
+  .muted { color:#7A8BA8; font-style:italic; }
+  .footer { margin-top:20px; padding-top:8px; border-top:1px solid #1A2744; color:#7A8BA8; font-size:10px; text-align:center; }
+  @media print { body { background:#fff; color:#000; } .kpi-card,.score-card,.class-card,.biz-impact { border-color:#ccc; background:#f9f9f9; } h1,h2 { color:#003; } .data-table th { background:#eee; color:#000; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header-bar">
+    <h1>MANAGEMENT SUMMARY</h1>
+    <div class="subtitle">$computerName | $model | SN: $serial | $dateDisplay | LDT v8.5</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value" style="color:#F5F7FA">$totalFindings</div><div class="kpi-label">Total Issues</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:#00C875">$fixCount</div><div class="kpi-label">Auto-Fixed</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:#F59E0B">$l2Count</div><div class="kpi-label">Advisory (L2)</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:#E2231A">$l3Count</div><div class="kpi-label">Escalated (L3)</div></div>
+  </div>
+
+  <h2>Health Score</h2>
+  <div class="score-section">
+    <div class="score-card">
+      <div class="score-label">BEFORE</div>
+      <div class="score-big" style="color:$beforeColor">$healthBefore</div>
+      <div class="score-band">$bandBefore</div>
+      <div class="bar"><div class="bar-fill" style="width:${beforeWidth}%;background:$beforeColor"></div></div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">AFTER</div>
+      <div class="score-big" style="color:$afterColor">$healthAfter</div>
+      <div class="score-band">$bandAfter</div>
+      <div class="bar"><div class="bar-fill" style="width:${afterWidth}%;background:$afterColor"></div></div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">RISK REDUCTION</div>
+      <div class="score-big" style="color:#4A8BEF">$riskDelta</div>
+      <div class="score-band">Classification: $escalLevel</div>
+    </div>
+  </div>
+
+  <h2>Business Impact</h2>
+  <div class="biz-impact">$bizImpact</div>
+
+  <h2>Classification Breakdown</h2>
+  <div class="class-grid">
+    <div class="class-card class-l1">
+      <div class="class-title" style="color:#00C875">L1 — AUTO-FIXED</div>
+      <span class="class-count" style="color:#00C875">$fixCount</span>
+      <ul class="class-list">$l1FixedHTML</ul>
+    </div>
+    <div class="class-card class-l2">
+      <div class="class-title" style="color:#F59E0B">L2 — ADVISORY</div>
+      <span class="class-count" style="color:#F59E0B">$l2Count</span>
+      <ul class="class-list">$l2HTML</ul>
+    </div>
+    <div class="class-card class-l3">
+      <div class="class-title" style="color:#E2231A">L3 — ESCALATED</div>
+      <span class="class-count" style="color:#E2231A">$l3Count</span>
+      <ul class="class-list">$l3HTML</ul>
+    </div>
+  </div>
+
+  <h2>Resolved Issues</h2>
+  <table class="data-table">
+    <tr><th>Issue ID</th><th>Category</th><th>Fix</th><th>Status</th></tr>
+    $resolvedTableHTML
+  </table>
+
+  <h2>Pending Risks</h2>
+  <table class="data-table">
+    <tr><th>Issue ID</th><th>Category</th><th>Status</th><th>Risk</th></tr>
+    $pendingTableHTML
+  </table>
+
+  <div class="footer">LDT v8.5 | Smart Diagnosis Engine | Management Summary | Generated: $dateDisplay | Classification: $escalLevel</div>
+</div>
+</body>
+</html>
+"@
+
+    $html | Out-File -FilePath $OutputPath -Encoding UTF8 -Force
+    Write-Log "Management Summary saved: $OutputPath"
+}
+
+# ============================================================
 # MAIN EXECUTION
 # ============================================================
 
-Write-Banner "SMART DIAGNOSIS ENGINE v7.2.0"
+Write-Banner "SMART DIAGNOSIS ENGINE v8.5.0"
 
 Write-Host "  Machine:  $computerName" -ForegroundColor White
 Write-Host "  Model:    $manufacturer $model" -ForegroundColor White
@@ -3956,6 +4534,17 @@ Invoke-Phase8-FinalClassification -DiagState $diagState
 Write-Host "  Generating HTML report..." -ForegroundColor DarkGray
 New-SmartDiagReport -DiagState $diagState -OutputPath $reportFile
 Write-Host "  Report saved: $reportFile" -ForegroundColor Green
+
+# ---- Generate Management Summary (v8.5) ----
+try {
+    $mgmtSummaryFile = Join-Path $ReportPath "ManagementSummary_$timestamp.html"
+    New-ManagementSummary -DiagState $diagState -OutputPath $mgmtSummaryFile
+    Write-Host "  Management Summary: $mgmtSummaryFile" -ForegroundColor Green
+}
+catch {
+    Write-Host "  [WARN] Management Summary: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Log "ManagementSummary generation failed: $($_.Exception.Message)"
+}
 
 # ---- Generate JSON Reports ----
 Write-Host "  Generating JSON reports..." -ForegroundColor DarkGray
