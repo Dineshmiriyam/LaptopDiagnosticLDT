@@ -1,4 +1,4 @@
-# LDT v7.0 GUARDRAILS
+# LDT v9.0 GUARDRAILS
 
 **Status:** MANDATORY -- applies to ALL contributors (human and AI).
 **Violation of any rule in this document is grounds for immediate revert.**
@@ -63,7 +63,7 @@ compromises the entire product.
    USB drive (except logs/reports saved to the USB itself).
 
 3. **Single entry point.** `Laptop_Master_Diagnostic.bat` is the ONLY file
-   end-users touch. All options (0-55) route through this launcher. Users
+   end-users touch. All options (0-57) route through this launcher. Users
    must never need to open PowerShell manually or navigate the file tree.
 
 4. **Self-contained.** All tools, fonts, configurations, documentation,
@@ -305,22 +305,23 @@ technical debt risk.
 
 1. **`Laptop_Diagnostic_Suite.ps1`** is the core engine (12,921+ lines).
    Do NOT modify this file unless absolutely necessary. Changes to this
-   file require justification and thorough testing of all 56 options.
+   file require justification and thorough testing of all 58 options.
 
 2. **New features go in separate scripts or `Core/` modules.** The core
    engine should only be modified to add routing hooks to new modules,
    never to add entire feature implementations inline.
 
 3. **All new modules must support graceful degradation.** Check the
-   `$v7EnginesAvailable` flag before calling v7 engine functions. If
-   the flag is `$false`, the module must fall back to v6 behavior or
-   skip gracefully.
+   `$v7EnginesAvailable` flag before calling v7+ engine functions. For
+   v9 governance features, check `$v9GovernanceAvailable`. If the flag
+   is `$false`, the module must fall back to previous behavior or skip
+   gracefully.
 
 ### Configuration Boundaries
 
 | What | Where | Format |
 |------|-------|--------|
-| Diagnostic thresholds | `Config/config.ini` | INI (23+ sections) |
+| Diagnostic thresholds | `Config/config.ini` | INI (33 sections) |
 | Engine settings | `Config/config.json` | JSON |
 | Scoring weights | `Config/config.ini` | INI |
 | UI/report settings | `Config/config.json` | JSON |
@@ -377,7 +378,7 @@ a testing strategy.
    strings in all modified `.ps1` files.
 
 4. **Option routing verification.** After any change to
-   `Laptop_Master_Diagnostic.bat`, verify that all 56 options (0-55)
+   `Laptop_Master_Diagnostic.bat`, verify that all 58 options (0-57)
    still route to the correct script/function.
 
 ### Hardware Testing
@@ -490,5 +491,5 @@ then implement the feature.
 
 ---
 
-*Last updated: 2026-02-21*
-*Applies to: LDT v7.0 and all subsequent versions*
+*Last updated: 2026-02-23*
+*Applies to: LDT v9.0 and all subsequent versions*

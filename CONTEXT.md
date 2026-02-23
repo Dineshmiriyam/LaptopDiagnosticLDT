@@ -48,7 +48,7 @@ These rules define what LDT is. Violating any of these breaks the product.
 
 ```
 E:\LDT-v6.0\
-├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-55)
+├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-57)
 ├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules, Options 1-48)
 ├── Smart_Diagnosis_Engine.ps1      ← Option 54: 9-phase auto-detect + auto-fix
 ├── Team_Issue_Detector.ps1         ← Option 49: BSOD + Reset + VPN detector
@@ -60,7 +60,7 @@ E:\LDT-v6.0\
 ├── README.md                       ← GitHub project overview
 ├── CHANGELOG.md                    ← Version history
 ├── Config\
-│   ├── config.ini                  ← Master configuration (23 sections, 200+ params)
+│   ├── config.ini                  ← Master configuration (33 sections, 200+ params)
 │   ├── config.json                 ← Enterprise engine config (scoring, guards, features)
 │   └── VersionManifest.json        ← SHA256 platform integrity hashes
 ├── Core\                           ← Enterprise engine modules (v7.0-v9.0)

@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-7.0.0-blue?style=flat-square" alt="Version 7.0.0">
+  <img src="https://img.shields.io/badge/version-9.0.0-blue?style=flat-square" alt="Version 9.0.0">
   <img src="https://img.shields.io/badge/PowerShell-5.1-blue?style=flat-square&logo=powershell&logoColor=white" alt="PowerShell 5.1">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square&logo=windows&logoColor=white" alt="Windows 10/11">
   <img src="https://img.shields.io/badge/optimized-Lenovo%20ThinkPad-E2231A?style=flat-square" alt="Lenovo ThinkPad">
@@ -16,7 +16,7 @@
 
 ## Overview
 
-LDT is a USB-portable diagnostic and repair automation toolkit designed for IT technicians, field engineers, and fleet managers. It runs entirely from a USB drive with zero installation on the target machine, works fully offline, and covers 56 menu options (0--55) spanning hardware validation, OS health, driver analysis, performance benchmarking, fleet aggregation, and enterprise compliance reporting.
+LDT is a USB-portable diagnostic and repair automation toolkit designed for IT technicians, field engineers, and fleet managers. It runs entirely from a USB drive with zero installation on the target machine, works fully offline, and covers 58 menu options (0--57) spanning hardware validation, OS health, driver analysis, performance benchmarking, fleet aggregation, and enterprise compliance reporting.
 
 Optimized for Lenovo ThinkPad fleets but compatible with any Windows 10/11 laptop.
 
@@ -28,7 +28,7 @@ Optimized for Lenovo ThinkPad fleets but compatible with any Windows 10/11 lapto
 - [Getting Started](#getting-started)
 - [Directory Structure](#directory-structure)
 - [Scripts and Entry Points](#scripts-and-entry-points)
-- [Enterprise Engines (v7.0)](#enterprise-engines-v70)
+- [Enterprise Engines (v9.0)](#enterprise-engines-v90)
 - [Smart Diagnosis Engine (Option 54)](#smart-diagnosis-engine-option-54)
 - [Configuration](#configuration)
 - [Quick Reference](#quick-reference)
@@ -40,7 +40,7 @@ Optimized for Lenovo ThinkPad fleets but compatible with any Windows 10/11 lapto
 
 ## Key Features
 
-- **56 diagnostic and repair options** across hardware, OS, drivers, performance, network, security, and fleet management
+- **58 diagnostic and repair options** across hardware, OS, drivers, performance, network, security, and fleet management
 - **USB-portable** -- copy to an 8GB+ USB drive and run on any target machine
 - **Zero installation** -- nothing is installed on the target laptop
 - **Fully offline** -- no internet connection required at runtime
@@ -69,10 +69,10 @@ There is no installation. LDT runs directly from the USB drive.
 1. Copy the entire `LDT-v6.0` folder to a USB drive
 2. Plug the USB drive into the target laptop
 3. Right-click **`Laptop_Master_Diagnostic.bat`** and select **Run as Administrator**
-4. Select an option from the menu (0--55)
+4. Select an option from the menu (0--57)
 5. Reports are saved to the `Reports/` folder on the USB drive
 
-> **Note:** The folder name `LDT-v6.0` is the distribution folder. The toolkit version is 7.0.0.
+> **Note:** The folder name `LDT-v6.0` is the distribution folder. The toolkit version is 9.0.0.
 
 ---
 
@@ -90,16 +90,19 @@ LDT-v6.0/
 |-- OEM_Validation.ps1                  Option 55: 8 read-only hardware validation checks
 |
 |-- Config/
-|   |-- config.ini                      Master configuration (23 sections, 200+ parameters)
+|   |-- config.ini                      Master configuration (33 sections, 200+ parameters)
 |   |-- config.json                     Enterprise engine configuration
 |   +-- VersionManifest.json            SHA256 platform integrity hashes
 |
-|-- Core/                               Enterprise engines (v7.0)
-|   |-- GuardEngine.psm1               6-gate remediation authority
+|-- Core/                               Enterprise engines (v9.0)
+|   |-- GuardEngine.psm1               7-gate remediation authority
 |   |-- IntegrityEngine.psm1           SHA256 tamper detection + log sealing
 |   |-- ScoringEngine.psm1             Weighted 0-100 health scoring
 |   |-- TrendEngine.psm1               90-session historical tracking
 |   |-- ComplianceExport.psm1          ISO 27001 / SOC 2 / CIS artifact generation
+|   |-- ClassificationEngine.psm1      3-Level diagnostic classification
+|   |-- GovernanceEngine.psm1          Enterprise governance (policy, transaction, retry, exceptions)
+|   |-- FleetGovernance.psm1           Fleet-wide governance controls
 |   +-- LDT-EngineAdapter.psm1         Bridge between LDT and enterprise engines
 |
 |-- Docs/                               Documentation and guides
@@ -134,20 +137,25 @@ LDT-v6.0/
 | `Quick_Start.ps1` | 51--53 | **One-click workflows.** Option 51: Full overview. Option 52: Auto-discover issues. Option 53: Score this machine. |
 | `Smart_Diagnosis_Engine.ps1` | 54 | **Smart Diagnosis.** 9-phase orchestrated root cause analysis with auto-fix and compliance reporting. |
 | `OEM_Validation.ps1` | 55 | **OEM validation.** 8 read-only hardware checks (no modifications to the target system). |
+| `Smart_Diagnosis_Engine.ps1` | 56 | **Classification Engine (ClassifyOnly).** 3-level triage without remediation. |
+| `Smart_Diagnosis_Engine.ps1` | 57 | **Governance Audit (AuditOnly).** Full scan and report without fixes or classification. |
 
 ---
 
-## Enterprise Engines (v7.0)
+## Enterprise Engines (v9.0)
 
-Version 7.0 introduces six enterprise-grade engine modules in the `Core/` directory. These are PowerShell modules (`.psm1`) consumed by the Smart Diagnosis Engine and other scripts via `LDT-EngineAdapter.psm1`.
+Version 9.0 provides nine enterprise-grade engine modules in the `Core/` directory. These are PowerShell modules (`.psm1`) consumed by the Smart Diagnosis Engine and other scripts via `LDT-EngineAdapter.psm1`.
 
 | Engine | File | Purpose |
 |--------|------|---------|
-| **GuardEngine** | `GuardEngine.psm1` | 6-gate remediation authority with a 20-item prohibition list. Prevents dangerous or unauthorized repairs from executing. |
+| **GuardEngine** | `GuardEngine.psm1` | 7-gate remediation authority with a 20-item prohibition list and whitelist support. Prevents dangerous or unauthorized repairs from executing. |
 | **IntegrityEngine** | `IntegrityEngine.psm1` | SHA256 platform tamper detection. Verifies all toolkit files against `VersionManifest.json`. Seals session logs against post-hoc modification. |
 | **ScoringEngine** | `ScoringEngine.psm1` | Weighted 0--100 health scoring across 9 categories. Produces letter grades (A--F) with per-category breakdowns. |
 | **TrendEngine** | `TrendEngine.psm1` | Stores up to 90 sessions of historical data per machine serial number. Enables trend analysis and regression detection. |
-| **ComplianceExport** | `ComplianceExport.psm1` | Generates compliance artifacts aligned to ISO 27001, SOC 2, and CIS benchmarks. Produces audit-ready documentation. |
+| **ComplianceExport** | `ComplianceExport.psm1` | Generates 12 compliance artifacts aligned to ISO 27001, SOC 2, and CIS benchmarks. Produces audit-ready documentation. |
+| **ClassificationEngine** | `ClassificationEngine.psm1` | 3-level diagnostic classification engine. Triages findings into L1 (OS Fix), L2 (Firmware), and L3 (Hardware) categories. |
+| **GovernanceEngine** | `GovernanceEngine.psm1` | Enterprise governance with policy enforcement, transaction management, retry logic, and exception handling. |
+| **FleetGovernance** | `FleetGovernance.psm1` | Fleet-wide governance controls for multi-machine policy enforcement and compliance tracking. |
 | **LDT-EngineAdapter** | `LDT-EngineAdapter.psm1` | Adapter layer that bridges the main LDT diagnostic suite with the enterprise engine modules. |
 
 ---
@@ -175,7 +183,7 @@ The Smart Diagnosis Engine is a 9-phase orchestrated diagnostic pipeline that au
 
 ### config.ini (Primary)
 
-The `Config/config.ini` file contains 23 sections with 200+ parameters that control every diagnostic threshold, timeout, and behavior. Fleet managers can customize these values without modifying any code.
+The `Config/config.ini` file contains 33 sections with 200+ parameters that control every diagnostic threshold, timeout, and behavior. Fleet managers can customize these values without modifying any code.
 
 Examples of configurable parameters:
 - Battery health thresholds (warning/critical percentages)
@@ -188,7 +196,7 @@ Examples of configurable parameters:
 
 ### config.json (Enterprise Engines)
 
-The `Config/config.json` file configures the enterprise engine modules (GuardEngine gates, ScoringEngine weights, TrendEngine retention, ComplianceExport templates).
+The `Config/config.json` file configures the enterprise engine modules (GuardEngine gates, ScoringEngine weights, TrendEngine retention, ComplianceExport templates, governance policies, execution modes, and whitelist rules).
 
 ### VersionManifest.json (Integrity)
 
@@ -213,6 +221,8 @@ Common scenarios and which option to use:
 | Validate OEM hardware (read-only) | **55** | OEM Validation -- 8 hardware checks, no modifications |
 | Specific diagnostic (battery, disk, etc.) | **1--48** | Core Suite -- choose the specific module from the menu |
 | Generate compliance report | **54** | Smart Diagnosis Engine -- Phase 8 produces ISO/SOC/CIS artifacts |
+| Classify issues without fixing anything | **56** | Smart Diagnosis Engine -- ClassifyOnly mode, 3-level triage |
+| Run a governance audit (no fixes) | **57** | Smart Diagnosis Engine -- AuditOnly mode, full scan and report |
 | Check if toolkit files were tampered with | **54** | Smart Diagnosis Engine -- Phase 0 runs integrity verification |
 
 ---
@@ -282,6 +292,6 @@ See the [LICENSE](LICENSE) file for details.
 ---
 
 <p align="center">
-  <strong>Laptop Diagnostic Toolkit v7.0.0</strong><br>
+  <strong>Laptop Diagnostic Toolkit v9.0.0</strong><br>
   Built for the field. Runs from USB. Zero install. Full diagnostics.
 </p>

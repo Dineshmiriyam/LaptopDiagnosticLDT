@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>LDT v9.0.0 -- Enterprise Governance Edition -- Implementation Report</title>
+<style>
+  @font-face { font-family:'Bebas Neue'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/bebas-neue-latin.woff2) format('woff2'); }
+  @font-face { font-family:'DM Sans'; font-style:normal; font-weight:300; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
+  @font-face { font-family:'DM Sans'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
+  @font-face { font-family:'DM Sans'; font-style:normal; font-weight:500; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
+  @font-face { font-family:'DM Sans'; font-style:normal; font-weight:600; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
+  @font-face { font-family:'DM Sans'; font-style:normal; font-weight:700; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
+  @font-face { font-family:'JetBrains Mono'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/jetbrains-mono-400-latin.woff2) format('woff2'); }
+  @font-face { font-family:'JetBrains Mono'; font-style:normal; font-weight:600; font-display:swap; src:url(fonts/jetbrains-mono-600-latin.woff2) format('woff2'); }
+
+  :root {
+    --red:#E2231A; --dark:#0A0F1A; --navy:#0F1E35; --navy2:#162840;
+    --blue:#1A5DCC; --blue-light:#4A8BEF; --green:#00C875;
+    --amber:#F59E0B; --purple:#8B5CF6; --teal:#06B6D4;
+    --white:#F5F7FA; --muted:#7A8BA8;
+    --border:rgba(255,255,255,0.07); --card:rgba(255,255,255,0.04);
+    --glass-bg:rgba(255,255,255,0.04);
+    --glass-border:rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--dark);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(26,93,204,0.12) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(226,35,26,0.08) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+  .header{position:relative;z-index:10;padding:48px 32px 0;text-align:center;}
+  .header-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--blue-light);text-transform:uppercase;margin-bottom:16px;display:inline-flex;align-items:center;gap:12px;}
+  .header-eyebrow::before,.header-eyebrow::after{content:'';display:block;width:32px;height:1px;background:var(--blue-light);opacity:0.5;}
+  .header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,6vw,72px);letter-spacing:1px;line-height:0.95;color:var(--white);margin-bottom:10px;}
+  .header h1 span{color:var(--red);}
+  .header-sub{font-size:16px;font-weight:300;color:var(--muted);margin-bottom:12px;}
+  .header-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:40px;}
+
+  .container{max-width:1100px;margin:0 auto;padding:0 32px 80px;position:relative;z-index:10;}
+
+  .divider{display:flex;align-items:center;gap:16px;margin:48px 0 32px;padding:0;}
+  .divider-line{flex:1;height:1px;background:var(--border);}
+  .divider-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.5px;color:var(--white);margin-bottom:20px;}
+
+  /* Stats row */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px;}
+  .stat-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;padding:20px 16px;text-align:center;}
+  .stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;}
+  .stat-num.green{color:var(--green);}
+  .stat-num.blue{color:var(--blue-light);}
+  .stat-num.red{color:#FF6B6B;}
+  .stat-num.amber{color:var(--amber);}
+  .stat-num.purple{color:#A78BFA;}
+  .stat-num.teal{color:#22D3EE;}
+  .stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+
+  /* Tables */
+  .table-container{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:16px;overflow:hidden;margin-bottom:32px;}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table thead tr{background:rgba(26,93,204,0.2);border-bottom:1px solid rgba(26,93,204,0.4);}
+  .data-table thead th{padding:12px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light);font-weight:400;}
+  .data-table tbody tr{border-bottom:1px solid var(--border);}
+  .data-table tbody tr:nth-child(even){background:rgba(255,255,255,0.015);}
+  .data-table tbody tr:hover{background:rgba(26,93,204,0.08);}
+  .data-table td{padding:11px 16px;vertical-align:middle;line-height:1.55;}
+  .data-table td:first-child{color:var(--white);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .data-table td:nth-child(2){color:var(--blue-light);font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;}
+  .data-table td:nth-child(3){color:#8A9BB8;}
+
+  /* Phase cards */
+  .phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px;}
+  .phase-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;}
+  .phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .phase-card.c-blue::before{background:var(--blue-light);}
+  .phase-card.c-green::before{background:var(--green);}
+  .phase-card.c-red::before{background:var(--red);}
+  .phase-card.c-purple::before{background:#8B5CF6;}
+  .phase-card.c-amber::before{background:var(--amber);}
+  .phase-card.c-teal::before{background:#06B6D4;}
+  .phase-num{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;margin-bottom:2px;}
+  .phase-card.c-blue .phase-num{color:var(--blue-light);}
+  .phase-card.c-green .phase-num{color:var(--green);}
+  .phase-card.c-red .phase-num{color:#FF6B6B;}
+  .phase-card.c-purple .phase-num{color:#A78BFA;}
+  .phase-card.c-amber .phase-num{color:var(--amber);}
+  .phase-card.c-teal .phase-num{color:#22D3EE;}
+  .phase-name{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white);margin-bottom:6px;}
+  .phase-items{list-style:none;display:flex;flex-direction:column;gap:3px;}
+  .phase-items li{font-size:11.5px;color:#7A8BA8;padding-left:14px;position:relative;line-height:1.5;}
+  .phase-items li::before{content:'>';position:absolute;left:2px;color:var(--blue-light);font-family:'JetBrains Mono',monospace;font-size:10px;}
+
+  /* Function group cards */
+  .func-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:32px;}
+  .func-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;padding:20px;position:relative;overflow:hidden;}
+  .func-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .func-card.fc-blue::before{background:var(--blue-light);}
+  .func-card.fc-green::before{background:var(--green);}
+  .func-card.fc-red::before{background:var(--red);}
+  .func-card.fc-purple::before{background:#8B5CF6;}
+  .func-card.fc-amber::before{background:var(--amber);}
+  .func-card.fc-teal::before{background:#06B6D4;}
+  .func-card .fc-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .func-card.fc-blue .fc-label{color:var(--blue-light);}
+  .func-card.fc-green .fc-label{color:var(--green);}
+  .func-card.fc-red .fc-label{color:#FF6B6B;}
+  .func-card.fc-purple .fc-label{color:#A78BFA;}
+  .func-card.fc-amber .fc-label{color:var(--amber);}
+  .func-card.fc-teal .fc-label{color:#22D3EE;}
+  .func-card .fc-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:6px;}
+  .func-card .fc-funcs{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green);margin-bottom:8px;line-height:1.6;}
+  .func-card .fc-desc{font-size:12px;color:#8A9BB8;line-height:1.6;}
+
+  /* Execution mode cards */
+  .mode-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:32px;}
+  .mode-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:16px 14px;text-align:center;position:relative;overflow:hidden;}
+  .mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .mode-card.mc-green::before{background:var(--green);}
+  .mode-card.mc-blue::before{background:var(--blue-light);}
+  .mode-card.mc-amber::before{background:var(--amber);}
+  .mode-card.mc-red::before{background:var(--red);}
+  .mode-card.mc-purple::before{background:#8B5CF6;}
+  .mode-card .mc-name{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--white);margin-bottom:6px;}
+  .mode-card .mc-phases{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue-light);margin-bottom:6px;}
+  .mode-card .mc-desc{font-size:11px;color:#7A8BA8;line-height:1.4;}
+
+  /* Escalation */
+  .esc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
+  .esc-card{border-radius:16px;padding:22px 18px;position:relative;overflow:hidden;}
+  .esc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .esc-card.l1{background:linear-gradient(135deg,rgba(0,200,117,0.10),rgba(0,200,117,0.03));border:1px solid rgba(0,200,117,0.2);}
+  .esc-card.l1::before{background:var(--green);}
+  .esc-card.l2{background:linear-gradient(135deg,rgba(245,158,11,0.10),rgba(245,158,11,0.03));border:1px solid rgba(245,158,11,0.2);}
+  .esc-card.l2::before{background:var(--amber);}
+  .esc-card.l3{background:linear-gradient(135deg,rgba(226,35,26,0.10),rgba(226,35,26,0.03));border:1px solid rgba(226,35,26,0.2);}
+  .esc-card.l3::before{background:var(--red);}
+  .esc-level{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .esc-card.l1 .esc-level{color:var(--green);}
+  .esc-card.l2 .esc-level{color:var(--amber);}
+  .esc-card.l3 .esc-level{color:#FF6B6B;}
+  .esc-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);margin-bottom:10px;}
+  .esc-items{list-style:none;display:flex;flex-direction:column;gap:5px;}
+  .esc-items li{font-size:12px;color:#8A9BB8;display:flex;gap:6px;align-items:baseline;}
+  .esc-card.l1 .esc-items li::before{content:'OK';font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--green);flex-shrink:0;}
+  .esc-card.l2 .esc-items li::before{content:'!!';font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--amber);flex-shrink:0;}
+  .esc-card.l3 .esc-items li::before{content:'XX';font-family:'JetBrains Mono',monospace;font-size:8px;color:#FF6B6B;flex-shrink:0;}
+
+  /* Output list */
+  .output-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px;}
+  .output-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:16px;}
+  .output-card .oc-icon{font-size:24px;margin-bottom:8px;}
+  .output-card .oc-name{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--white);margin-bottom:4px;}
+  .output-card .oc-desc{font-size:11.5px;color:#7A8BA8;line-height:1.5;}
+  .output-card .oc-phase{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue-light);margin-top:6px;}
+
+  /* Docs section */
+  .docs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:32px;}
+  .doc-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:16px 18px;}
+  .doc-card .dc-name{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--white);margin-bottom:4px;}
+  .doc-card .dc-desc{font-size:12px;color:#7A8BA8;line-height:1.5;}
+
+  /* Version history */
+  .version-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+  .ver-item{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:16px 20px;display:flex;gap:16px;align-items:flex-start;}
+  .ver-tag{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;flex-shrink:0;letter-spacing:0.5px;}
+  .ver-tag.current{background:rgba(0,200,117,0.15);color:var(--green);border:1px solid rgba(0,200,117,0.3);}
+  .ver-tag.prev{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid rgba(255,255,255,0.1);}
+  .ver-body .ver-title{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--white);margin-bottom:4px;}
+  .ver-body .ver-desc{font-size:12.5px;color:#7A8BA8;line-height:1.6;}
+
+  /* Checklist */
+  .check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:32px;}
+  .check-item{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:14px 18px;display:flex;gap:12px;align-items:center;}
+  .check-icon{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+  .check-icon.pass{background:rgba(0,200,117,0.15);color:var(--green);border:1px solid rgba(0,200,117,0.3);}
+  .check-text{font-size:12.5px;color:#8A9BB8;line-height:1.4;}
+  .check-text strong{color:var(--white);font-weight:600;}
+
+  /* Bottom card */
+  .bottom-card{background:linear-gradient(135deg,rgba(226,35,26,0.10),rgba(26,93,204,0.12));border:1px solid rgba(226,35,26,0.18);border-radius:20px;padding:40px 36px;text-align:center;position:relative;overflow:hidden;margin-top:48px;}
+  .bottom-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--blue-light),var(--green));}
+  .bottom-card h2{font-family:'Bebas Neue',sans-serif;font-size:36px;margin-bottom:12px;color:var(--white);}
+  .bottom-card p{color:#8A9BB8;font-size:15px;max-width:700px;margin:0 auto 24px;line-height:1.8;}
+  .bottom-card strong{color:var(--white);}
+  .bottom-card .tagline{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:20px;}
+  .big-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:12px;}
+  .big-stat{text-align:center;}
+  .big-stat-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;}
+  .big-stat-num.green{color:var(--green);}
+  .big-stat-num.blue{color:var(--blue-light);}
+  .big-stat-num.red{color:#FF6B6B;}
+  .big-stat-num.amber{color:var(--amber);}
+  .big-stat-num.purple{color:#A78BFA;}
+  .big-stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+  /* Badge */
+  .badge{display:inline-block;padding:2px 8px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.5px;}
+  .badge-new{background:rgba(0,200,117,0.15);color:var(--green);border:1px solid rgba(0,200,117,0.3);}
+  .badge-mod{background:rgba(74,139,239,0.15);color:var(--blue-light);border:1px solid rgba(74,139,239,0.3);}
+  .badge-upd{background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+
+  /* Prose paragraph */
+  .prose{color:#8A9BB8;font-size:14px;line-height:1.8;margin-bottom:24px;}
+  .prose strong{color:var(--white);font-weight:600;}
+  .prose code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green);background:rgba(0,200,117,0.08);padding:2px 6px;border-radius:4px;}
+
+  /* Summary bullet list */
+  .summary-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:32px;}
+  .summary-list li{font-size:13.5px;color:#8A9BB8;padding-left:20px;position:relative;line-height:1.6;}
+  .summary-list li::before{content:'>';position:absolute;left:4px;color:var(--blue-light);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;}
+  .summary-list li strong{color:var(--white);font-weight:600;}
+
+  /* Sub-section title */
+  .sub-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.5px;color:var(--white);margin-bottom:16px;margin-top:8px;}
+
+  @media(max-width:960px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .phase-grid{grid-template-columns:repeat(2,1fr);}
+    .func-grid{grid-template-columns:1fr;}
+    .mode-grid{grid-template-columns:repeat(3,1fr);}
+    .esc-grid{grid-template-columns:1fr;}
+    .output-grid{grid-template-columns:repeat(2,1fr);}
+    .check-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:720px){
+    .header{padding:32px 20px 0;}
+    .container{padding:0 20px 60px;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .phase-grid{grid-template-columns:1fr;}
+    .mode-grid{grid-template-columns:repeat(2,1fr);}
+    .output-grid{grid-template-columns:1fr;}
+    .docs-grid{grid-template-columns:1fr;}
+  }
+
+  @media print {
+    body{background:#fff;color:#111;}
+    body::before{display:none;}
+    .header-eyebrow{color:#1A5DCC;}
+    .header h1{color:#111;}
+    .header h1 span{color:#E2231A;}
+    .stat-card,.phase-card,.func-card,.mode-card,.esc-card,.output-card,.ver-item,.doc-card,.check-item{background:#f8f9fa;border:1px solid #ddd;}
+    .data-table thead tr{background:#e8f0fe;}
+    .data-table thead th{color:#1A5DCC;}
+    .section-title,.sub-title{color:#111;}
+    .bottom-card{background:#f0f4f8;border:1px solid #ccc;}
+    .bottom-card h2{color:#111;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Implementation Report</div>
+  <h1>LAPTOP DIAGNOSTIC<br><span>TOOLKIT v9.0.0</span></h1>
+  <p class="header-sub">Enterprise Governance Edition &nbsp;|&nbsp; Policy-Driven Execution &nbsp;|&nbsp; Fleet-Ready &nbsp;|&nbsp; Windows 10 &amp; 11</p>
+  <p class="header-date">Report Generated: 23 February 2026</p>
+</div>
+
+<div class="container">
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num green">2</div><div class="stat-label">New Modules</div></div>
+    <div class="stat-card"><div class="stat-num blue">9</div><div class="stat-label">Total Engines</div></div>
+    <div class="stat-card"><div class="stat-num amber">58</div><div class="stat-label">Menu Options</div></div>
+    <div class="stat-card"><div class="stat-num purple">12</div><div class="stat-label">Compliance Artifacts</div></div>
+  </div>
+
+  <!-- SECTION 1: EXECUTIVE SUMMARY -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 1</div><div class="divider-line"></div></div>
+  <div class="section-title">EXECUTIVE SUMMARY</div>
+  <p class="prose">
+    LDT v9.0.0 introduces the <strong>Enterprise Governance Edition</strong> -- a policy-driven execution framework
+    that transforms the diagnostic toolkit from a standalone analysis tool into a <strong>governed, auditable,
+    fleet-ready platform</strong>. Two new PowerShell modules -- <code>GovernanceEngine.psm1</code> and
+    <code>FleetGovernance.psm1</code> -- add structured policy profiles, transaction control with crash recovery,
+    five distinct execution modes, exception governance with configurable abort thresholds, and directory-level
+    tamper detection with whitelist enforcement.
+  </p>
+  <ul class="summary-list">
+    <li><strong>Enterprise Governance Engine</strong> with 3 policy profiles (Strict, Balanced, Aggressive) and full transaction control</li>
+    <li><strong>Fleet Governance</strong> with directory tamper detection via VersionManifest.json and remediation whitelist enforcement</li>
+    <li><strong>5 execution modes</strong> -- AuditOnly, Diagnostic, Remediation, Full, ClassifyOnly -- for granular operational control</li>
+    <li><strong>7th GuardEngine gate</strong> added for whitelist enforcement before any remediation action executes</li>
+    <li><strong>Crash recovery</strong> via ExecutionState.json with automatic session restoration (24-hour max age)</li>
+    <li><strong>12 compliance artifacts</strong> (up from 10) -- adds GovernanceReport.json and ExceptionLog.json</li>
+    <li><strong>Option 57: Governance Audit</strong> -- standalone governance health check and policy compliance report</li>
+  </ul>
+
+  <!-- SECTION 2: NEW MODULES -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 2</div><div class="divider-line"></div></div>
+  <div class="section-title">NEW MODULES</div>
+
+  <!-- GovernanceEngine.psm1 -->
+  <div class="sub-title">GOVERNANCEENGINE.PSM1 &nbsp;<span class="badge badge-new">NEW</span> &nbsp;<span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);font-weight:400;">~565 lines &nbsp;|&nbsp; 15 exported functions &nbsp;|&nbsp; 6 groups</span></div>
+
+  <div class="func-grid">
+
+    <div class="func-card fc-blue">
+      <div class="fc-label">Group 1 -- Policy Engine</div>
+      <div class="fc-title">POLICY PROFILES</div>
+      <div class="fc-funcs">Initialize-PolicyEngine<br>Get-PolicyProfile<br>Test-PolicyGate</div>
+      <div class="fc-desc">
+        Three pre-defined governance profiles control execution behavior across the entire pipeline.
+        <strong>Strict</strong>: max escalation L1, whitelist required for all remediation.
+        <strong>Balanced</strong>: max escalation L1, retry enabled with exponential backoff.
+        <strong>Aggressive</strong>: max escalation L2, allows component-level fixes.
+      </div>
+    </div>
+
+    <div class="func-card fc-green">
+      <div class="fc-label">Group 2 -- Transaction Control</div>
+      <div class="fc-title">CRASH RECOVERY</div>
+      <div class="fc-funcs">Save-ExecutionState<br>Restore-ExecutionState<br>Clear-ExecutionState</div>
+      <div class="fc-desc">
+        ExecutionState.json checkpoint written at every phase boundary. If a session is interrupted (power loss, crash, forced close),
+        the next run auto-detects the state file, validates age (24-hour max), and offers to resume from the last completed phase.
+        State includes session GUID, completed phases, accumulated findings, and partial results.
+      </div>
+    </div>
+
+    <div class="func-card fc-purple">
+      <div class="fc-label">Group 3 -- Execution Modes</div>
+      <div class="fc-title">5-MODE GATING</div>
+      <div class="fc-funcs">Get-ExecutionMode<br>Test-ModeAllowsPhase<br>Test-ModeAllowsRemediation<br>Test-ModeAllowsClassification</div>
+      <div class="fc-desc">
+        Each mode defines which phases execute and what actions are permitted.
+        <strong>AuditOnly</strong>: Phases 0-5,8 (scan + report, no classification or remediation).
+        <strong>Diagnostic</strong>: Phases 0-5,8 (scan + classify).
+        <strong>Remediation</strong>: Phases 0,6-8 (fix pre-classified issues).
+        <strong>Full</strong>: Phases 0-8 (everything).
+        <strong>ClassifyOnly</strong>: Phases 0-5,8 (classify without fixing).
+      </div>
+    </div>
+
+    <div class="func-card fc-red">
+      <div class="fc-label">Group 4 -- Exception Governance</div>
+      <div class="fc-title">SEVERITY ROUTING</div>
+      <div class="fc-funcs">Write-GovernedException<br>Get-ExceptionSummary<br>Test-ExceptionThreshold</div>
+      <div class="fc-desc">
+        All exceptions are routed through severity classification -- Warning, Error, or Critical.
+        Configurable abort thresholds (default: 3 critical, 10 errors) trigger automatic session termination
+        with a full exception log export. Prevents runaway failures from cascading through the pipeline.
+      </div>
+    </div>
+
+    <div class="func-card fc-amber">
+      <div class="fc-label">Group 5 -- Retry Governance</div>
+      <div class="fc-title">EXPONENTIAL BACKOFF</div>
+      <div class="fc-funcs">Invoke-GovernedRetry</div>
+      <div class="fc-desc">
+        Wraps any remediation action with configurable retry logic. Exponential backoff with jitter
+        (1s / 2s / 4s base delays) prevents thundering herd on fleet deployments.
+        Configurable max retries and backoff multiplier per policy profile.
+        Only active in Balanced and Aggressive profiles.
+      </div>
+    </div>
+
+    <div class="func-card fc-teal">
+      <div class="fc-label">Group 6 -- Business Impact</div>
+      <div class="fc-title">IMPACT SCORING</div>
+      <div class="fc-funcs">Get-BusinessImpactWeight</div>
+      <div class="fc-desc">
+        Calculates business impact weight using a three-factor formula: Category multiplier (Hardware=3, Boot=2.5, Security=2, Performance=1.5)
+        times Severity multiplier (Critical=3, High=2, Medium=1.5, Low=1) times Classification multiplier (L3=3, L2=2, L1=1).
+        Used for prioritization in fleet-wide reporting and KPI aggregation.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FleetGovernance.psm1 -->
+  <div class="sub-title">FLEETGOVERNANCE.PSM1 &nbsp;<span class="badge badge-new">NEW</span> &nbsp;<span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);font-weight:400;">~436 lines &nbsp;|&nbsp; 6 exported functions</span></div>
+
+  <div class="func-grid">
+
+    <div class="func-card fc-blue">
+      <div class="fc-label">Directory Integrity</div>
+      <div class="fc-title">TAMPER DETECTION</div>
+      <div class="fc-funcs">Test-DirectoryIntegrity</div>
+      <div class="fc-desc">
+        Validates the entire LDT file system against VersionManifest.json. Detects missing files, unexpected files,
+        and hash mismatches. Reports integrity status (Clean / Tampered / Degraded) with per-file detail.
+        Blocks execution in Strict profile if tampering is detected.
+      </div>
+    </div>
+
+    <div class="func-card fc-green">
+      <div class="fc-label">Whitelist Enforcement</div>
+      <div class="fc-title">APPROVED ACTIONS</div>
+      <div class="fc-funcs">Get-RemediationWhitelist<br>Test-WhitelistApproval</div>
+      <div class="fc-desc">
+        Loads the approved remediation action list from config.json. Every Phase 6 dispatch is validated against
+        the whitelist before execution. Unapproved actions are blocked and logged as governance violations.
+        The 7th GuardEngine gate enforces this check at the engine level.
+      </div>
+    </div>
+
+    <div class="func-card fc-amber">
+      <div class="fc-label">Rollback Validation</div>
+      <div class="fc-title">SIMULATION</div>
+      <div class="fc-funcs">Test-RollbackSimulation</div>
+      <div class="fc-desc">
+        Validates rollback token BeforeState data without executing any rollback.
+        Confirms that registry exports, restore points, and driver snapshots exist
+        and are readable. Reports rollback readiness as READY / PARTIAL / FAILED.
+      </div>
+    </div>
+
+    <div class="func-card fc-purple">
+      <div class="fc-label">Fleet KPIs</div>
+      <div class="fc-title">AGGREGATION</div>
+      <div class="fc-funcs">Export-FleetKPIs</div>
+      <div class="fc-desc">
+        Aggregates fleet-wide performance metrics from TrendStore: L1 auto-fix success rate,
+        enterprise score delta over time, issue recurrence rate, and mean time to resolution.
+        Exports FleetKPIs.json for dashboard consumption.
+      </div>
+    </div>
+
+    <div class="func-card fc-teal">
+      <div class="fc-label">Governance Summary</div>
+      <div class="fc-title">HEALTH SNAPSHOT</div>
+      <div class="fc-funcs">New-FleetGovernanceSummary</div>
+      <div class="fc-desc">
+        Consolidated governance health snapshot combining directory integrity, whitelist compliance,
+        exception summary, policy profile status, and KPI highlights into a single structured report.
+        Used by Option 57 (Governance Audit) for standalone governance health checks.
+      </div>
+    </div>
+
+    <div class="func-card fc-red">
+      <div class="fc-label">Combined Total</div>
+      <div class="fc-title">21 FUNCTIONS</div>
+      <div class="fc-funcs">15 + 6 = 21 exported</div>
+      <div class="fc-desc">
+        Both modules follow the existing LDT pattern: <code>Import-Module</code> with <code>-ErrorAction SilentlyContinue</code>,
+        graceful degradation if modules are missing, and full PS 5.1 compatibility.
+        Zero external dependencies. All functions are idempotent and safe to re-run.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 3: EXECUTION MODES -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 3</div><div class="divider-line"></div></div>
+  <div class="section-title">SMART DIAGNOSIS ENGINE INTEGRATION</div>
+  <p class="prose">
+    The 9-phase Smart Diagnosis Engine gains governance awareness at every boundary. Phase 0 initializes the governance
+    subsystem -- loading the active policy profile, setting the execution mode, checking for crash recovery state, and
+    validating directory integrity. Every phase transition writes an <code>ExecutionState.json</code> checkpoint.
+    Phase 6 remediation is gated by the 5-mode system. Phase 7 stress validation monitors exception thresholds.
+    Phase 8 exports two new compliance artifacts: <code>GovernanceReport.json</code> and <code>ExceptionLog.json</code>.
+  </p>
+
+  <div class="sub-title">5 EXECUTION MODES</div>
+  <div class="mode-grid">
+    <div class="mode-card mc-green">
+      <div class="mc-name">AUDITONLY</div>
+      <div class="mc-phases">Phases 0-5, 8</div>
+      <div class="mc-desc">Scan and report only. No classification, no remediation.</div>
+    </div>
+    <div class="mode-card mc-blue">
+      <div class="mc-name">DIAGNOSTIC</div>
+      <div class="mc-phases">Phases 0-5, 8</div>
+      <div class="mc-desc">Scan and classify findings. No remediation.</div>
+    </div>
+    <div class="mode-card mc-amber">
+      <div class="mc-name">REMEDIATION</div>
+      <div class="mc-phases">Phases 0, 6-8</div>
+      <div class="mc-desc">Fix pre-classified issues. Requires prior diagnostic run.</div>
+    </div>
+    <div class="mode-card mc-red">
+      <div class="mc-name">FULL</div>
+      <div class="mc-phases">Phases 0-8</div>
+      <div class="mc-desc">Complete pipeline. Scan, classify, fix, validate, report.</div>
+    </div>
+    <div class="mode-card mc-purple">
+      <div class="mc-name">CLASSIFYONLY</div>
+      <div class="mc-phases">Phases 0-5, 8</div>
+      <div class="mc-desc">Classify findings without executing any fixes.</div>
+    </div>
+  </div>
+
+  <div class="sub-title">PHASE INTEGRATION POINTS</div>
+  <div class="phase-grid">
+
+    <div class="phase-card c-blue">
+      <div class="phase-num">PHASE 0 -- GOVERNANCE INIT</div>
+      <div class="phase-name">PREFLIGHT + GOVERNANCE</div>
+      <ul class="phase-items">
+        <li>Initialize-PolicyEngine (load active profile)</li>
+        <li>Get-ExecutionMode (determine phase gates)</li>
+        <li>Restore-ExecutionState (crash recovery check)</li>
+        <li>Test-DirectoryIntegrity (tamper detection)</li>
+        <li>All existing Phase 0 preflight checks</li>
+        <li>Save-ExecutionState checkpoint</li>
+      </ul>
+    </div>
+
+    <div class="phase-card c-green">
+      <div class="phase-num">PHASES 1-5 -- DATA COLLECTION</div>
+      <div class="phase-name">CHECKPOINT AT EVERY BOUNDARY</div>
+      <ul class="phase-items">
+        <li>ExecutionState.json written after each phase</li>
+        <li>Exception governance monitors all errors</li>
+        <li>Test-ExceptionThreshold at each boundary</li>
+        <li>Auto-abort if thresholds exceeded</li>
+        <li>All existing scan logic unchanged</li>
+      </ul>
+    </div>
+
+    <div class="phase-card c-amber">
+      <div class="phase-num">PHASE 6 -- GOVERNED REMEDIATION</div>
+      <div class="phase-name">MODE-GATED FIXES</div>
+      <ul class="phase-items">
+        <li>Test-ModeAllowsRemediation gate</li>
+        <li>Test-WhitelistApproval for every action</li>
+        <li>Invoke-GovernedRetry wraps dispatches</li>
+        <li>7th GuardEngine gate (whitelist check)</li>
+        <li>Write-GovernedException on failures</li>
+        <li>Save-ExecutionState checkpoint</li>
+      </ul>
+    </div>
+
+    <div class="phase-card c-red">
+      <div class="phase-num">PHASE 7 -- STRESS VALIDATION</div>
+      <div class="phase-name">EXCEPTION MONITORING</div>
+      <ul class="phase-items">
+        <li>Threshold monitoring during stress tests</li>
+        <li>Critical exception auto-abort</li>
+        <li>Test-RollbackSimulation validation</li>
+        <li>All existing stress logic unchanged</li>
+        <li>Save-ExecutionState checkpoint</li>
+      </ul>
+    </div>
+
+    <div class="phase-card c-purple">
+      <div class="phase-num">PHASE 8 -- GOVERNANCE EXPORT</div>
+      <div class="phase-name">12 COMPLIANCE ARTIFACTS</div>
+      <ul class="phase-items">
+        <li>GovernanceReport.json (new)</li>
+        <li>ExceptionLog.json (new)</li>
+        <li>All 10 existing artifacts unchanged</li>
+        <li>Clear-ExecutionState (cleanup)</li>
+        <li>Export-FleetKPIs (if TrendStore exists)</li>
+        <li>New-FleetGovernanceSummary</li>
+      </ul>
+    </div>
+
+    <div class="phase-card c-teal">
+      <div class="phase-num">OPTION 57</div>
+      <div class="phase-name">GOVERNANCE AUDIT</div>
+      <ul class="phase-items">
+        <li>Standalone governance health check</li>
+        <li>Directory integrity validation</li>
+        <li>Policy profile compliance report</li>
+        <li>Whitelist configuration review</li>
+        <li>Exception threshold status</li>
+        <li>Fleet KPI summary (if available)</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- SECTION 4: CONFIGURATION CHANGES -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 4</div><div class="divider-line"></div></div>
+  <div class="section-title">CONFIGURATION CHANGES</div>
+  <p class="prose">
+    Four new sections added to <code>config.ini</code>, bringing the total from 29 to <strong>33 sections</strong>.
+    The <code>config.json</code> governance block adds structured policy definitions, execution mode mappings,
+    remediation whitelist, retry policy parameters, and exception thresholds.
+  </p>
+
+  <div class="esc-grid">
+    <div class="esc-card l1">
+      <div class="esc-level">config.ini -- 4 New Sections</div>
+      <div class="esc-title">INI ADDITIONS</div>
+      <ul class="esc-items">
+        <li>[GovernanceEngine] -- Profile, mode defaults, state file path</li>
+        <li>[ExceptionGovernance] -- Max critical, max errors, log path</li>
+        <li>[RetryPolicy] -- Max retries, base delay, backoff multiplier, jitter</li>
+        <li>[FleetGovernance] -- Manifest path, whitelist enforcement toggle, KPI export</li>
+      </ul>
+    </div>
+    <div class="esc-card l2">
+      <div class="esc-level">config.json -- Governance Block</div>
+      <div class="esc-title">JSON ADDITIONS</div>
+      <ul class="esc-items">
+        <li>policies: Strict, Balanced, Aggressive definitions</li>
+        <li>executionModes: Phase maps for all 5 modes</li>
+        <li>whitelist: Approved remediation actions list</li>
+        <li>retryPolicy: Backoff parameters per profile</li>
+        <li>exceptionThresholds: Abort limits per severity</li>
+      </ul>
+    </div>
+    <div class="esc-card l3">
+      <div class="esc-level">Total Configuration</div>
+      <div class="esc-title">33 SECTIONS</div>
+      <ul class="esc-items">
+        <li>29 existing sections unchanged</li>
+        <li>4 new governance sections added</li>
+        <li>All backward compatible</li>
+        <li>Graceful defaults if sections missing</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: FILES CHANGED -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 5</div><div class="divider-line"></div></div>
+  <div class="section-title">FILES CHANGED</div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>File</th><th>Action</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Core/GovernanceEngine.psm1</td><td><span class="badge badge-new">NEW</span></td><td>~565 lines -- 15 exported functions across 6 groups (Policy, Transaction, Mode, Exception, Retry, Impact)</td></tr>
+        <tr><td>Core/FleetGovernance.psm1</td><td><span class="badge badge-new">NEW</span></td><td>~436 lines -- 6 exported functions (Directory integrity, whitelist, rollback sim, KPIs, summary)</td></tr>
+        <tr><td>Smart_Diagnosis_Engine.ps1</td><td><span class="badge badge-mod">MOD +135</span></td><td>Governance init in Phase 0, ExecutionState checkpoints, mode gating in Phase 6, artifact export in Phase 8</td></tr>
+        <tr><td>Core/GuardEngine.psm1</td><td><span class="badge badge-mod">MOD +15</span></td><td>7th gate added -- Test-WhitelistApproval check before remediation dispatch</td></tr>
+        <tr><td>Core/ComplianceExport.psm1</td><td><span class="badge badge-mod">MOD +40</span></td><td>GovernanceReport.json and ExceptionLog.json export functions; artifact count 10 to 12</td></tr>
+        <tr><td>Core/LDT-EngineAdapter.psm1</td><td><span class="badge badge-mod">MOD +20</span></td><td>Import-Module calls for GovernanceEngine and FleetGovernance with graceful fallback</td></tr>
+        <tr><td>Config/config.ini</td><td><span class="badge badge-mod">MOD +25</span></td><td>4 new sections: [GovernanceEngine], [ExceptionGovernance], [RetryPolicy], [FleetGovernance]</td></tr>
+        <tr><td>Config/config.json</td><td><span class="badge badge-mod">MOD +30</span></td><td>Governance block: policies, executionModes, whitelist, retryPolicy, exceptionThresholds</td></tr>
+        <tr><td>Laptop_Master_Diagnostic.bat</td><td><span class="badge badge-mod">MOD +35</span></td><td>Options 55-57 menu entries, dispatch logic for Governance Audit, version bump to 9.0.0</td></tr>
+        <tr><td>VersionManifest.json</td><td><span class="badge badge-upd">UPDATED</span></td><td>17 file hashes regenerated to include new modules and modified files</td></tr>
+        <tr><td>CONTEXT.md</td><td><span class="badge badge-upd">UPDATED</span></td><td>Version references updated to v9.0.0, architecture notes for governance subsystem</td></tr>
+        <tr><td>CHANGELOG.md</td><td><span class="badge badge-upd">UPDATED</span></td><td>+35 lines -- v9.0.0 release entry with full change documentation</td></tr>
+        <tr><td>README.md</td><td><span class="badge badge-upd">UPDATED</span></td><td>Version references, feature list, module count updated</td></tr>
+        <tr><td>GUARDRAILS.md</td><td><span class="badge badge-upd">UPDATED</span></td><td>Version references, governance guardrail documentation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 6: VERSION HISTORY -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 6</div><div class="divider-line"></div></div>
+  <div class="section-title">VERSION HISTORY TIMELINE</div>
+
+  <div class="version-list">
+    <div class="ver-item">
+      <div class="ver-tag current">v9.0.0</div>
+      <div class="ver-body">
+        <div class="ver-title">CURRENT -- ENTERPRISE GOVERNANCE EDITION</div>
+        <div class="ver-desc">GovernanceEngine.psm1 (15 functions, 6 groups), FleetGovernance.psm1 (6 functions), 5 execution modes, 3 policy profiles, crash recovery via ExecutionState.json, 7th GuardEngine gate, 12 compliance artifacts, Option 57 Governance Audit. 33 config sections.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v8.5.0</div>
+      <div class="ver-body">
+        <div class="ver-title">TREND ANALYTICS + COMPLIANCE EXPORT</div>
+        <div class="ver-desc">TrendEngine with historical scoring, ComplianceExport with 10 artifact types, TrendStore JSON persistence, fleet-wide analytics foundation.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v7.2.0</div>
+      <div class="ver-body">
+        <div class="ver-title">ADVANCED REMEDIATION + ROLLBACK</div>
+        <div class="ver-desc">RollbackEngine with per-action undo tokens, remediation dispatch improvements, BeforeState capture, automated rollback on failure detection.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v7.1.0</div>
+      <div class="ver-body">
+        <div class="ver-title">GUARDENGINE + SAFETY GATES</div>
+        <div class="ver-desc">6-gate GuardEngine (admin, PS version, hardware critical, confidence, escalation cap, dry-run), pre-remediation safety validation.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v7.0.1</div>
+      <div class="ver-body">
+        <div class="ver-title">ENGINE ADAPTER + MODULE LOADER</div>
+        <div class="ver-desc">LDT-EngineAdapter for dynamic module loading, graceful degradation pattern, centralized import with fallback.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v7.0.0</div>
+      <div class="ver-body">
+        <div class="ver-title">MODULAR ENGINE ARCHITECTURE</div>
+        <div class="ver-desc">Core engine refactored into PSM1 modules. ClassificationEngine, RemediationEngine, ReportingEngine extracted. Plugin-ready architecture.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v6.1.3</div>
+      <div class="ver-body">
+        <div class="ver-title">DISPLAY / GPU DIAGNOSTICS</div>
+        <div class="ver-desc">Phase 4H-4J: Display adapter health, GPU TDR/crash events, display panel health. Phase 4 expanded from 7 to 10 checks.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v6.1.2</div>
+      <div class="ver-body">
+        <div class="ver-title">6 ENTERPRISE ENHANCEMENTS</div>
+        <div class="ver-desc">Phase 0 Preflight, Phase 1 enrichment, Phase 3 new checks (BCD, CHKDSK, corrupt services, WU health), Phase 5 network, Phase 7 mdsched.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v6.1.1</div>
+      <div class="ver-body">
+        <div class="ver-title">VERSION CONSISTENCY FIX</div>
+        <div class="ver-desc">Synchronized version strings across config.ini and BAT launcher to match CHANGELOG.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v6.1.0</div>
+      <div class="ver-body">
+        <div class="ver-title">6 CORE ENHANCEMENTS</div>
+        <div class="ver-desc">JSON output, enterprise score engine (0-100), BCD backup, driver/service snapshot, scheduled task analysis, thermal monitoring.</div>
+      </div>
+    </div>
+    <div class="ver-item">
+      <div class="ver-tag prev">v6.0</div>
+      <div class="ver-body">
+        <div class="ver-title">FOUNDATION RELEASE</div>
+        <div class="ver-desc">Initial release. 9-phase Smart Diagnosis Engine, 45 diagnostic modules, dual-layer rollback, confidence-gated remediation, USB-portable architecture.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: VERIFICATION CHECKLIST -->
+  <div class="divider"><div class="divider-line"></div><div class="divider-label">Section 7</div><div class="divider-line"></div></div>
+  <div class="section-title">VERIFICATION CHECKLIST</div>
+
+  <div class="check-grid">
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>Parse check all PS1/PSM1 files</strong><br>All scripts pass PowerShell 5.1 syntax validation with zero errors</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>PS7+ syntax grep</strong><br>Zero instances of ??, ??=, ?., ternary, -Parallel, or pipeline chain operators</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>Option 54 (Full mode) test</strong><br>All 9 phases execute with governance checkpoints and 12 artifact exports</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>Option 56 (ClassifyOnly) test</strong><br>Phases 0-5,8 execute; Phase 6-7 correctly skipped by mode gate</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>Option 57 (AuditOnly) test</strong><br>Governance Audit produces standalone health report with all subsystem checks</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>Graceful degradation test</strong><br>Delete GovernanceEngine.psm1 -- engine runs with governance disabled, no crash</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>VersionManifest hash regeneration</strong><br>All 17 file hashes verified after final modifications</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon pass">OK</div>
+      <div class="check-text"><strong>All existing Options 1-56 unchanged</strong><br>Full regression pass -- no behavioral changes to existing functionality</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM CARD -->
+  <div class="bottom-card">
+    <h2>LDT v9.0.0 -- ENTERPRISE GOVERNANCE EDITION</h2>
+    <p>
+      Two new modules, <strong>21 exported functions</strong>, 5 execution modes, 3 policy profiles,
+      crash recovery, directory tamper detection, whitelist enforcement, and 12 compliance artifacts.
+      <strong>Fully offline. USB-portable. Zero telemetry. PS 5.1 only.</strong>
+    </p>
+    <div class="big-stats">
+      <div class="big-stat"><div class="big-stat-num green">21</div><div class="big-stat-label">New Functions</div></div>
+      <div class="big-stat"><div class="big-stat-num blue">9</div><div class="big-stat-label">Engines</div></div>
+      <div class="big-stat"><div class="big-stat-num red">58</div><div class="big-stat-label">Menu Options</div></div>
+      <div class="big-stat"><div class="big-stat-num amber">12</div><div class="big-stat-label">Artifacts</div></div>
+      <div class="big-stat"><div class="big-stat-num purple">33</div><div class="big-stat-label">Config Sections</div></div>
+    </div>
+    <div class="tagline">Built for the field. Governed for the enterprise.</div>
+  </div>
+
+</div>
+</body>
+</html>
