@@ -95,97 +95,98 @@ if /I "%EXEC_POLICY%"=="Restricted" (
 :main_menu
 cls
 echo ============================================================
-echo   Laptop Diagnostic Toolkit v7.1.0
+echo   Laptop Diagnostic Toolkit v9.0.0
+echo   Enterprise Governance Edition
 echo   Location: %SCRIPT_DRIVE%\
 echo ============================================================
 echo.
-echo   QUICK START
-echo   -----------
-echo   51. Auto-Discover          (Scan machine, show dashboard)
-echo   52. Quick Fix by Symptom   (Pick symptom, run targeted fixes)
-echo   53. Score This Machine     (Health score 0-100 + grade)
+echo   QUICK START                          [Recommended First Run]
+echo   -------------------------------------------------------
+echo   51. Auto-Discover            Scan machine, show dashboard
+echo   52. Quick Fix by Symptom     Pick symptom, run targeted fixes
+echo   53. Score This Machine       Health score 0-100 + grade A-F
 echo.
-echo   DIAGNOSTICS
-echo   -----------
-echo    1. Advanced Diagnostic      (Full system scan)
-echo    2. BSOD Analysis            (Crash dump analysis)
-echo    3. Enhanced Hardware Test    (CPU, memory, disk, network)
-echo    4. Custom Tests             (Select test categories)
-echo    5. Diagnostic Analyzer      (Analyze previous logs)
+echo   ENTERPRISE ENGINES                   [Deep Analysis]
+echo   -------------------------------------------------------
+echo   54. Smart Diagnosis Engine   9-phase root cause + auto-fix
+echo   55. OEM Validation Mode      Read-only hardware baseline
+echo   56. Classification Engine    3-Level triage (L1/L2/L3)
+echo   57. Governance Audit         AuditOnly scan, no fixes
 echo.
-echo   REPAIR TOOLS
-echo   ------------
-echo    6. Boot Repair              (BCD, SFC, DISM)
-echo    7. BIOS Repair              (Version check, recommendations)
-echo    8. Driver Repair            (Problem/unsigned drivers)
-echo    9. Software Cleanup         (Temp, cache, startup)
+echo   DIAGNOSTICS                           [Scan Only]
+echo   -------------------------------------------------------
+echo    1. Advanced Diagnostic      Full system scan
+echo    2. BSOD Analysis            Crash dump analysis
+echo    3. Enhanced Hardware Test    CPU, memory, disk, network
+echo    4. Custom Tests             Select test categories
+echo    5. Diagnostic Analyzer      Analyze previous logs
 echo.
-echo   FLEET MANAGEMENT
-echo   ----------------
-echo   10. Fleet Report             (System inventory + CSV)
-echo   11. Verify Scripts           (Module integrity check)
-echo   12. Compatibility Checker    (PS version, .NET, admin)
-echo   13. Hardware Inventory       (Full CIM enumeration)
+echo   REPAIR TOOLS                          [Fix with Backup]
+echo   -------------------------------------------------------
+echo    6. Boot Repair              BCD, SFC, DISM
+echo    7. BIOS Repair              Version check, recommendations
+echo    8. Driver Repair            Problem/unsigned drivers
+echo    9. Software Cleanup         Temp, cache, startup
 echo.
-echo   HARDWARE TESTS
-echo   --------------
-echo   14. Battery Health           (Wear, cycles, capacity)
-echo   15. Network Diagnostic       (Adapters, DNS, latency)
-echo   16. Performance Analyzer     (CPU/mem/disk benchmarks)
-echo   17. Thermal Analysis         (Temperature monitoring)
-echo   18. Display Calibration      (GPU, resolution, pixels)
-echo   19. Audio Diagnostic         (Sound devices, service)
-echo   20. Keyboard Test            (Key detection, hotkeys)
-echo   21. TrackPoint Calibration   (TrackPoint/touchpad)
-echo   22. Power Settings           (Plans, sleep, lid)
+echo   TROUBLESHOOTERS                       [Auto-Fix]
+echo   -------------------------------------------------------
+echo   31. Security Hardening       Fix Defender, Firewall, UAC, WU
+echo   32. Network Troubleshooter   Fix Wi-Fi, Bluetooth, VPN
+echo   33. BSOD Troubleshooter      Fix crash-causing drivers
+echo   34. Input Troubleshooter     Fix keyboard, trackpoint, touchpad
+echo   35. Driver Auto-Update       Update outdated/problem drivers
+echo.
+echo   HARDWARE TESTS                       [Read-Only]
+echo   -------------------------------------------------------
+echo   14. Battery Health           Wear, cycles, capacity
+echo   15. Network Diagnostic       Adapters, DNS, latency
+echo   16. Performance Analyzer     CPU/mem/disk benchmarks
+echo   17. Thermal Analysis         Temperature monitoring
+echo   18. Display Calibration      GPU, resolution, pixels
+echo   19. Audio Diagnostic         Sound devices, service
+echo   20. Keyboard Test            Key detection, hotkeys
+echo   21. TrackPoint Calibration   TrackPoint/touchpad
+echo   22. Power Settings           Plans, sleep, lid
+echo.
+echo   ADVANCED DIAGNOSTICS                 [Deep Checks]
+echo   -------------------------------------------------------
+echo   39. POST Error Reader        ThinkPad POST/BIOS error codes
+echo   40. SMART Disk Analysis      Deep SMART attributes
+echo   41. CMOS Battery Check       RTC coin cell health
+echo   42. Machine Identity Check   Serial, UUID, Asset Tag
+echo   43. TPM Health Check         TPM 2.0, ROCA, BitLocker
+echo   44. Win11 Readiness Check    Full hardware compatibility
+echo   45. Lenovo Vantage Check     Vantage/SystemUpdate stack
+echo   46. Memory Error Log Check   WHEA, WMD, BugCheck
+echo   47. Display Pixel Check      LCD policy, GPU, backlight
+echo   48. Enterprise Readiness     Master health scorecard
 echo.
 echo   SYSTEM MANAGEMENT
-echo   -----------------
-echo   23. Secure Wipe              (Privacy cleanup)
-echo   24. Deployment Prep          (Pre-deploy checklist)
-echo   25. Update Manager           (Windows Update, Lenovo)
-echo   26. BIOS Update              (Version check, flash)
-echo   27. Security Check           (Defender, TPM, BitLocker)
+echo   -------------------------------------------------------
+echo   23. Secure Wipe              Privacy cleanup
+echo   24. Deployment Prep          Pre-deploy checklist
+echo   25. Update Manager           Windows Update, Lenovo
+echo   26. BIOS Update              Version check, flash
+echo   27. Security Check           Defender, TPM, BitLocker
 echo.
 echo   REFURBISHMENT
-echo   -------------
-echo   28. Refurb Battery Analysis  (Battery score for resale)
-echo   29. Refurb Quality Check     (10-point QA checklist)
-echo   30. Refurb Thermal Analysis  (CPU stress + thermal test)
+echo   -------------------------------------------------------
+echo   28. Refurb Battery Analysis  Battery score for resale
+echo   29. Refurb Quality Check     10-point QA checklist
+echo   30. Refurb Thermal Analysis  CPU stress + thermal test
 echo.
-echo   TROUBLESHOOTERS (Auto-Fix)
-echo   --------------------------
-echo   31. Security Hardening       (Fix Defender, Firewall, UAC, WU)
-echo   32. Network Troubleshooter   (Fix Wi-Fi, Bluetooth, VPN, Mobile)
-echo   33. BSOD Troubleshooter      (Fix crash-causing drivers + repair)
-echo   34. Input Troubleshooter     (Fix keyboard, trackpoint, touchpad)
-echo   35. Driver Auto-Update       (Update outdated/problem drivers)
+echo   FLEET TOOLS
+echo   -------------------------------------------------------
+echo   10. Fleet Report             System inventory + CSV
+echo   11. Verify Scripts           Module integrity check
+echo   12. Compatibility Checker    PS version, .NET, admin
+echo   13. Hardware Inventory       Full CIM enumeration
+echo   49. Team Issue Detector      BSOD + Resets + VPN fleet scan
+echo   50. Fleet CSV Aggregator     Merge USB CSV + deduplicate
 echo.
-echo   ADVANCED DIAGNOSTICS
-echo   --------------------
-echo   39. POST Error Reader        (ThinkPad POST/BIOS error codes)
-echo   40. SMART Disk Analysis      (Deep SMART attributes)
-echo   41. CMOS Battery Check       (RTC coin cell health)
-echo   42. Machine Identity Check   (Serial, UUID, Asset Tag)
-echo   43. TPM Health Check         (TPM 2.0, ROCA, BitLocker)
-echo   44. Win11 Readiness Check    (Full hardware compatibility)
-echo   45. Lenovo Vantage Check     (Vantage/SystemUpdate stack)
-echo   46. Memory Error Log Check   (WHEA, WMD, BugCheck)
-echo   47. Display Pixel Check      (LCD policy, GPU, backlight)
-echo   48. Enterprise Readiness     (Master health scorecard)
-echo.
-echo   TEAM TOOLS
-echo   ----------
-echo   49. Team Issue Detector      (BSOD + Resets + VPN scan + auto-fix)
-echo   50. Fleet CSV Aggregator     (merge all USB CSV data + deduplicate)
-echo   54. Smart Diagnosis Engine   (9-phase root cause analysis + auto-fix)
-echo   55. OEM Validation Mode     (Read-only hardware baseline check)
-echo   56. Classification Engine   (3-Level diagnostic triage + report)
-echo   57. Governance Audit        (AuditOnly mode -- scan without fixes)
-echo.
-echo   OTHER
-echo   -----
-echo   36. Run Interactive Menu     (PS1 built-in menu)
+echo   UTILITIES
+echo   -------------------------------------------------------
+echo   36. Run Interactive Menu     PS1 built-in menu
 echo   37. Open Logs Folder
 echo   38. Open Reports Folder
 echo    0. Exit
