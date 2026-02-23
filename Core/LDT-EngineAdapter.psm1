@@ -11,7 +11,7 @@
     engines find Write-EngineLog in scope without modification.
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
 #>
 
@@ -330,6 +330,28 @@ function ConvertTo-RemediationEntry {
     }
 }
 
+function ConvertTo-GovernanceContext {
+    <#
+    .SYNOPSIS
+        Bridges DiagState to governance engine format for v9 governance integration.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [hashtable] $DiagState
+    )
+    return [ordered]@{
+        SessionGUID        = if ($DiagState.ContainsKey('SessionGUID')) { $DiagState['SessionGUID'] } else { '' }
+        MachineName        = $env:COMPUTERNAME
+        FindingsCount      = if ($DiagState.ContainsKey('Findings')) { $DiagState['Findings'].Count } else { 0 }
+        FixesAppliedCount  = if ($DiagState.ContainsKey('FixesApplied')) { $DiagState['FixesApplied'].Count } else { 0 }
+        FixesFailedCount   = if ($DiagState.ContainsKey('FixesFailed')) { $DiagState['FixesFailed'].Count } else { 0 }
+        LedgerCount        = if ($DiagState.ContainsKey('RemediationLedger')) { $DiagState['RemediationLedger'].Count } else { 0 }
+        HealthBefore       = if ($DiagState.ContainsKey('HealthBefore')) { $DiagState['HealthBefore'] } else { 0 }
+        HealthAfter        = if ($DiagState.ContainsKey('HealthAfter')) { $DiagState['HealthAfter'] } else { 0 }
+        Timestamp          = (Get-Date).ToString('o')
+    }
+}
+
 Export-ModuleMember -Function @(
     'Initialize-EngineAdapter',
     'Write-EngineLog',
@@ -338,5 +360,6 @@ Export-ModuleMember -Function @(
     'Get-LDTEscalationAsInt',
     'ConvertTo-WinDRESeverity',
     'ConvertTo-ClassificationFindings',
-    'ConvertTo-RemediationEntry'
+    'ConvertTo-RemediationEntry',
+    'ConvertTo-GovernanceContext'
 )

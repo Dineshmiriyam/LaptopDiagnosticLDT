@@ -1,9 +1,9 @@
 ﻿{
     "_type":  "VERSION_MANIFEST",
     "_description":  "LDT Platform Version Governance Manifest. SHA256 hashes validated at engine startup by IntegrityEngine. Regenerate with Tools\\Update-VersionManifest.ps1",
-    "version":  "8.5.0",
+    "version":  "9.0.0",
     "releaseDate":  "2026-02-23",
-    "releaseName":  "Enterprise Hardened Edition",
+    "releaseName":  "Enterprise Governance Edition",
     "minimumPSVersion":  "5.1",
     "minimumOSBuild":  19041,
     "changelog":  [
@@ -29,7 +29,7 @@
                       "critical":  true,
                       "role":  "ENGINE",
                       "description":  "9-phase orchestrated root cause analysis engine",
-                      "sha256":  "A5614A9D15F42D4989439B6F638A6EA048A3BCC4284794C8217A5A1BF0821692"
+                      "sha256":  "2C5D4D4BA3BD044DE965CA1EAE061643A007D6D2FD018CF36BCCAE8DB022E7AE"
                   },
                   {
                       "relativePath":  "Laptop_Diagnostic_Suite.ps1",
@@ -43,28 +43,28 @@
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "Bridge module between LDT conventions and enterprise engines",
-                      "sha256":  "827E94C361648D35547A32551F02844264D84676D4EDFEECF1B6361655A746FE"
+                      "sha256":  "191E010F8363DDFE053210BAB4375B1526EB2C099AC72C62973A403F0B9F1289"
                   },
                   {
                       "relativePath":  "Core\\GuardEngine.psm1",
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "Central remediation override authority with 6-gate system",
-                      "sha256":  "BE35575C046D2B41D87C62E93FABEB8CE361CD21900054D8FCB5F09CD258FA44"
+                      "sha256":  "A530039212F030A2B213B0A40B84A2AF54B12EE654CB0B7D8876DD9C11C9A29F"
                   },
                   {
                       "relativePath":  "Core\\IntegrityEngine.psm1",
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "SHA256 tamper-evident log sealing and platform validation",
-                      "sha256":  "B46977CEDBDCCEE7B61C20B48B196FB7901323183C2CE735146A23720F1B2DDD"
+                      "sha256":  "BBCA784020E140069BA33DB3057A4A4FC1B8D5AF7EFAE8360058688320AE606B"
                   },
                   {
                       "relativePath":  "Core\\ScoringEngine.psm1",
                       "critical":  false,
                       "role":  "CORE",
                       "description":  "Weighted system health score calculator",
-                      "sha256":  "CC60D6354CCFDC262D17BC1596B3D891F8DF4F20FDA90A6FEB83B06E3188BB32"
+                      "sha256":  "F0AD72F8DA27B011BFA25B2DB0C2CE6539362499719AA86048C80C4A34552343"
                   },
                   {
                       "relativePath":  "Core\\TrendEngine.psm1",
@@ -78,14 +78,14 @@
                       "critical":  false,
                       "role":  "CORE",
                       "description":  "ISO/SOC2/CIS compliance artifact generator",
-                      "sha256":  "97C03F361A2ACDD85C59CB0505E4E5F5A4CB3B6D541CCCBE0726BFB4B9B539BE"
+                      "sha256":  "C2C096B496FDDA951E2B1DCD7AF27558A744BD482D71A3370EBB036D9F4DA14E"
                   },
                   {
                       "relativePath":  "Config\\config.json",
                       "critical":  true,
                       "role":  "CONFIG",
                       "description":  "Enterprise engine configuration",
-                      "sha256":  "EFDE1512BB988BD6325D95457B127AFFCCDEF6D7E508943588DF4C022F824D81"
+                      "sha256":  "5393F7DDE7E742F0F13274D1B459AAB6FFD738A3BAABBBE77771E9943AFFEF08"
                   },
                   {
                       "relativePath":  "Quick_Start.ps1",
@@ -120,24 +120,38 @@
                       "critical":  false,
                       "role":  "CONFIG",
                       "description":  "Diagnostic threshold configuration (29 sections)",
-                      "sha256":  "0CAE14EF5277A8C0AB3003A6ED9E62357D8FBB14A8FC625373B5F3DAC649ABE2"
+                      "sha256":  "082F5E2727F341AE4D84186B084CDEF94195F45F401E21F42AFEC801FB772896"
                   },
                   {
                       "relativePath":  "Core\\ClassificationEngine.psm1",
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "3-Level diagnostic classification engine (L1/L2/L3)",
-                      "sha256":  "0F09D80B69D77BB5F96F4B03550ADE40A9C35336F4758E5BF35CDEB8110AE6C9"
+                      "sha256":  "E9BF1877C834F84C5351F9EF7AB1D8BA35A77296C017503BB0AA2296EC5FB319"
+                  },
+                  {
+                      "relativePath":  "Core\\GovernanceEngine.psm1",
+                      "critical":  true,
+                      "role":  "CORE",
+                      "description":  "Enterprise governance control authority (v9.0)",
+                      "sha256":  "4CE1BE2E4D30890983C4A01C23659E0E764FE9EBD0E8C3479313248571536CED"
+                  },
+                  {
+                      "relativePath":  "Core\\FleetGovernance.psm1",
+                      "critical":  false,
+                      "role":  "CORE",
+                      "description":  "Fleet-wide governance controls (v9.0)",
+                      "sha256":  "04595A5C3898EB46204E056EDA3611C825440CE685A0CEF2E423DA1CCEC23BDF"
                   }
               ],
     "governance":  {
                        "approvedBy":  "LDT Development Team",
                        "classifiedAs":  "INTERNAL — FIELD SERVICE TOOL",
-                       "changeControlRef":  "LDT-v8.5.0",
+                       "changeControlRef":  "LDT-v9.0.0",
                        "validationMatrix":  "Docs\\ValidationTestMatrix.md"
                    },
-    "_selfHash":  "CF447015B000B3A4D94DFF7E35F27728BC259F11DB24025522DADC29A7D74C3C",
-    "_manifestUpdatedAt":  "2026-02-23T13:14:53.8474028+05:30",
+    "_selfHash":  "4780C991BF536173B3ACC30CD86AB179DA607EF4342B36EA7A6CE47A47FF87A4",
+    "_manifestUpdatedAt":  "2026-02-23T15:43:58.6822831+05:30",
     "_manifestUpdatedBy":  "DESKTOP-7G6HT08\\LENOVO"
 }
 

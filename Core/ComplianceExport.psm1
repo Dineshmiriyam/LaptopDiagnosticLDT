@@ -10,7 +10,7 @@
       - SOC 2 Type II (Availability, Integrity, Confidentiality criteria)
       - CIS Controls (CIS v8: Controls 2, 4, 7, 10, 13)
 
-    Generated Artifacts (up to 10 per session):
+    Generated Artifacts (up to 12 per session):
       1. ComplianceReport.json     -- Master audit record with control mappings
       2. ChangeRecord.json         -- What changed, when, by what module
       3. RisksAccepted.json        -- Unresolved issues with review dates
@@ -21,9 +21,11 @@
       8. RemediationLedger.json     -- Per-fix audit trail with rollback tokens (v8.5)
       9. RiskReduction.json         -- HealthBefore/HealthAfter scoring delta (v8.5)
      10. PhaseTiming.json           -- Per-phase execution timing and memory (v8.5)
+     11. ExceptionLog.json          -- Governed exception log with severity routing (v9.0)
+     12. GovernanceReport.json      -- Policy profile, execution mode, KPIs (v9.0)
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 ComplianceExport with LDT adaptations
 #>
@@ -34,7 +36,7 @@ Set-StrictMode -Version Latest
 
 $script:_OperationalBoundary = [ordered]@{
     platformName    = 'LDT -- Laptop Diagnostic Toolkit'
-    version         = '8.5.0'
+    version         = '9.0.0'
     classification  = 'INTERNAL -- FIELD SERVICE TOOL'
 
     canDo = @(
@@ -248,6 +250,52 @@ function Export-ComplianceArtifacts {
         $artifacts['PhaseTiming'] = $timingPath
     }
 
+    # ── Artifact 11: Exception Log (v9.0) ──────────────────────────────────
+    if (Get-Command 'Get-ExceptionSummary' -ErrorAction SilentlyContinue) {
+        try {
+            $exSummary = Get-ExceptionSummary
+            if ($exSummary.TotalExceptions -gt 0) {
+                $exRecord = [ordered]@{
+                    _type            = 'EXCEPTION_LOG'
+                    sessionId        = $SessionId
+                    generatedAt      = Get-Date -Format 'o'
+                    computername     = $env:COMPUTERNAME
+                    totalExceptions  = $exSummary.TotalExceptions
+                    bySeverity       = $exSummary.BySeverity
+                    entries          = $exSummary.Entries
+                }
+                $exPath = Join-Path $complianceDir 'ExceptionLog.json'
+                $exRecord | ConvertTo-Json -Depth 10 | Set-Content $exPath -Encoding UTF8
+                $artifacts['ExceptionLog'] = $exPath
+            }
+        } catch { }
+    }
+
+    # ── Artifact 12: Governance Report (v9.0) ────────────────────────────────
+    if (Get-Command 'Get-PolicyProfile' -ErrorAction SilentlyContinue) {
+        try {
+            $govRecord = [ordered]@{
+                _type              = 'GOVERNANCE_REPORT'
+                sessionId          = $SessionId
+                generatedAt        = Get-Date -Format 'o'
+                computername       = $env:COMPUTERNAME
+                governanceVersion  = '9.0.0'
+                policyProfile      = Get-PolicyProfile
+                directoryIntegrity = if ($DiagState.ContainsKey('DirectoryCheck')) { $DiagState['DirectoryCheck'] } else { @{} }
+            }
+            if (Get-Command 'Get-ExceptionSummary' -ErrorAction SilentlyContinue) {
+                $govRecord['exceptionSummary'] = Get-ExceptionSummary
+            }
+            if ($DiagState.ContainsKey('RemediationLedger') -and $DiagState['RemediationLedger'] -and
+                (Get-Command 'Test-RollbackSimulation' -ErrorAction SilentlyContinue)) {
+                $govRecord['rollbackSimulation'] = Test-RollbackSimulation -RemediationLedger @($DiagState['RemediationLedger'])
+            }
+            $govPath = Join-Path $complianceDir 'GovernanceReport.json'
+            $govRecord | ConvertTo-Json -Depth 10 | Set-Content $govPath -Encoding UTF8
+            $artifacts['GovernanceReport'] = $govPath
+        } catch { }
+    }
+
     Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'ComplianceExport' `
         -Message "Compliance artifacts generated" `
         -Data @{ artifactCount = $artifacts.Count; outputDir = $complianceDir }
@@ -292,11 +340,11 @@ function New-ComplianceReport {
     $report = [ordered]@{
         _type             = 'COMPLIANCE_REPORT'
         sessionId         = $SessionId
-        reportVersion     = '8.5.0'
+        reportVersion     = '9.0.0'
         generatedAt       = Get-Date -Format 'o'
         computername      = $env:COMPUTERNAME
         username          = "$env:USERDOMAIN\$env:USERNAME"
-        platformVersion   = '8.5.0'
+        platformVersion   = '9.0.0'
         manifestHash      = $manifestHash
         mode              = if ($DiagState.OEMMode) { 'OEM_VALIDATION' } else { 'DIAGNOSTIC' }
         healthScore       = $ScoreResult.finalScore

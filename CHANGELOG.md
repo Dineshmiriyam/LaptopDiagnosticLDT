@@ -2,6 +2,42 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [9.0.0] - 2026-02-23
+
+### Added
+- **GovernanceEngine.psm1** (`Core/`): Enterprise governance control authority with 15 exported functions
+  - `Initialize-PolicyEngine`: Loads Strict/Balanced/Aggressive policy profiles from config.json
+  - `Get-PolicyProfile` / `Test-PolicyGate`: Policy-driven remediation gating
+  - `Save-ExecutionState` / `Restore-ExecutionState` / `Clear-ExecutionState`: Crash recovery via ExecutionState.json
+  - `Get-ExecutionMode` / `Test-ModeAllowsPhase`: 5 execution modes (AuditOnly/Diagnostic/Remediation/Full/ClassifyOnly)
+  - `Write-GovernedException` / `Get-ExceptionSummary` / `Test-ExceptionThreshold`: Structured exception governance with severity routing
+  - `Invoke-GovernedRetry`: Configurable retry with exponential backoff for transient failures
+  - `Get-BusinessImpactWeight`: Category/severity/classification business impact scoring
+- **FleetGovernance.psm1** (`Core/`): Fleet-wide governance controls with 6 exported functions
+  - `Test-DirectoryIntegrity`: Validates LDT directory against VersionManifest.json (detects missing/unexpected files)
+  - `Test-WhitelistApproval` / `Get-RemediationWhitelist`: Approved remediation whitelist enforcement
+  - `Test-RollbackSimulation`: Dry-run rollback token validation (BeforeState integrity check)
+  - `Export-FleetKPIs`: Aggregates L1 fix rate, score improvement, recurrence rate from TrendStore
+  - `New-FleetGovernanceSummary`: Consolidated governance health snapshot
+- **Option 57: Governance Audit** (AuditOnly mode): Runs Phases 0-5 + Phase 8 (scan + report only, no remediation or classification)
+- **7th GuardEngine gate**: Whitelist enforcement via `Test-WhitelistApproval` in `Invoke-GuardedRemediation`
+- **Crash recovery**: `ExecutionState.json` checkpoint at every phase boundary, auto-restore on interrupted sessions
+- **ExceptionLog.json**: Governed exception log with severity routing (Warning/Error/Critical)
+- **GovernanceReport.json**: Policy profile, execution mode, directory integrity, rollback simulation results
+- **ComplianceExport expanded to 12 artifacts**: Added ExceptionLog, GovernanceReport
+- **4 new config.ini sections**: `[GovernanceEngine]`, `[ExceptionGovernance]`, `[RetryPolicy]`, `[FleetGovernance]`
+- **config.json governance block**: Policy profiles, execution modes, whitelist, retry policy, exception thresholds
+- **`ConvertTo-GovernanceContext`** bridge function in LDT-EngineAdapter.psm1
+- **Phase 0 governance initialization**: Policy engine, execution mode, crash recovery, directory tamper detection
+- **Phase 6 governance integration**: Whitelist/policy gates, retry for transient fixes, exception logging
+- **Phase 7 exception threshold check**: Abort if critical exception count exceeds threshold
+
+### Changed
+- Execution mode handling expanded from ClassifyOnly to 5 governance-aware modes
+- GuardEngine now has 7 gates (6 original + whitelist enforcement)
+- ComplianceExport description updated to "up to 12 per session"
+- Version bumped to 9.0.0 across all Core modules, Smart Diagnosis Engine, and config files
+
 ## [8.5.0] - 2026-02-23
 
 ### Added

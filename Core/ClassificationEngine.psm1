@@ -23,7 +23,7 @@
       - Fleet_Aggregator.ps1
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
     Config  : Config\config.ini [ClassificationEngine] section
 #>
@@ -926,7 +926,7 @@ function Get-ClassificationReport {
     # Build the mandatory report
     $report = [ordered]@{
         _type                    = 'CLASSIFICATION_REPORT'
-        _version                 = '8.5.0'
+        _version                 = '9.0.0'
         device                   = $device
         snapshot_time            = if ($machine.ContainsKey('ScanTime')) { $machine['ScanTime'] } else { (Get-Date -Format 'o') }
         findings                 = $findingsArray

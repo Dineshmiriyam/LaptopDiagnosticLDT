@@ -38,7 +38,7 @@
       - Any action in OEM Validation Mode
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 GuardEngine with LDT adaptations
 #>
@@ -420,6 +420,20 @@ function Invoke-GuardedRemediation {
         $result.FinalStatus = "BLOCKED"
         $result.VerificationResult = "GUARD_DENIED"
         return [PSCustomObject]$result
+    }
+
+    # Gate 7: Whitelist enforcement (v9 -- only if FleetGovernance available)
+    if (Get-Command 'Test-WhitelistApproval' -ErrorAction SilentlyContinue) {
+        $whitelistCheck = Test-WhitelistApproval -ActionId $ActionId
+        if (-not $whitelistCheck.Approved) {
+            $result.FixEligible = $false
+            $result.FinalStatus = "BLOCKED"
+            $result.VerificationResult = "WHITELIST_DENIED"
+            Write-EngineLog -SessionId $sessionId -Level 'AUDIT' -Source 'GuardEngine' `
+                -Message "WHITELIST BLOCKED: $ActionId -- $($whitelistCheck.Reason)" `
+                -Data @{ actionId = $ActionId; reason = $whitelistCheck.Reason }
+            return [PSCustomObject]$result
+        }
     }
 
     # Capture BeforeState

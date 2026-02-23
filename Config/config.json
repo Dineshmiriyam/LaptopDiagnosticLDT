@@ -81,13 +81,42 @@
     },
 
     "governance": {
-        "classifiedAs":          "INTERNAL — FIELD SERVICE TOOL",
+        "classifiedAs":          "INTERNAL -- FIELD SERVICE TOOL",
         "changeControlRequired": true,
         "prohibitedActions": [
             "BIOS_Flash", "UEFI_Firmware_Modify", "BitLocker_Reset",
             "SecureBoot_Disable", "TPM_Clear", "Internet_Call",
             "Disk_Format", "DiskPart_Clean", "Group_Policy_Modify",
             "Credential_Store_Access"
-        ]
+        ],
+        "policies": {
+            "Strict":     { "maxAutoFixLevel": "L1", "requireWhitelist": true,  "retryEnabled": false, "abortOnCritical": true  },
+            "Balanced":   { "maxAutoFixLevel": "L1", "requireWhitelist": false, "retryEnabled": true,  "abortOnCritical": true  },
+            "Aggressive": { "maxAutoFixLevel": "L2", "requireWhitelist": false, "retryEnabled": true,  "abortOnCritical": false }
+        },
+        "executionModes": {
+            "AuditOnly":    { "phases": [0,1,2,3,4,5,8],    "remediation": false, "classification": false },
+            "Diagnostic":   { "phases": [0,1,2,3,4,5,8],    "remediation": false, "classification": true  },
+            "Remediation":  { "phases": [0,6,7,8],           "remediation": true,  "classification": true  },
+            "Full":         { "phases": [0,1,2,3,4,5,6,7,8], "remediation": true,  "classification": true  },
+            "ClassifyOnly": { "phases": [0,1,2,3,4,5,8],    "remediation": false, "classification": true  }
+        },
+        "whitelist": [
+            "BITS_ServiceRestart", "DISM_ComponentRepair", "SFC_SystemScan",
+            "DisplayDriver_Update", "DNS_Reset", "Winsock_Reset",
+            "WindowsUpdate_Reset", "Defender_SignatureUpdate",
+            "TempFile_Cleanup", "RestorePoint_Create"
+        ],
+        "retryPolicy": {
+            "maxRetries": 3,
+            "backoffBaseMs": 1000,
+            "backoffMultiplier": 2,
+            "maxBackoffMs": 8000
+        },
+        "exceptionThresholds": {
+            "warningMax": 20,
+            "errorMax": 10,
+            "criticalMax": 3
+        }
     }
 }

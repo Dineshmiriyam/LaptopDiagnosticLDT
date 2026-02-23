@@ -1,4 +1,4 @@
-# LDT v8.5 — Project Context
+# LDT v9.0 — Project Context
 
 > This file is the single source of truth for the LDT project.
 > Every developer, AI assistant, and contributor must read this before making any changes.
@@ -12,17 +12,17 @@
 | Field | Value |
 |-------|-------|
 | **Name** | Laptop Diagnostic Toolkit (LDT) |
-| **Version** | 8.5.0 |
+| **Version** | 9.0.0 |
 | **Purpose** | USB-portable diagnostic and repair automation for Lenovo ThinkPad fleets |
 | **Users** | IT technicians, field engineers, fleet managers (limited developer experience) |
 | **Platform** | Windows 10/11 on Lenovo ThinkPad hardware |
 | **Deployment** | USB drive (8GB+), fully offline, zero installation on target machine |
 | **Core Script** | `Laptop_Diagnostic_Suite.ps1` (378KB, PowerShell) |
-| **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (~4,582 lines, 9-phase auto-detect + auto-fix) |
+| **Smart Engine** | `Smart_Diagnosis_Engine.ps1` (~4,700 lines, 9-phase auto-detect + auto-fix) |
 | **Launcher** | `Laptop_Master_Diagnostic.bat` (right-click → Run as Administrator) |
-| **Config** | `Config\config.ini` (29 sections) + `Config\config.json` (enterprise engines) |
-| **Modules** | 45 diagnostic modules + 7 enterprise engines, 57 menu options (0-56) |
-| **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport, ClassificationEngine |
+| **Config** | `Config\config.ini` (33 sections) + `Config\config.json` (enterprise engines + governance) |
+| **Modules** | 45 diagnostic modules + 9 enterprise engines, 58 menu options (0-57) |
+| **Enterprise Engines** | GuardEngine, IntegrityEngine, ScoringEngine, TrendEngine, ComplianceExport, ClassificationEngine, GovernanceEngine, FleetGovernance |
 | **Repository** | https://github.com/Dineshmiriyam/LaptopDiagnosticLDT |
 
 ---
@@ -63,13 +63,15 @@ E:\LDT-v6.0\
 │   ├── config.ini                  ← Master configuration (23 sections, 200+ params)
 │   ├── config.json                 ← Enterprise engine config (scoring, guards, features)
 │   └── VersionManifest.json        ← SHA256 platform integrity hashes
-├── Core\                           ← Enterprise engine modules (v7.0)
-│   ├── GuardEngine.psm1            ← 6-gate remediation authority
+├── Core\                           ← Enterprise engine modules (v7.0-v9.0)
+│   ├── GuardEngine.psm1            ← 7-gate remediation authority (6+whitelist)
 │   ├── IntegrityEngine.psm1        ← SHA256 tamper detection + log sealing
 │   ├── ScoringEngine.psm1          ← Weighted 0-100 health scoring
 │   ├── TrendEngine.psm1            ← 90-session historical tracking
-│   ├── ComplianceExport.psm1       ← ISO/SOC2/CIS artifact generation
+│   ├── ComplianceExport.psm1       ← ISO/SOC2/CIS artifact generation (12 artifacts)
 │   ├── ClassificationEngine.psm1   ← 3-Level diagnostic classification (L1/L2/L3)
+│   ├── GovernanceEngine.psm1       ← Policy engine, transaction control, retry, exceptions (v9.0)
+│   ├── FleetGovernance.psm1        ← Fleet KPIs, directory tamper, whitelist, rollback sim (v9.0)
 │   └── LDT-EngineAdapter.psm1      ← Bridge between LDT and engines
 ├── Docs\
 │   ├── fonts\                      ← Bebas Neue, DM Sans, JetBrains Mono (woff2)
@@ -208,6 +210,7 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 
 | Version | Date | What Changed |
 |---------|------|-------------|
+| 9.0.0 | 2026-02-23 | Enterprise Governance: GovernanceEngine.psm1 (policy profiles, transaction control, exception governance, retry with backoff, execution modes), FleetGovernance.psm1 (directory tamper detection, whitelist enforcement, rollback simulation, fleet KPIs), 5 execution modes (AuditOnly/Diagnostic/Remediation/Full/ClassifyOnly), Option 57 Governance Audit, 7th guard gate (whitelist), crash recovery via ExecutionState.json, 12 compliance artifacts |
 | 8.5.0 | 2026-02-23 | Enterprise Hardened: Invoke-GuardedRemediation wrapper, RemediationLedger per-fix audit trail, HealthBefore/HealthAfter risk reduction scoring, ManagementSummary.html executive report, phase timing instrumentation, pre-remediation integrity revalidation, enhanced confidence formula (3-factor), recurrence escalation, stress override classification, 10 compliance artifacts |
 | 7.2.0 | 2026-02-23 | 3-Level Classification Engine: ClassificationEngine.psm1 (L1/L2/L3 decision tree), Option 56 ClassifyOnly mode, HTML triage panel, severity scoring (0-100), component health cards, TrendEngine escalation tracking, 7th compliance artifact |
 | 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 55), Phase 6A direct fixes, scoring/remediation overhaul |

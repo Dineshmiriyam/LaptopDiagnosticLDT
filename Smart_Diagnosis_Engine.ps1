@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Smart Diagnosis Engine - LDT v8.5 Option 54
+    Smart Diagnosis Engine - LDT v9.0 Option 54
     9-phase orchestrated diagnostic with decision tree, root cause ranking,
     rollback protection, post-fix stress validation, and enterprise engines.
 
 .VERSION
-    8.5.0
+    9.0.0
 
 .NOTES
     Architecture: Standalone PS1 (called by Laptop_Master_Diagnostic.bat)
@@ -62,6 +62,20 @@ if (Test-Path $coreDir) {
     catch {
         Write-Host "  [WARN] Enterprise engines failed to load: $($_.Exception.Message)" -ForegroundColor Yellow
         $v7EnginesAvailable = $false
+    }
+}
+
+# v9 Governance Engine imports (graceful degradation)
+$v9GovernanceAvailable = $false
+if ($v7EnginesAvailable -and (Test-Path $coreDir)) {
+    try {
+        Import-Module (Join-Path $coreDir "GovernanceEngine.psm1") -Force -ErrorAction Stop
+        Import-Module (Join-Path $coreDir "FleetGovernance.psm1") -Force -ErrorAction Stop
+        $v9GovernanceAvailable = $true
+    }
+    catch {
+        Write-Host "  [INFO] Governance engines not available: $($_.Exception.Message)" -ForegroundColor DarkGray
+        $v9GovernanceAvailable = $false
     }
 }
 
@@ -521,6 +535,7 @@ function Get-RootCauseRanking {
 function Invoke-Phase0-Preflight {
     param([hashtable]$DiagState)
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase0"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 0 -OutputDir $ReportPath } catch {} }
     Write-ScanHeader -Name "PHASE 0: PREFLIGHT" -Icon "[0/8]"
     Write-Log "--- Phase 0: Preflight ---"
 
@@ -628,7 +643,48 @@ function Invoke-Phase0-Preflight {
         }
     }
 
-    # 0F: Platform Integrity Validation (v7)
+    # 0F: Initialize Governance Engine (v9)
+    if ($v9GovernanceAvailable) {
+        try {
+            $configJsonPath = Join-Path $ScriptRoot "Config\config.json"
+            $configIniPath = Join-Path $ScriptRoot "Config\config.ini"
+
+            # Initialize policy engine
+            $policyProfile = Initialize-PolicyEngine -ConfigJsonPath $configJsonPath -ProfileName 'Balanced'
+            Write-Finding -Label "  GovernanceEngine" -Value "Policy: $($policyProfile.Name)" -Color "Green"
+
+            # Set execution mode
+            $govMode = Get-ExecutionMode -RequestedMode $Mode -ConfigJsonPath $configJsonPath
+            Write-Finding -Label "  Execution Mode" -Value $govMode -Color "Cyan"
+
+            # Check for crash recovery (previous interrupted session)
+            $prevState = Restore-ExecutionState -OutputDir $ReportPath
+            if ($prevState) {
+                Write-Finding -Label "  Crash Recovery" -Value "Previous session interrupted at Phase $($prevState.CurrentPhase)" -Color "Yellow"
+                Write-Log "Crash recovery: Previous session $($prevState.SessionGUID) interrupted at Phase $($prevState.CurrentPhase)"
+            }
+
+            # Directory tamper detection
+            $manifestPath = Join-Path $ScriptRoot "Config\VersionManifest.json"
+            $dirCheck = Test-DirectoryIntegrity -ManifestPath $manifestPath -BasePath $ScriptRoot
+            if ($dirCheck.Valid) {
+                Write-Finding -Label "  Directory Integrity" -Value "PASS ($($dirCheck.ExpectedCount) files verified)" -Color "Green"
+            } else {
+                Write-Finding -Label "  Directory Integrity" -Value "WARN: $($dirCheck.MissingFiles.Count) missing, $($dirCheck.UnexpectedFiles.Count) unexpected" -Color "Yellow"
+                Write-Log "Directory integrity: $($dirCheck.MissingFiles.Count) missing, $($dirCheck.UnexpectedFiles.Count) unexpected"
+            }
+            $DiagState['GovernanceInitialized'] = $true
+            $DiagState['PolicyProfile'] = $policyProfile
+            $DiagState['DirectoryCheck'] = $dirCheck
+            Write-Log "GovernanceEngine initialized: Policy=$($policyProfile.Name), Mode=$govMode"
+        }
+        catch {
+            Write-Finding -Label "  GovernanceEngine" -Value "Failed: $($_.Exception.Message)" -Color "Yellow"
+            Write-Log "GovernanceEngine init failed: $($_.Exception.Message)"
+        }
+    }
+
+    # 0G: Platform Integrity Validation (v7)
     if ($v7EnginesAvailable) {
         try {
             $intResult = Test-PlatformIntegrity -SessionId $DiagState.SessionId -PlatformRoot $ScriptRoot
@@ -643,7 +699,7 @@ function Invoke-Phase0-Preflight {
         }
     }
 
-    # 0G: Previous Log Seal Verification (v7)
+    # 0H: Previous Log Seal Verification (v7)
     if ($v7EnginesAvailable) {
         try {
             $sealResult = Invoke-LogIntegrityCheck -SessionId $DiagState.SessionId -LogPath $LogPath
@@ -684,6 +740,7 @@ function Invoke-Phase1-SystemSnapshot {
     Write-ScanHeader -Name "PHASE 1: SYSTEM SNAPSHOT" -Icon "[1/8]"
     Write-Log "--- Phase 1: System Snapshot ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase1"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 1 -OutputDir $ReportPath } catch {} }
 
     $totalRAM = 0
     if ($csInfo) { $totalRAM = [math]::Round($csInfo.TotalPhysicalMemory / 1GB, 1) }
@@ -866,6 +923,7 @@ function Invoke-Phase2-HardwareIntegrity {
     Write-ScanHeader -Name "PHASE 2: HARDWARE INTEGRITY" -Icon "[2/8]"
     Write-Log "--- Phase 2: Hardware Integrity ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase2"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 2 -OutputDir $ReportPath } catch {} }
 
     $hwFails = 0
     $hwWarns = 0
@@ -1086,6 +1144,7 @@ function Invoke-Phase3-BootAndOS {
     Write-ScanHeader -Name "PHASE 3: BOOT & OS VALIDATION" -Icon "[3/8]"
     Write-Log "--- Phase 3: Boot & OS Validation ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase3"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 3 -OutputDir $ReportPath } catch {} }
 
     $osFails = 0
     $osWarns = 0
@@ -1428,6 +1487,7 @@ function Invoke-Phase4-ServiceAndDriver {
     Write-ScanHeader -Name "PHASE 4: SERVICE & DRIVER INTEGRITY" -Icon "[4/8]"
     Write-Log "--- Phase 4: Service & Driver Integrity ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase4"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 4 -OutputDir $ReportPath } catch {} }
 
     $drvFails = 0
     $drvWarns = 0
@@ -2009,6 +2069,7 @@ function Invoke-Phase5-PerformanceProfile {
     Write-ScanHeader -Name "PHASE 5: PERFORMANCE PROFILING" -Icon "[5/8]"
     Write-Log "--- Phase 5: Performance Profiling ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase5"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 5 -OutputDir $ReportPath } catch {} }
 
     $perfFails = 0
     $perfWarns = 0
@@ -2362,6 +2423,7 @@ function Invoke-SmartDiagRollback {
 function Invoke-Phase6-AutoRemediation {
     param([hashtable]$DiagState)
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 6 -OutputDir $ReportPath } catch {} }
 
     if ($DiagState.HardwareCritical) {
         Write-ScanHeader -Name "PHASE 6: AUTOMATED REMEDIATION" -Icon "[6/8]"
@@ -3070,6 +3132,7 @@ function Invoke-Phase6-AutoRemediation {
 function Invoke-Phase7-StressValidation {
     param([hashtable]$DiagState)
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase7"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 7 -OutputDir $ReportPath } catch {} }
 
     if ($DiagState.HardwareCritical -or $DiagState.ThermalCritical) {
         Write-ScanHeader -Name "PHASE 7: STRESS VALIDATION" -Icon "[7/8]"
@@ -3401,6 +3464,17 @@ function Invoke-Phase7-StressValidation {
         }
     }
 
+    # v9: Exception threshold check after stress validation
+    if ($v9GovernanceAvailable) {
+        try {
+            $exThreshold = Test-ExceptionThreshold -ConfigIniPath (Join-Path $ScriptRoot "Config\config.ini")
+            if ($exThreshold.ShouldAbort) {
+                Write-Host "  [GOVERNANCE] Exception threshold reached: $($exThreshold.Reason)" -ForegroundColor Red
+                Write-Log "Exception threshold abort: $($exThreshold.Reason)"
+            }
+        } catch {}
+    }
+
     Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase7"
 }
 
@@ -3413,6 +3487,7 @@ function Invoke-Phase8-FinalClassification {
     Write-ScanHeader -Name "PHASE 8: FINAL CLASSIFICATION" -Icon "[8/8]"
     Write-Log "--- Phase 8: Final Classification ---"
     Start-PhaseTimer -DiagState $DiagState -PhaseName "Phase8"
+    if ($v9GovernanceAvailable) { try { Save-ExecutionState -SessionGUID $DiagState.SessionId -CurrentPhase 8 -OutputDir $ReportPath } catch {} }
 
     $ranking = Get-RootCauseRanking -DiagState $DiagState
     $totalFindings = @($DiagState.Findings | Where-Object { $_.Status -eq 'Fail' -or $_.Status -eq 'Warning' }).Count
@@ -3759,6 +3834,49 @@ function Invoke-Phase8-FinalClassification {
                 Write-Log "ClassificationReport.json exported"
             }
             catch { Write-Log "ClassificationReport export failed: $($_.Exception.Message)" }
+        }
+
+        # v9: Governance artifacts
+        if ($v9GovernanceAvailable) {
+            try {
+                # ExceptionLog.json
+                $exceptionSummary = Get-ExceptionSummary
+                if ($exceptionSummary.TotalExceptions -gt 0) {
+                    $exceptionFile = Join-Path $v85ReportDir "ExceptionLog_$v85Timestamp.json"
+                    $exceptionSummary | ConvertTo-Json -Depth 5 | Out-File -FilePath $exceptionFile -Encoding UTF8 -Force
+                    Write-Host "  ExceptionLog: $exceptionFile" -ForegroundColor Green
+                    Write-Log "ExceptionLog.json exported ($($exceptionSummary.TotalExceptions) exceptions)"
+                }
+
+                # GovernanceReport.json
+                $govReport = [ordered]@{
+                    _type = 'GOVERNANCE_REPORT'
+                    sessionId = $DiagState.SessionId
+                    generatedAt = Get-Date -Format 'o'
+                    computername = $env:COMPUTERNAME
+                    governanceVersion = '9.0.0'
+                    policyProfile = if ($DiagState.ContainsKey('PolicyProfile')) { $DiagState['PolicyProfile'] } else { @{} }
+                    executionMode = $Mode
+                    directoryCheck = if ($DiagState.ContainsKey('DirectoryCheck')) { $DiagState['DirectoryCheck'] } else { @{} }
+                    exceptionSummary = $exceptionSummary
+                }
+                # Rollback simulation
+                if ($DiagState.RemediationLedger -and $DiagState.RemediationLedger.Count -gt 0) {
+                    $rollbackSim = Test-RollbackSimulation -RemediationLedger @($DiagState.RemediationLedger)
+                    $govReport['rollbackSimulation'] = $rollbackSim
+                }
+                $govFile = Join-Path $v85ReportDir "GovernanceReport_$v85Timestamp.json"
+                $govReport | ConvertTo-Json -Depth 10 | Out-File -FilePath $govFile -Encoding UTF8 -Force
+                Write-Host "  GovernanceReport: $govFile" -ForegroundColor Green
+                Write-Log "GovernanceReport.json exported"
+
+                # Clear execution state (session completed successfully)
+                Clear-ExecutionState -OutputDir $ReportPath -FinalStatus 'COMPLETED'
+                Write-Log "ExecutionState cleared: session completed"
+            }
+            catch {
+                Write-Log "Governance artifact export failed: $($_.Exception.Message)"
+            }
         }
     }
     Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase8"
@@ -4462,7 +4580,7 @@ function New-ManagementSummary {
 # MAIN EXECUTION
 # ============================================================
 
-Write-Banner "SMART DIAGNOSIS ENGINE v8.5.0"
+Write-Banner "SMART DIAGNOSIS ENGINE v9.0.0"
 
 Write-Host "  Machine:  $computerName" -ForegroundColor White
 Write-Host "  Model:    $manufacturer $model" -ForegroundColor White
@@ -4510,18 +4628,27 @@ Invoke-Phase4-ServiceAndDriver -DiagState $diagState
 Invoke-Phase5-PerformanceProfile -DiagState $diagState
 
 # ---- Phase 6: Auto Remediation (gates checked internally) ----
-if ($Mode -eq 'ClassifyOnly') {
-    Write-Host "  [ClassifyOnly] Skipping Phase 6 (Remediation)" -ForegroundColor DarkGray
-    Write-Log "Phase 6 skipped: ClassifyOnly mode"
+$skipRemediation = ($Mode -eq 'ClassifyOnly')
+if ($v9GovernanceAvailable) {
+    if (-not (Test-ModeAllowsRemediation)) { $skipRemediation = $true }
+    if (-not (Test-ModeAllowsPhase -Phase 6)) { $skipRemediation = $true }
+}
+if ($skipRemediation) {
+    Write-Host "  [$Mode] Skipping Phase 6 (Remediation)" -ForegroundColor DarkGray
+    Write-Log "Phase 6 skipped: $Mode mode"
     $diagState.PhaseResults["Phase6"] = "SKIP"
 } else {
     Invoke-Phase6-AutoRemediation -DiagState $diagState
 }
 
 # ---- Phase 7: Stress Validation (skips if HW/thermal critical) ----
-if ($Mode -eq 'ClassifyOnly') {
-    Write-Host "  [ClassifyOnly] Skipping Phase 7 (Stress Validation)" -ForegroundColor DarkGray
-    Write-Log "Phase 7 skipped: ClassifyOnly mode"
+$skipStress = ($Mode -eq 'ClassifyOnly')
+if ($v9GovernanceAvailable) {
+    if (-not (Test-ModeAllowsPhase -Phase 7)) { $skipStress = $true }
+}
+if ($skipStress) {
+    Write-Host "  [$Mode] Skipping Phase 7 (Stress Validation)" -ForegroundColor DarkGray
+    Write-Log "Phase 7 skipped: $Mode mode"
     $diagState.PhaseResults["Phase7"] = "SKIP"
 } else {
     Invoke-Phase7-StressValidation -DiagState $diagState

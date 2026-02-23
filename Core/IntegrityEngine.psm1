@@ -32,7 +32,7 @@
     }
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 IntegrityEngine with LDT adaptations
 #>
@@ -310,7 +310,7 @@ function Seal-SessionLog {
             entryCount    = $entryCount
             logHash       = $logHash
             manifestHash  = $manifestHash
-            sealVersion   = '8.5.0'
+            sealVersion   = '9.0.0'
         }
 
         $sealJson = $seal | ConvertTo-Json -Compress -Depth 5
@@ -388,7 +388,7 @@ function New-ExecutionReceipt {
         _type              = 'EXECUTION_RECEIPT'
         sessionId          = $SessionId
         issuedAt           = Get-Date -Format 'o'
-        platformVersion    = '8.5.0'
+        platformVersion    = '9.0.0'
         manifestVersion    = $manifestVer
         computername       = $env:COMPUTERNAME
         username           = "$env:USERDOMAIN\$env:USERNAME"

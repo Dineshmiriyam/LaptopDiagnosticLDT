@@ -24,7 +24,7 @@
     Output is suitable for trend tracking (stored per-session in TrendStore).
 
 .NOTES
-    Version : 8.5.0
+    Version : 9.0.0
     Platform: PowerShell 5.1+
     Ported  : From WinDRE v2.1.0 ScoringEngine with LDT adaptations
 #>
