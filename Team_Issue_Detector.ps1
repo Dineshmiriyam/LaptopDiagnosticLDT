@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Team Issue Detector - LDT v9.0 Option 49
+    Team Issue Detector - LDT v9.0 Option 53
     Scans for BSOD, Unexpected Resets, and VPN/Network issues.
     Displays live terminal results, generates HTML report, auto-launches fix modules.
 

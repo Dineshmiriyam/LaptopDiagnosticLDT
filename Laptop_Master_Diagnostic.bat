@@ -70,7 +70,7 @@ if not exist "%PS1_FILE%" (
 )
 
 :: Log startup
-call :log_message "Laptop Diagnostic Toolkit v6.0 started"
+call :log_message "Laptop Diagnostic Toolkit v9.0 started"
 call :log_message "Script drive: %SCRIPT_DRIVE%"
 call :log_message "PS1 module: %PS1_FILE%"
 
@@ -100,95 +100,95 @@ echo   Enterprise Governance Edition
 echo   Location: %SCRIPT_DRIVE%\
 echo ============================================================
 echo.
-echo   QUICK START                          [Recommended First Run]
-echo   -------------------------------------------------------
-echo   51. Auto-Discover            Scan machine, show dashboard
-echo   52. Quick Fix by Symptom     Pick symptom, run targeted fixes
-echo   53. Score This Machine       Health score 0-100 + grade A-F
+echo   QUICK START ............................. [First Run]
+echo   ---------------------------------------------------------
+echo    1. Auto-Discover            Scan machine, show dashboard
+echo    2. Quick Fix by Symptom     Pick symptom, run targeted fixes
+echo    3. Score This Machine       Health score 0-100 + grade A-F
 echo.
-echo   ENTERPRISE ENGINES                   [Deep Analysis]
-echo   -------------------------------------------------------
-echo   54. Smart Diagnosis Engine   9-phase root cause + auto-fix
-echo   55. OEM Validation Mode      Read-only hardware baseline
-echo   56. Classification Engine    3-Level triage (L1/L2/L3)
-echo   57. Governance Audit         AuditOnly scan, no fixes
+echo   ENTERPRISE ENGINES .................. [Deep Analysis]
+echo   ---------------------------------------------------------
+echo    4. Smart Diagnosis Engine   9-phase root cause + auto-fix
+echo    5. OEM Validation Mode      Read-only hardware baseline
+echo    6. Classification Engine    3-Level triage (L1/L2/L3)
+echo    7. Governance Audit         AuditOnly scan, no fixes
 echo.
-echo   DIAGNOSTICS                           [Scan Only]
-echo   -------------------------------------------------------
-echo    1. Advanced Diagnostic      Full system scan
-echo    2. BSOD Analysis            Crash dump analysis
-echo    3. Enhanced Hardware Test    CPU, memory, disk, network
-echo    4. Custom Tests             Select test categories
-echo    5. Diagnostic Analyzer      Analyze previous logs
+echo   DIAGNOSTICS ............................ [Scan Only]
+echo   ---------------------------------------------------------
+echo    8. Advanced Diagnostic      Full system scan
+echo    9. BSOD Analysis            Crash dump analysis
+echo   10. Enhanced Hardware Test    CPU, memory, disk, network
+echo   11. Custom Tests             Select test categories
+echo   12. Diagnostic Analyzer      Analyze previous logs
 echo.
-echo   REPAIR TOOLS                          [Fix with Backup]
-echo   -------------------------------------------------------
-echo    6. Boot Repair              BCD, SFC, DISM
-echo    7. BIOS Repair              Version check, recommendations
-echo    8. Driver Repair            Problem/unsigned drivers
-echo    9. Software Cleanup         Temp, cache, startup
+echo   REPAIR TOOLS ....................... [Fix with Backup]
+echo   ---------------------------------------------------------
+echo   13. Boot Repair              BCD, SFC, DISM
+echo   14. BIOS Repair              Version check, recommendations
+echo   15. Driver Repair            Problem/unsigned drivers
+echo   16. Software Cleanup         Temp, cache, startup
 echo.
-echo   TROUBLESHOOTERS                       [Auto-Fix]
-echo   -------------------------------------------------------
-echo   31. Security Hardening       Fix Defender, Firewall, UAC, WU
-echo   32. Network Troubleshooter   Fix Wi-Fi, Bluetooth, VPN
-echo   33. BSOD Troubleshooter      Fix crash-causing drivers
-echo   34. Input Troubleshooter     Fix keyboard, trackpoint, touchpad
-echo   35. Driver Auto-Update       Update outdated/problem drivers
+echo   TROUBLESHOOTERS ........................ [Auto-Fix]
+echo   ---------------------------------------------------------
+echo   17. Security Hardening       Fix Defender, Firewall, UAC
+echo   18. Network Troubleshooter   Fix Wi-Fi, Bluetooth, VPN
+echo   19. BSOD Troubleshooter      Fix crash-causing drivers
+echo   20. Input Troubleshooter     Fix keyboard, trackpoint
+echo   21. Driver Auto-Update       Update outdated drivers
 echo.
-echo   HARDWARE TESTS                       [Read-Only]
-echo   -------------------------------------------------------
-echo   14. Battery Health           Wear, cycles, capacity
-echo   15. Network Diagnostic       Adapters, DNS, latency
-echo   16. Performance Analyzer     CPU/mem/disk benchmarks
-echo   17. Thermal Analysis         Temperature monitoring
-echo   18. Display Calibration      GPU, resolution, pixels
-echo   19. Audio Diagnostic         Sound devices, service
-echo   20. Keyboard Test            Key detection, hotkeys
-echo   21. TrackPoint Calibration   TrackPoint/touchpad
-echo   22. Power Settings           Plans, sleep, lid
+echo   HARDWARE TESTS ....................... [Read-Only]
+echo   ---------------------------------------------------------
+echo   22. Battery Health           Wear, cycles, capacity
+echo   23. Network Diagnostic       Adapters, DNS, latency
+echo   24. Performance Analyzer     CPU/mem/disk benchmarks
+echo   25. Thermal Analysis         Temperature monitoring
+echo   26. Display Calibration      GPU, resolution, pixels
+echo   27. Audio Diagnostic         Sound devices, service
+echo   28. Keyboard Test            Key detection, hotkeys
+echo   29. TrackPoint Calibration   TrackPoint/touchpad
+echo   30. Power Settings           Plans, sleep, lid
 echo.
-echo   ADVANCED DIAGNOSTICS                 [Deep Checks]
-echo   -------------------------------------------------------
-echo   39. POST Error Reader        ThinkPad POST/BIOS error codes
-echo   40. SMART Disk Analysis      Deep SMART attributes
-echo   41. CMOS Battery Check       RTC coin cell health
-echo   42. Machine Identity Check   Serial, UUID, Asset Tag
-echo   43. TPM Health Check         TPM 2.0, ROCA, BitLocker
-echo   44. Win11 Readiness Check    Full hardware compatibility
-echo   45. Lenovo Vantage Check     Vantage/SystemUpdate stack
-echo   46. Memory Error Log Check   WHEA, WMD, BugCheck
-echo   47. Display Pixel Check      LCD policy, GPU, backlight
-echo   48. Enterprise Readiness     Master health scorecard
+echo   ADVANCED DIAGNOSTICS ............... [Deep Checks]
+echo   ---------------------------------------------------------
+echo   31. POST Error Reader        ThinkPad POST/BIOS error codes
+echo   32. SMART Disk Analysis      Deep SMART attributes
+echo   33. CMOS Battery Check       RTC coin cell health
+echo   34. Machine Identity Check   Serial, UUID, Asset Tag
+echo   35. TPM Health Check         TPM 2.0, ROCA, BitLocker
+echo   36. Win11 Readiness Check    Full hardware compatibility
+echo   37. Lenovo Vantage Check     Vantage/SystemUpdate stack
+echo   38. Memory Error Log Check   WHEA, WMD, BugCheck
+echo   39. Display Pixel Check      LCD policy, GPU, backlight
+echo   40. Enterprise Readiness     Master health scorecard
 echo.
 echo   SYSTEM MANAGEMENT
-echo   -------------------------------------------------------
-echo   23. Secure Wipe              Privacy cleanup
-echo   24. Deployment Prep          Pre-deploy checklist
-echo   25. Update Manager           Windows Update, Lenovo
-echo   26. BIOS Update              Version check, flash
-echo   27. Security Check           Defender, TPM, BitLocker
+echo   ---------------------------------------------------------
+echo   41. Secure Wipe              Privacy cleanup
+echo   42. Deployment Prep          Pre-deploy checklist
+echo   43. Update Manager           Windows Update, Lenovo
+echo   44. BIOS Update              Version check, flash
+echo   45. Security Check           Defender, TPM, BitLocker
 echo.
 echo   REFURBISHMENT
-echo   -------------------------------------------------------
-echo   28. Refurb Battery Analysis  Battery score for resale
-echo   29. Refurb Quality Check     10-point QA checklist
-echo   30. Refurb Thermal Analysis  CPU stress + thermal test
+echo   ---------------------------------------------------------
+echo   46. Refurb Battery Analysis  Battery score for resale
+echo   47. Refurb Quality Check     10-point QA checklist
+echo   48. Refurb Thermal Analysis  CPU stress + thermal test
 echo.
 echo   FLEET TOOLS
-echo   -------------------------------------------------------
-echo   10. Fleet Report             System inventory + CSV
-echo   11. Verify Scripts           Module integrity check
-echo   12. Compatibility Checker    PS version, .NET, admin
-echo   13. Hardware Inventory       Full CIM enumeration
-echo   49. Team Issue Detector      BSOD + Resets + VPN fleet scan
-echo   50. Fleet CSV Aggregator     Merge USB CSV + deduplicate
+echo   ---------------------------------------------------------
+echo   49. Fleet Report             System inventory + CSV
+echo   50. Verify Scripts           Module integrity check
+echo   51. Compatibility Checker    PS version, .NET, admin
+echo   52. Hardware Inventory       Full CIM enumeration
+echo   53. Team Issue Detector      BSOD + Resets + VPN fleet scan
+echo   54. Fleet CSV Aggregator     Merge USB CSV + deduplicate
 echo.
 echo   UTILITIES
-echo   -------------------------------------------------------
-echo   36. Run Interactive Menu     PS1 built-in menu
-echo   37. Open Logs Folder
-echo   38. Open Reports Folder
+echo   ---------------------------------------------------------
+echo   55. Run Interactive Menu     PS1 built-in menu
+echo   56. Open Logs Folder
+echo   57. Open Reports Folder
 echo    0. Exit
 echo.
 echo ============================================================
@@ -198,64 +198,88 @@ set /p "CHOICE=  Select option (0-57): "
 if "%CHOICE%"=="" goto main_menu
 if "%CHOICE%"=="0" goto exit_tool
 
-:: Map menu choices to function names
-if "%CHOICE%"=="1"  ( set "FUNC=AdvancedDiagnostic" & goto run_function )
-if "%CHOICE%"=="2"  ( set "FUNC=BSODAnalysis" & goto run_function )
-if "%CHOICE%"=="3"  ( set "FUNC=EnhancedHardwareTest" & goto run_function )
-if "%CHOICE%"=="4"  ( set "FUNC=CustomTests" & goto run_function )
-if "%CHOICE%"=="5"  ( set "FUNC=DiagnosticAnalyzer" & goto run_function )
-if "%CHOICE%"=="6"  ( set "FUNC=BootRepair" & goto run_function )
-if "%CHOICE%"=="7"  ( set "FUNC=BIOSRepair" & goto run_function )
-if "%CHOICE%"=="8"  ( set "FUNC=DriverRepair" & goto run_function )
-if "%CHOICE%"=="9"  ( set "FUNC=SoftwareCleanup" & goto run_function )
-if "%CHOICE%"=="10" ( set "FUNC=FleetReport" & goto run_function )
-if "%CHOICE%"=="11" ( set "FUNC=VerifyScripts" & goto run_function )
-if "%CHOICE%"=="12" ( set "FUNC=CompatibilityChecker" & goto run_function )
-if "%CHOICE%"=="13" ( set "FUNC=HardwareInventory" & goto run_function )
-if "%CHOICE%"=="14" ( set "FUNC=BatteryHealth" & goto run_function )
-if "%CHOICE%"=="15" ( set "FUNC=NetworkDiagnostic" & goto run_function )
-if "%CHOICE%"=="16" ( set "FUNC=PerformanceAnalyzer" & goto run_function )
-if "%CHOICE%"=="17" ( set "FUNC=ThermalAnalysis" & goto run_function )
-if "%CHOICE%"=="18" ( set "FUNC=DisplayCalibration" & goto run_function )
-if "%CHOICE%"=="19" ( set "FUNC=AudioDiagnostic" & goto run_function )
-if "%CHOICE%"=="20" ( set "FUNC=KeyboardTest" & goto run_function )
-if "%CHOICE%"=="21" ( set "FUNC=TrackPointCalibration" & goto run_function )
-if "%CHOICE%"=="22" ( set "FUNC=PowerSettings" & goto run_function )
-if "%CHOICE%"=="23" ( set "FUNC=SecureWipe" & goto run_function )
-if "%CHOICE%"=="24" ( set "FUNC=DeploymentPrep" & goto run_function )
-if "%CHOICE%"=="25" ( set "FUNC=UpdateManager" & goto run_function )
-if "%CHOICE%"=="26" ( set "FUNC=BIOSUpdate" & goto run_function )
-if "%CHOICE%"=="27" ( set "FUNC=SecurityCheck" & goto run_function )
-if "%CHOICE%"=="28" ( set "FUNC=RefurbBatteryAnalysis" & goto run_function )
-if "%CHOICE%"=="29" ( set "FUNC=RefurbQualityCheck" & goto run_function )
-if "%CHOICE%"=="30" ( set "FUNC=RefurbThermalAnalysis" & goto run_function )
-if "%CHOICE%"=="31" ( set "FUNC=SecurityHardening" & goto run_function )
-if "%CHOICE%"=="32" ( set "FUNC=NetworkTroubleshooter" & goto run_function )
-if "%CHOICE%"=="33" ( set "FUNC=BSODTroubleshooter" & goto run_function )
-if "%CHOICE%"=="34" ( set "FUNC=InputTroubleshooter" & goto run_function )
-if "%CHOICE%"=="35" ( set "FUNC=DriverAutoUpdate" & goto run_function )
-if "%CHOICE%"=="36" goto run_interactive
-if "%CHOICE%"=="37" goto open_logs
-if "%CHOICE%"=="38" goto open_reports
-if "%CHOICE%"=="39" ( set "FUNC=POSTErrorReader" & goto run_function )
-if "%CHOICE%"=="40" ( set "FUNC=SMARTDiskAnalysis" & goto run_function )
-if "%CHOICE%"=="41" ( set "FUNC=CMOSBatteryCheck" & goto run_function )
-if "%CHOICE%"=="42" ( set "FUNC=MachineIdentityCheck" & goto run_function )
-if "%CHOICE%"=="43" ( set "FUNC=TPMHealthCheck" & goto run_function )
-if "%CHOICE%"=="44" ( set "FUNC=Win11ReadinessCheck" & goto run_function )
-if "%CHOICE%"=="45" ( set "FUNC=LenovoVantageCheck" & goto run_function )
-if "%CHOICE%"=="46" ( set "FUNC=MemoryErrorLogCheck" & goto run_function )
-if "%CHOICE%"=="47" ( set "FUNC=DisplayPixelCheck" & goto run_function )
-if "%CHOICE%"=="48" ( set "FUNC=EnterpriseReadinessReport" & goto run_function )
-if "%CHOICE%"=="49" goto run_detector
-if "%CHOICE%"=="50" goto run_aggregator
-if "%CHOICE%"=="51" ( set "QS_MODE=AutoDiscover" & goto run_quickstart )
-if "%CHOICE%"=="52" ( set "QS_MODE=SymptomFix" & goto run_quickstart )
-if "%CHOICE%"=="53" ( set "QS_MODE=ScoreMachine" & goto run_quickstart )
-if "%CHOICE%"=="54" goto run_smartdiag
-if "%CHOICE%"=="55" goto run_oemvalidation
-if "%CHOICE%"=="56" goto run_classification
-if "%CHOICE%"=="57" goto run_governance_audit
+:: ============================================================
+:: OPTION ROUTING (Sequential 1-57)
+:: ============================================================
+
+:: QUICK START [1-3]
+if "%CHOICE%"=="1"  ( set "QS_MODE=AutoDiscover" & goto run_quickstart )
+if "%CHOICE%"=="2"  ( set "QS_MODE=SymptomFix" & goto run_quickstart )
+if "%CHOICE%"=="3"  ( set "QS_MODE=ScoreMachine" & goto run_quickstart )
+
+:: ENTERPRISE ENGINES [4-7]
+if "%CHOICE%"=="4"  goto run_smartdiag
+if "%CHOICE%"=="5"  goto run_oemvalidation
+if "%CHOICE%"=="6"  goto run_classification
+if "%CHOICE%"=="7"  goto run_governance_audit
+
+:: DIAGNOSTICS [8-12]
+if "%CHOICE%"=="8"  ( set "FUNC=AdvancedDiagnostic" & goto run_function )
+if "%CHOICE%"=="9"  ( set "FUNC=BSODAnalysis" & goto run_function )
+if "%CHOICE%"=="10" ( set "FUNC=EnhancedHardwareTest" & goto run_function )
+if "%CHOICE%"=="11" ( set "FUNC=CustomTests" & goto run_function )
+if "%CHOICE%"=="12" ( set "FUNC=DiagnosticAnalyzer" & goto run_function )
+
+:: REPAIR TOOLS [13-16]
+if "%CHOICE%"=="13" ( set "FUNC=BootRepair" & goto run_function )
+if "%CHOICE%"=="14" ( set "FUNC=BIOSRepair" & goto run_function )
+if "%CHOICE%"=="15" ( set "FUNC=DriverRepair" & goto run_function )
+if "%CHOICE%"=="16" ( set "FUNC=SoftwareCleanup" & goto run_function )
+
+:: TROUBLESHOOTERS [17-21]
+if "%CHOICE%"=="17" ( set "FUNC=SecurityHardening" & goto run_function )
+if "%CHOICE%"=="18" ( set "FUNC=NetworkTroubleshooter" & goto run_function )
+if "%CHOICE%"=="19" ( set "FUNC=BSODTroubleshooter" & goto run_function )
+if "%CHOICE%"=="20" ( set "FUNC=InputTroubleshooter" & goto run_function )
+if "%CHOICE%"=="21" ( set "FUNC=DriverAutoUpdate" & goto run_function )
+
+:: HARDWARE TESTS [22-30]
+if "%CHOICE%"=="22" ( set "FUNC=BatteryHealth" & goto run_function )
+if "%CHOICE%"=="23" ( set "FUNC=NetworkDiagnostic" & goto run_function )
+if "%CHOICE%"=="24" ( set "FUNC=PerformanceAnalyzer" & goto run_function )
+if "%CHOICE%"=="25" ( set "FUNC=ThermalAnalysis" & goto run_function )
+if "%CHOICE%"=="26" ( set "FUNC=DisplayCalibration" & goto run_function )
+if "%CHOICE%"=="27" ( set "FUNC=AudioDiagnostic" & goto run_function )
+if "%CHOICE%"=="28" ( set "FUNC=KeyboardTest" & goto run_function )
+if "%CHOICE%"=="29" ( set "FUNC=TrackPointCalibration" & goto run_function )
+if "%CHOICE%"=="30" ( set "FUNC=PowerSettings" & goto run_function )
+
+:: ADVANCED DIAGNOSTICS [31-40]
+if "%CHOICE%"=="31" ( set "FUNC=POSTErrorReader" & goto run_function )
+if "%CHOICE%"=="32" ( set "FUNC=SMARTDiskAnalysis" & goto run_function )
+if "%CHOICE%"=="33" ( set "FUNC=CMOSBatteryCheck" & goto run_function )
+if "%CHOICE%"=="34" ( set "FUNC=MachineIdentityCheck" & goto run_function )
+if "%CHOICE%"=="35" ( set "FUNC=TPMHealthCheck" & goto run_function )
+if "%CHOICE%"=="36" ( set "FUNC=Win11ReadinessCheck" & goto run_function )
+if "%CHOICE%"=="37" ( set "FUNC=LenovoVantageCheck" & goto run_function )
+if "%CHOICE%"=="38" ( set "FUNC=MemoryErrorLogCheck" & goto run_function )
+if "%CHOICE%"=="39" ( set "FUNC=DisplayPixelCheck" & goto run_function )
+if "%CHOICE%"=="40" ( set "FUNC=EnterpriseReadinessReport" & goto run_function )
+
+:: SYSTEM MANAGEMENT [41-45]
+if "%CHOICE%"=="41" ( set "FUNC=SecureWipe" & goto run_function )
+if "%CHOICE%"=="42" ( set "FUNC=DeploymentPrep" & goto run_function )
+if "%CHOICE%"=="43" ( set "FUNC=UpdateManager" & goto run_function )
+if "%CHOICE%"=="44" ( set "FUNC=BIOSUpdate" & goto run_function )
+if "%CHOICE%"=="45" ( set "FUNC=SecurityCheck" & goto run_function )
+
+:: REFURBISHMENT [46-48]
+if "%CHOICE%"=="46" ( set "FUNC=RefurbBatteryAnalysis" & goto run_function )
+if "%CHOICE%"=="47" ( set "FUNC=RefurbQualityCheck" & goto run_function )
+if "%CHOICE%"=="48" ( set "FUNC=RefurbThermalAnalysis" & goto run_function )
+
+:: FLEET TOOLS [49-54]
+if "%CHOICE%"=="49" ( set "FUNC=FleetReport" & goto run_function )
+if "%CHOICE%"=="50" ( set "FUNC=VerifyScripts" & goto run_function )
+if "%CHOICE%"=="51" ( set "FUNC=CompatibilityChecker" & goto run_function )
+if "%CHOICE%"=="52" ( set "FUNC=HardwareInventory" & goto run_function )
+if "%CHOICE%"=="53" goto run_detector
+if "%CHOICE%"=="54" goto run_aggregator
+
+:: UTILITIES [55-57]
+if "%CHOICE%"=="55" goto run_interactive
+if "%CHOICE%"=="56" goto open_logs
+if "%CHOICE%"=="57" goto open_reports
 
 echo.
 echo  Invalid selection. Press any key to try again...
@@ -290,7 +314,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN TEAM ISSUE DETECTOR (Option 49)
+:: RUN TEAM ISSUE DETECTOR (Option 53)
 :: ============================================================
 :run_detector
 cls
@@ -325,7 +349,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN FLEET AGGREGATOR (Option 50)
+:: RUN FLEET AGGREGATOR (Option 54)
 :: ============================================================
 :run_aggregator
 cls
@@ -360,7 +384,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN QUICK START (Options 51-53)
+:: RUN QUICK START (Options 1-3)
 :: ============================================================
 :run_quickstart
 cls
@@ -395,7 +419,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN SMART DIAGNOSIS ENGINE (Option 54)
+:: RUN SMART DIAGNOSIS ENGINE (Option 4)
 :: ============================================================
 :run_smartdiag
 cls
@@ -430,7 +454,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN OEM VALIDATION (Option 55)
+:: RUN OEM VALIDATION (Option 5)
 :: ============================================================
 :run_oemvalidation
 cls
@@ -465,7 +489,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN CLASSIFICATION ENGINE (Option 56) -- ClassifyOnly mode
+:: RUN CLASSIFICATION ENGINE (Option 6) -- ClassifyOnly mode
 :: ============================================================
 :run_classification
 cls
@@ -500,7 +524,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN GOVERNANCE AUDIT (Option 57) -- AuditOnly mode
+:: RUN GOVERNANCE AUDIT (Option 7) -- AuditOnly mode
 :: ============================================================
 :run_governance_audit
 cls
@@ -535,7 +559,7 @@ pause >nul
 goto main_menu
 
 :: ============================================================
-:: RUN INTERACTIVE PS1 MENU
+:: RUN INTERACTIVE PS1 MENU (Option 55)
 :: ============================================================
 :run_interactive
 cls

@@ -285,7 +285,7 @@
     <li><strong>7th GuardEngine gate</strong> added for whitelist enforcement before any remediation action executes</li>
     <li><strong>Crash recovery</strong> via ExecutionState.json with automatic session restoration (24-hour max age)</li>
     <li><strong>12 compliance artifacts</strong> (up from 10) -- adds GovernanceReport.json and ExceptionLog.json</li>
-    <li><strong>Option 57: Governance Audit</strong> -- standalone governance health check and policy compliance report</li>
+    <li><strong>Option 7: Governance Audit</strong> -- standalone governance health check and policy compliance report</li>
   </ul>
 
   <!-- SECTION 2: NEW MODULES -->
@@ -426,7 +426,7 @@
       <div class="fc-desc">
         Consolidated governance health snapshot combining directory integrity, whitelist compliance,
         exception summary, policy profile status, and KPI highlights into a single structured report.
-        Used by Option 57 (Governance Audit) for standalone governance health checks.
+        Used by Option 7 (Governance Audit) for standalone governance health checks.
       </div>
     </div>
 
@@ -642,7 +642,7 @@
       <div class="ver-tag current">v9.0.0</div>
       <div class="ver-body">
         <div class="ver-title">CURRENT -- ENTERPRISE GOVERNANCE EDITION</div>
-        <div class="ver-desc">GovernanceEngine.psm1 (15 functions, 6 groups), FleetGovernance.psm1 (6 functions), 5 execution modes, 3 policy profiles, crash recovery via ExecutionState.json, 7th GuardEngine gate, 12 compliance artifacts, Option 57 Governance Audit. 33 config sections.</div>
+        <div class="ver-desc">GovernanceEngine.psm1 (15 functions, 6 groups), FleetGovernance.psm1 (6 functions), 5 execution modes, 3 policy profiles, crash recovery via ExecutionState.json, 7th GuardEngine gate, 12 compliance artifacts, Option 7 Governance Audit. 33 config sections.</div>
       </div>
     </div>
     <div class="ver-item">
@@ -732,15 +732,15 @@
     </div>
     <div class="check-item">
       <div class="check-icon pass">OK</div>
-      <div class="check-text"><strong>Option 54 (Full mode) test</strong><br>All 9 phases execute with governance checkpoints and 12 artifact exports</div>
+      <div class="check-text"><strong>Option 4 (Full mode) test</strong><br>All 9 phases execute with governance checkpoints and 12 artifact exports</div>
     </div>
     <div class="check-item">
       <div class="check-icon pass">OK</div>
-      <div class="check-text"><strong>Option 56 (ClassifyOnly) test</strong><br>Phases 0-5,8 execute; Phase 6-7 correctly skipped by mode gate</div>
+      <div class="check-text"><strong>Option 6 (ClassifyOnly) test</strong><br>Phases 0-5,8 execute; Phase 6-7 correctly skipped by mode gate</div>
     </div>
     <div class="check-item">
       <div class="check-icon pass">OK</div>
-      <div class="check-text"><strong>Option 57 (AuditOnly) test</strong><br>Governance Audit produces standalone health report with all subsystem checks</div>
+      <div class="check-text"><strong>Option 7 (AuditOnly) test</strong><br>Governance Audit produces standalone health report with all subsystem checks</div>
     </div>
     <div class="check-item">
       <div class="check-icon pass">OK</div>

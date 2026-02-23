@@ -19,7 +19,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
   - `Test-RollbackSimulation`: Dry-run rollback token validation (BeforeState integrity check)
   - `Export-FleetKPIs`: Aggregates L1 fix rate, score improvement, recurrence rate from TrendStore
   - `New-FleetGovernanceSummary`: Consolidated governance health snapshot
-- **Option 57: Governance Audit** (AuditOnly mode): Runs Phases 0-5 + Phase 8 (scan + report only, no remediation or classification)
+- **Option 7: Governance Audit** (AuditOnly mode): Runs Phases 0-5 + Phase 8 (scan + report only, no remediation or classification)
 - **7th GuardEngine gate**: Whitelist enforcement via `Test-WhitelistApproval` in `Invoke-GuardedRemediation`
 - **Crash recovery**: `ExecutionState.json` checkpoint at every phase boundary, auto-restore on interrupted sessions
 - **ExceptionLog.json**: Governed exception log with severity routing (Warning/Error/Critical)
@@ -76,7 +76,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
   - `Get-ComponentHealth`: Maps findings to SOFTWARE/WEAR/FATAL classifications
   - `Get-ClassificationReport`: Generates mandatory structured JSON report
   - `Get-ClassificationConfig`: Reads [ClassificationEngine] thresholds from config.ini
-- **Option 56: Classification Engine** (ClassifyOnly mode): Runs Phases 0-5 + Phase 8 (scan + classify), skips Phase 6/7 (no remediation)
+- **Option 6: Classification Engine** (ClassifyOnly mode): Runs Phases 0-5 + Phase 8 (scan + classify), skips Phase 6/7 (no remediation)
 - **HTML Triage Panel**: 3-column L1/L2/L3 visual panel in Smart Diagnosis reports with active level highlighting
 - **Decision Tree Path**: Visual breadcrumb showing classification path (Power OK → Windows OK → L1 AUTO-FIXABLE)
 - **L2 Component Health Cards**: Per-component cards with wear details and replacement recommendations
@@ -103,7 +103,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
 - **Phase 4N: EDID / Native Resolution**: Panel manufacturer extraction via WmiMonitorID, native vs current resolution mismatch detection
 - **Phase 7 GPU Stress Test**: GDI+ bitmap stress with TDR event monitoring during load, catches driver instability
 - **Display Severity Classification** in Phase 8: Level 1 (auto-fixable) / Level 2 (component) / Level 3 (technician) per v11 taxonomy
-- **DisplayPixelCheck steps [8/9] and [9/9]**: Refresh rate baseline and brightness control test added to Option 47
+- **DisplayPixelCheck steps [8/9] and [9/9]**: Refresh rate baseline and brightness control test added to Option 39
 - **[Display] config section**: 8 new thresholds for GPU stress, refresh rate, brightness, EDID validation
 - `display_status` field added to JSON export
 
@@ -136,7 +136,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
   - `TrendEngine.psm1`: 90-session per-machine historical tracking (TrendStore/)
   - `ComplianceExport.psm1`: ISO 27001/SOC2/CIS compliance artifact generation (6 JSONs)
   - `LDT-EngineAdapter.psm1`: Bridge module between LDT and enterprise engines
-- **OEM Validation Mode** (Option 55): 8 read-only hardware checks (SecureBoot, TPM, BIOS, fingerprint, Win11 readiness, POST history, driver catalog, baseline drift)
+- **OEM Validation Mode** (Option 5): 8 read-only hardware checks (SecureBoot, TPM, BIOS, fingerprint, Win11 readiness, POST history, driver catalog, baseline drift)
 - **Phase 6A Direct Targeted Fixes**: BITS service restart, DISM component store repair, SFC system file check, display driver 4-method update (WU, Lenovo System Update, Thin Installer, pnputil)
 - **Phase 6 smart gating**: Proceeds with obvious fixable issues even when root-cause confidence is below threshold
 - **Finding status "Repaired"**: Fixed items marked as Repaired with 5% score penalty (vs 50% for Fail)
@@ -154,7 +154,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
 - Phase 8 now includes ScoringEngine, TrendEngine, ComplianceExport, log sealing
 - TDR/GPU events reclassified from "Hardware" to "Driver" category (software-fixable)
 - Enterprise score formula: added Repaired status at 5% penalty, Info at 0%
-- BAT launcher: added Option 55, updated version to 7.0.0, prompt accepts 0-55
+- BAT launcher: added Option 5 (OEM Validation), updated version to 7.0.0
 - Version bumped to 7.0.0 across config.ini, BAT, and all scripts
 
 ### Fixed
@@ -191,7 +191,7 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
 ## [6.1.1] - 2026-02-20
 
 ### Added
-- **Smart Diagnosis Engine** (Option 54): 8-phase orchestrated root cause analysis
+- **Smart Diagnosis Engine** (Option 4): 8-phase orchestrated root cause analysis
   - Decision tree logic with conditional branching (hardware-first gating)
   - Root cause ranking with weighted findings, correlation rules, confidence %
   - 3-level escalation classification: L1 (OS Fix), L2 (Firmware), L3 (Hardware)
@@ -201,12 +201,12 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
 - `[SmartDiagnosis]` config section with 14 configurable thresholds
 
 ### Changed
-- BAT menu accepts options 0-54 (was 0-53)
+- BAT menu accepts options 0-57 (sequential numbering)
 
 ## [6.1.0] - 2026-02-20
 
 ### Added
-- **Quick Start workflows** (Options 51-53): Auto-Discover, Quick Fix by Symptom, Score This Machine
+- **Quick Start workflows** (Options 1-3): Auto-Discover, Quick Fix by Symptom, Score This Machine
 - **Machine Health Score**: Weighted 0-100 score with letter grade (A-F) across 4 categories
 - **Baseline Comparison**: JSON snapshot per device serial, delta tracking on re-scan
 - **Fleet Dashboard HTML**: Self-contained dark-themed dashboard with sortable table, score distribution chart
@@ -219,21 +219,21 @@ All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
 ### Changed
 - Version bumped from 6.0.0 to 6.1.0
-- BAT menu now shows QUICK START section at top (Options 51-53)
+- BAT menu now shows QUICK START section at top (Options 1-3)
 - Fleet Aggregator generates Fleet_Dashboard.html alongside CSV
-- Menu prompt accepts options 0-53
+- Menu prompt accepts options 0-57
 
 ## [6.0.0] - 2026-02-13
 
 ### Added
 - Initial release: 45 diagnostic/repair modules across 8 categories
-- Restore points before destructive operations (Options 6, 8, 31, 33, 35)
+- Restore points before destructive operations (Options 13, 15, 17, 19, 21)
 - Domain/BitLocker/vendor awareness in Get-SystemInformation
 - Domain safety guards (DNS, Firewall, Boot operations)
 - Structured audit logging (SIEM-compatible key=value format)
 - Post-fix validation for Security Hardening and BSOD Troubleshooter
 - Severity classification system (S1-S4, H1-H3)
 - Cross-OEM vendor detection (Lenovo, Dell, HP)
-- Team Issue Detector (Option 49): BSOD + Resets + VPN scan
-- Fleet CSV Aggregator (Option 50): Merge and deduplicate fleet data
+- Team Issue Detector (Option 53): BSOD + Resets + VPN scan
+- Fleet CSV Aggregator (Option 54): Merge and deduplicate fleet data
 - Enterprise-grade Step-by-Step HTML Guide with 12 visual enhancements

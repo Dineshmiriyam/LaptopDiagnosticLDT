@@ -1,5 +1,5 @@
 ﻿# Fleet_Aggregator.ps1 -- Merge fleet CSV files from multiple USB drives
-# Usage: Run from LDT menu (Option 50) or standalone
+# Usage: Run from LDT menu (Option 54) or standalone
 # Input: Folder containing CSV files (default: Results folder on USB)
 # Output: Master_Fleet_Report.csv with deduplicated, scored fleet data
 
@@ -53,7 +53,7 @@ if (Test-Path $InputPath) {
 
 if ($csvFiles.Count -eq 0) {
     Write-Host "  No CSV files found in $InputPath" -ForegroundColor Red
-    Write-Host "  Run Option 1 (Advanced Diagnostic) or Option 48 (Enterprise Readiness)" -ForegroundColor Yellow
+    Write-Host "  Run Option 8 (Advanced Diagnostic) or Option 40 (Enterprise Readiness)" -ForegroundColor Yellow
     Write-Host "  on target laptops first to generate fleet data." -ForegroundColor Yellow
     Write-Host
     Read-Host "  Press Enter to continue"

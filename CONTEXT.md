@@ -49,12 +49,12 @@ These rules define what LDT is. Violating any of these breaks the product.
 ```
 E:\LDT-v9.0\
 ├── Laptop_Master_Diagnostic.bat    ← Launcher (user entry point, options 0-57)
-├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules, Options 1-48)
-├── Smart_Diagnosis_Engine.ps1      ← Option 54: 9-phase auto-detect + auto-fix
-├── Team_Issue_Detector.ps1         ← Option 49: BSOD + Reset + VPN detector
-├── Quick_Start.ps1                 ← Options 51-53: Score, Auto-Discover, What's Wrong
-├── Fleet_Aggregator.ps1            ← Option 50: Multi-machine fleet dashboard
-├── OEM_Validation.ps1              ← Option 55: 8 read-only hardware validation checks
+├── Laptop_Diagnostic_Suite.ps1     ← Core engine (45 modules, Options 8-48)
+├── Smart_Diagnosis_Engine.ps1      ← Option 4: 9-phase auto-detect + auto-fix
+├── Team_Issue_Detector.ps1         ← Option 53: BSOD + Reset + VPN detector
+├── Quick_Start.ps1                 ← Options 1-3: Auto-Discover, Quick Fix, Score Machine
+├── Fleet_Aggregator.ps1            ← Option 54: Multi-machine fleet dashboard
+├── OEM_Validation.ps1              ← Option 5: 8 read-only hardware validation checks
 ├── CONTEXT.md                      ← THIS FILE
 ├── GUARDRAILS.md                   ← Strict rules for all contributors
 ├── README.md                       ← GitHub project overview
@@ -202,7 +202,7 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 | 2026-02-19 | Vanilla JS (~80 lines) for interactivity | No JS, jQuery, Alpine.js | Minimal footprint. No dependencies. Progressive enhancement. |
 | 2026-02-19 | Team Issue Detector as standalone PS1 | Add to main 378KB PS1, or Node script | Separate PS1 is lower risk — no touching the core engine. Same parameter conventions. |
 | 2026-02-19 | Detect + Auto-Fix (not detect-only) | Detect only, Detect + Recommend | Full value — one script scans AND fixes. Technician runs once, walks away. |
-| 2026-02-19 | Option 49 in BAT menu (not standalone) | Standalone script, Part of Option 1 | Consistent UX — technicians already know the menu. One entry point. |
+| 2026-02-19 | Option 53 in BAT menu (not standalone) | Standalone script, Part of Option 1 | Consistent UX — technicians already know the menu. One entry point. |
 
 ---
 
@@ -210,17 +210,17 @@ Documenting WHY we made key choices. Future contributors: read this before quest
 
 | Version | Date | What Changed |
 |---------|------|-------------|
-| 9.0.0 | 2026-02-23 | Enterprise Governance: GovernanceEngine.psm1 (policy profiles, transaction control, exception governance, retry with backoff, execution modes), FleetGovernance.psm1 (directory tamper detection, whitelist enforcement, rollback simulation, fleet KPIs), 5 execution modes (AuditOnly/Diagnostic/Remediation/Full/ClassifyOnly), Option 57 Governance Audit, 7th guard gate (whitelist), crash recovery via ExecutionState.json, 12 compliance artifacts |
+| 9.0.0 | 2026-02-23 | Enterprise Governance: GovernanceEngine.psm1 (policy profiles, transaction control, exception governance, retry with backoff, execution modes), FleetGovernance.psm1 (directory tamper detection, whitelist enforcement, rollback simulation, fleet KPIs), 5 execution modes (AuditOnly/Diagnostic/Remediation/Full/ClassifyOnly), Option 7 Governance Audit, 7th guard gate (whitelist), crash recovery via ExecutionState.json, 12 compliance artifacts, sequential menu numbering 1-57 |
 | 8.5.0 | 2026-02-23 | Enterprise Hardened: Invoke-GuardedRemediation wrapper, RemediationLedger per-fix audit trail, HealthBefore/HealthAfter risk reduction scoring, ManagementSummary.html executive report, phase timing instrumentation, pre-remediation integrity revalidation, enhanced confidence formula (3-factor), recurrence escalation, stress override classification, 10 compliance artifacts |
-| 7.2.0 | 2026-02-23 | 3-Level Classification Engine: ClassificationEngine.psm1 (L1/L2/L3 decision tree), Option 56 ClassifyOnly mode, HTML triage panel, severity scoring (0-100), component health cards, TrendEngine escalation tracking, 7th compliance artifact |
-| 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 55), Phase 6A direct fixes, scoring/remediation overhaul |
+| 7.2.0 | 2026-02-23 | 3-Level Classification Engine: ClassificationEngine.psm1 (L1/L2/L3 decision tree), Option 6 ClassifyOnly mode, HTML triage panel, severity scoring (0-100), component health cards, TrendEngine escalation tracking, 7th compliance artifact |
+| 7.0.0 | 2026-02-21 | Enterprise engine evolution: 6 Core modules (Guard, Integrity, Scoring, Trend, Compliance, Adapter), OEM Validation (Option 5), Phase 6A direct fixes, scoring/remediation overhaul |
 | 6.1.3 | 2026-02-20 | Display diagnostics: Phase 4H/4I/4J (GPU health, TDR events, panel health) |
 | 6.1.2 | 2026-02-20 | Phase 0 preflight, Phase 3/5 enrichment, backup expansion |
-| 6.1.1 | 2026-02-20 | Smart Diagnosis Engine (Option 54): 8-phase root cause analysis |
-| 6.1.0 | 2026-02-20 | Quick Start (Options 51-53), Fleet Aggregator (Option 50), health scoring |
+| 6.1.1 | 2026-02-20 | Smart Diagnosis Engine (Option 4): 8-phase root cause analysis |
+| 6.1.0 | 2026-02-20 | Quick Start (Options 1-3), Fleet Aggregator (Option 54), health scoring |
 | 6.0.0 | 2026-02-13 | Initial LDT v6.0 — 45 modules, 8 categories, config.ini, BAT launcher |
 | docs-1.0 | 2026-02-19 | Step-by-Step Guide: 12 enterprise visual enhancements |
-| detect-1.0 | 2026-02-19 | Team Issue Detector (Option 49): BSOD + Reset + VPN detection |
+| detect-1.0 | 2026-02-19 | Team Issue Detector (Option 53): BSOD + Reset + VPN detection |
 
 ---
 
@@ -287,11 +287,11 @@ Before deploying any change, manually verify ALL of the following.
 ### Completed
 | # | Item | Status | Type |
 |---|------|--------|------|
-| 1 | Issue Detector Script (BSOD, Reset, VPN) | DONE — Option 49 | New feature |
-| 2 | Smart Diagnosis Engine (Option 54) | DONE — 9-phase auto-detect + auto-fix | New feature |
-| 3 | Quick Start workflows (Options 51-53) | DONE — Score, Auto-Discover, What's Wrong | New feature |
-| 4 | Fleet Aggregator (Option 50) | DONE — Multi-machine dashboard | New feature |
-| 5 | OEM Validation Mode (Option 55) | DONE — 8 read-only hardware checks | New feature |
+| 1 | Issue Detector Script (BSOD, Reset, VPN) | DONE — Option 53 | New feature |
+| 2 | Smart Diagnosis Engine (Option 4) | DONE — 9-phase auto-detect + auto-fix | New feature |
+| 3 | Quick Start workflows (Options 1-3) | DONE — Auto-Discover, Quick Fix, Score Machine | New feature |
+| 4 | Fleet Aggregator (Option 54) | DONE — Multi-machine dashboard | New feature |
+| 5 | OEM Validation Mode (Option 5) | DONE — 8 read-only hardware checks | New feature |
 | 6 | Enterprise Engines (Core/) | DONE — Guard, Integrity, Scoring, Trend, Compliance | New feature |
 | 7 | Phase 6A Direct Fixes | DONE — BITS, DISM, SFC, display driver 4-method | Enhancement |
 | 8 | Git repository initialized | DONE — github.com/Dineshmiriyam/LaptopDiagnosticLDT | Process |

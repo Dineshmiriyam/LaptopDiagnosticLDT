@@ -29,14 +29,14 @@
                       "critical":  true,
                       "role":  "ENGINE",
                       "description":  "9-phase orchestrated root cause analysis engine",
-                      "sha256":  "2C5D4D4BA3BD044DE965CA1EAE061643A007D6D2FD018CF36BCCAE8DB022E7AE"
+                      "sha256":  "47256B40ECFA1270ED7AA072A3A3FEECE3EE48A2258E804C95CC6B94EF97ECA0"
                   },
                   {
                       "relativePath":  "Laptop_Diagnostic_Suite.ps1",
                       "critical":  true,
                       "role":  "CORE",
                       "description":  "Core engine with 45 diagnostic and repair modules",
-                      "sha256":  "9A7B656A832DF5E2C3C9B59250D700B500FAC3C4A06B2F13D98F4EF3303344E3"
+                      "sha256":  "0AA4F03754E64E64A31402912B6EA8FF6CE01C8C3336386853109BA8BCE40914"
                   },
                   {
                       "relativePath":  "Core\\LDT-EngineAdapter.psm1",
@@ -99,21 +99,21 @@
                       "critical":  false,
                       "role":  "SCRIPT",
                       "description":  "Fleet-wide BSOD/Reset/VPN detector (Option 49)",
-                      "sha256":  "4DF0F638E6130B5AA5A7A58BFD3CA9701FB0DDB693557B85779E631A15374C81"
+                      "sha256":  "51723617C5E77F5978194F71F0A8BEE28427D796048BB378CBE1CF5125D5441E"
                   },
                   {
                       "relativePath":  "Fleet_Aggregator.ps1",
                       "critical":  false,
                       "role":  "SCRIPT",
                       "description":  "CSV merge and fleet HTML dashboard (Option 50)",
-                      "sha256":  "374D897BEDBB2A866AD9B3729A56B2865C5B986B61BECBF1994DB0F5E6BC8B1D"
+                      "sha256":  "4BFACD0B3D44793C7625A434B08F44CBCE6E71C9ECBD3E849A51C42C2B12AB42"
                   },
                   {
                       "relativePath":  "OEM_Validation.ps1",
                       "critical":  false,
                       "role":  "TOOL",
                       "description":  "OEM read-only validation mode (Option 55)",
-                      "sha256":  "86C5B83256E620DC45FDE92CF4F2C21C765AA99A486F07328488A6BC17AB43B6"
+                      "sha256":  "912C910BF47DA37B6AAD164D3C0D14FC1F6A11FC86E59A7CAFC2DC7AE1060A15"
                   },
                   {
                       "relativePath":  "Config\\config.ini",
@@ -150,8 +150,8 @@
                        "changeControlRef":  "LDT-v9.0.0",
                        "validationMatrix":  "Docs\\ValidationTestMatrix.md"
                    },
-    "_selfHash":  "FE133D8D751AEAE326FD466E8E2A09823249DE79CCD37452B01BE8FF2E69CC20",
-    "_manifestUpdatedAt":  "2026-02-23T17:20:00.9149314+05:30",
+    "_selfHash":  "06D1791C186BF12DF69863AAEE4557C490D4C8582FB91D9E942EE10813CF9236",
+    "_manifestUpdatedAt":  "2026-02-23T18:13:04.4461797+05:30",
     "_manifestUpdatedBy":  "DESKTOP-7G6HT08\\LENOVO"
 }
 

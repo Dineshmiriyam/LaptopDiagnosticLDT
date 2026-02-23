@@ -2,7 +2,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    LDT OEM Validation Mode -- Read-Only Hardware and Firmware Baseline Validator (Option 55)
+    LDT OEM Validation Mode -- Read-Only Hardware and Firmware Baseline Validator (Option 5)
 
 .DESCRIPTION
     Operates in a strictly read-only mode. NO system state is modified.

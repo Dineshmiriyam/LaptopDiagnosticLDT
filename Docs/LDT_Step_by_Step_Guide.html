@@ -360,10 +360,10 @@
       <p>
         Laptop Diagnostic Toolkit v9.0.0 is a <strong>deterministic, state-driven diagnostic and remediation engine</strong>
         for Windows 10 and Windows 11 laptops. Runs 100% from a USB drive — no installation, no internet, no cloud,
-        no telemetry. The <strong>Smart Diagnosis Engine (Option 54)</strong> runs a 9-phase analysis with decision tree logic,
+        no telemetry. The <strong>Smart Diagnosis Engine (Option 4)</strong> runs a 9-phase analysis with decision tree logic,
         creates rollback backups before any fix, validates fixes under stress, and produces
-        structured <strong>JSON + HTML reports</strong>. The <strong>Classification Engine (Option 56)</strong> adds formal
-        3-level L1/L2/L3 diagnostic triage with a 5-branch decision tree. The <strong>Governance Audit (Option 57)</strong> provides
+        structured <strong>JSON + HTML reports</strong>. The <strong>Classification Engine (Option 6)</strong> adds formal
+        3-level L1/L2/L3 diagnostic triage with a 5-branch decision tree. The <strong>Governance Audit (Option 7)</strong> provides
         enterprise policy enforcement with Strict/Balanced/Aggressive profiles and transaction control. Includes <strong>45 core diagnostic modules</strong>,
         <strong>9 enterprise engine modules</strong>, fleet scanning, and guided quick-start workflows.
       </p>
@@ -409,25 +409,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128269;</div><div class="if-name">Not sure what's wrong</div></div></td>
               <td class="if-desc">Auto-scans the entire machine — hardware, software, drivers, security — and shows a full dashboard with all issues found</td>
-              <td class="if-option"><span>Option</span>51</td>
+              <td class="if-option"><span>Option</span>1</td>
               <td><span class="badge badge-scan">SCAN</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9889;</div><div class="if-name">Quick fix by symptom</div></div></td>
               <td class="if-desc">Pick your symptom from a list (slow, BSOD, Wi-Fi, etc.) and the toolkit runs only the targeted fixes for that issue</td>
-              <td class="if-option"><span>Option</span>52</td>
+              <td class="if-option"><span>Option</span>2</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#127942;</div><div class="if-name">Quick health score check</div></div></td>
               <td class="if-desc">Gives you a 0-100 health score with letter grade (A-F) across hardware, security, stability, and performance in under 2 minutes</td>
-              <td class="if-option"><span>Option</span>53</td>
+              <td class="if-option"><span>Option</span>3</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128300;</div><div class="if-name">Full 9-phase deep diagnosis</div></div></td>
               <td class="if-desc">Runs all 9 phases: snapshot, hardware gate, OS check, driver check, performance, auto-fix, stress test, final report — the complete package</td>
-              <td class="if-option"><span>Option</span>54</td>
+              <td class="if-option"><span>Option</span>4</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
 
@@ -436,25 +436,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128309;</div><div class="if-name">Random blue screen (BSOD)</div></div></td>
               <td class="if-desc">Reads crash dump files, finds the bad driver causing the BSOD, rolls back or updates it automatically — creates restore point first</td>
-              <td class="if-option"><span>Option</span>33</td>
+              <td class="if-option"><span>Option</span>19</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128163;</div><div class="if-name">BSOD analysis only (no fix)</div></div></td>
               <td class="if-desc">Analyzes minidump files and BugCheck events to identify crash patterns and faulting drivers — report only, no changes made</td>
-              <td class="if-option"><span>Option</span>2</td>
+              <td class="if-option"><span>Option</span>9</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128260;</div><div class="if-name">Laptop keeps restarting</div></div></td>
               <td class="if-desc">Scans Kernel-Power 41 (dirty shutdown) and Event 6008 (unexpected reboot) logs to find the root cause of restart loops</td>
-              <td class="if-option"><span>Option</span>54</td>
+              <td class="if-option"><span>Option</span>4</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#10060;</div><div class="if-name">Windows won't boot</div></div></td>
               <td class="if-desc">Repairs BCD boot entries, runs SFC and DISM to fix corrupt system files, validates Secure Boot — creates full backup before repair</td>
-              <td class="if-option"><span>Option</span>6</td>
+              <td class="if-option"><span>Option</span>13</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
 
@@ -463,25 +463,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128737;</div><div class="if-name">Antivirus / Defender disabled</div></div></td>
               <td class="if-desc">Detects Defender off, re-enables real-time protection, updates virus signatures, turns on all 3 firewall profiles automatically</td>
-              <td class="if-option"><span>Option</span>31</td>
+              <td class="if-option"><span>Option</span>17</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128293;</div><div class="if-name">Firewall disabled</div></div></td>
               <td class="if-desc">Checks Domain, Private, and Public firewall profiles — re-enables any disabled profiles, fixes UAC, and hardens Windows Update</td>
-              <td class="if-option"><span>Option</span>31</td>
+              <td class="if-option"><span>Option</span>17</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128274;</div><div class="if-name">TPM / BitLocker issues</div></div></td>
               <td class="if-desc">Checks TPM 2.0 presence, ROCA vulnerability, BitLocker status, and TPM event logs — reports readiness for encryption</td>
-              <td class="if-option"><span>Option</span>43</td>
+              <td class="if-option"><span>Option</span>35</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128272;</div><div class="if-name">Full security audit</div></div></td>
               <td class="if-desc">Checks Defender status, TPM, BitLocker, Secure Boot, firewall, and security services — full security posture assessment</td>
-              <td class="if-option"><span>Option</span>27</td>
+              <td class="if-option"><span>Option</span>45</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -490,25 +490,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128246;</div><div class="if-name">Wi-Fi not working</div></div></td>
               <td class="if-desc">Resets Wi-Fi adapter, updates driver, resets Winsock and IP stack, sets DNS fallback (8.8.8.8/1.1.1.1), tests connectivity</td>
-              <td class="if-option"><span>Option</span>32</td>
+              <td class="if-option"><span>Option</span>18</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#127760;</div><div class="if-name">No internet / DNS failure</div></div></td>
               <td class="if-desc">Tests default gateway, checks Winsock catalogue health, detects proxy misconfig, resets network stack with DNS fallback</td>
-              <td class="if-option"><span>Option</span>32</td>
+              <td class="if-option"><span>Option</span>18</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128279;</div><div class="if-name">VPN connection failing</div></div></td>
               <td class="if-desc">Scans VPN adapter state, Bluetooth pairing issues, mobile hotspot config, and network adapter health — fixes common VPN blockers</td>
-              <td class="if-option"><span>Option</span>32</td>
+              <td class="if-option"><span>Option</span>18</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128225;</div><div class="if-name">Network diagnostic only</div></div></td>
               <td class="if-desc">Enumerates all adapters (Wi-Fi, Ethernet, Bluetooth), tests DNS resolution, measures latency — report only, no changes</td>
-              <td class="if-option"><span>Option</span>15</td>
+              <td class="if-option"><span>Option</span>23</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -517,25 +517,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128034;</div><div class="if-name">Laptop running slow</div></div></td>
               <td class="if-desc">Benchmarks CPU, RAM, and disk I/O — identifies startup bloat, memory pressure, low disk space — recommends cleanup actions</td>
-              <td class="if-option"><span>Option</span>16</td>
+              <td class="if-option"><span>Option</span>24</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128293;</div><div class="if-name">Laptop running hot / fan loud</div></div></td>
               <td class="if-desc">30-second thermal monitoring — logs CPU temps every 5 seconds, detects if fan RPM is absent, warns on thermal throttling</td>
-              <td class="if-option"><span>Option</span>17</td>
+              <td class="if-option"><span>Option</span>25</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128267;</div><div class="if-name">Battery draining fast</div></div></td>
               <td class="if-desc">Reads battery wear %, cycle count, design vs actual capacity — tells you if battery needs replacement or if it's a software drain</td>
-              <td class="if-option"><span>Option</span>14</td>
+              <td class="if-option"><span>Option</span>22</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128336;</div><div class="if-name">Slow boot / too many startups</div></div></td>
               <td class="if-desc">Cleans temp files, disables excessive startup items, clears cache — reduces boot time by removing unnecessary software bloat</td>
-              <td class="if-option"><span>Option</span>9</td>
+              <td class="if-option"><span>Option</span>16</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
 
@@ -544,31 +544,31 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128190;</div><div class="if-name">Hard drive failing / slow disk</div></div></td>
               <td class="if-desc">Deep SMART attribute analysis — reads uncorrectable errors, wear level, power-on hours, temperature — predicts drive failure</td>
-              <td class="if-option"><span>Option</span>40</td>
+              <td class="if-option"><span>Option</span>32</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128204;</div><div class="if-name">RAM / Memory errors</div></div></td>
               <td class="if-desc">Cross-references WHEA errors, Windows Memory Diagnostic results, and BugCheck memory stop codes — identifies bad DIMM</td>
-              <td class="if-option"><span>Option</span>46</td>
+              <td class="if-option"><span>Option</span>38</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128424;</div><div class="if-name">Display issues / dead pixels</div></div></td>
               <td class="if-desc">9-step display check: GPU health, driver age, TDR events, refresh rate, brightness, EDID panel info, resolution mismatch, pixel policy</td>
-              <td class="if-option"><span>Option</span>47</td>
+              <td class="if-option"><span>Option</span>39</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128187;</div><div class="if-name">Full hardware deep scan</div></div></td>
               <td class="if-desc">Tests CPU, memory, disk, network adapter, battery, thermal — all hardware subsystems in one pass with pass/fail results</td>
-              <td class="if-option"><span>Option</span>3</td>
+              <td class="if-option"><span>Option</span>10</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9000;</div><div class="if-name">CMOS battery dead / clock wrong</div></div></td>
               <td class="if-desc">Checks RTC clock drift against NTP, scans for CMOS error events over 180 days — detects dead CR2032 coin cell battery</td>
-              <td class="if-option"><span>Option</span>41</td>
+              <td class="if-option"><span>Option</span>33</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -577,13 +577,13 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9000;</div><div class="if-name">Keyboard / trackpoint not working</div></div></td>
               <td class="if-desc">Diagnoses keyboard, TrackPoint, and touchpad drivers — resets HID devices, reinstalls input drivers, verifies hotkeys</td>
-              <td class="if-option"><span>Option</span>34</td>
+              <td class="if-option"><span>Option</span>20</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128266;</div><div class="if-name">No sound / audio issues</div></div></td>
               <td class="if-desc">Scans sound devices, checks Windows Audio service, validates audio driver status — identifies hardware vs software audio faults</td>
-              <td class="if-option"><span>Option</span>19</td>
+              <td class="if-option"><span>Option</span>27</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
 
@@ -592,31 +592,31 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9888;</div><div class="if-name">Driver problems / yellow triangle</div></div></td>
               <td class="if-desc">Finds all problem and unsigned drivers, auto-updates via Windows Update + Lenovo System Update + Thin Installer + pnputil</td>
-              <td class="if-option"><span>Option</span>35</td>
+              <td class="if-option"><span>Option</span>21</td>
               <td><span class="badge badge-auto">AUTO-FIX</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128296;</div><div class="if-name">Driver repair (targeted)</div></div></td>
               <td class="if-desc">Scans for drivers with PnP error codes, identifies unsigned drivers, attempts targeted repair — less aggressive than full auto-update</td>
-              <td class="if-option"><span>Option</span>8</td>
+              <td class="if-option"><span>Option</span>15</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128268;</div><div class="if-name">BIOS needs update</div></div></td>
               <td class="if-desc">Checks current BIOS version, age, and firmware type — recommends update path. Requires AC power and 20%+ battery</td>
-              <td class="if-option"><span>Option</span>26</td>
+              <td class="if-option"><span>Option</span>44</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128197;</div><div class="if-name">Windows Update stuck / old</div></div></td>
               <td class="if-desc">Checks Windows Update status, Lenovo System Update availability, update component health — triggers pending installs</td>
-              <td class="if-option"><span>Option</span>25</td>
+              <td class="if-option"><span>Option</span>43</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128187;</div><div class="if-name">ThinkPad POST beep codes</div></div></td>
               <td class="if-desc">Reads POST/BIOS error codes from event logs (90 days), checks BIOS age — decodes ThinkPad-specific POST error patterns</td>
-              <td class="if-option"><span>Option</span>39</td>
+              <td class="if-option"><span>Option</span>31</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -625,19 +625,19 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128101;</div><div class="if-name">Same issue across the team</div></div></td>
               <td class="if-desc">Scans for BSOD patterns, unexpected resets, and VPN issues across multiple machines — generates CSV for fleet-wide analysis</td>
-              <td class="if-option"><span>Option</span>49</td>
+              <td class="if-option"><span>Option</span>53</td>
               <td><span class="badge badge-scan">SCAN</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128202;</div><div class="if-name">Merge fleet scan results</div></div></td>
               <td class="if-desc">Combines CSV results from multiple USB scans into one fleet view — generates sortable HTML dashboard with score distribution</td>
-              <td class="if-option"><span>Option</span>50</td>
+              <td class="if-option"><span>Option</span>54</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#127970;</div><div class="if-name">Enterprise health scorecard</div></div></td>
               <td class="if-desc">Master health scorecard with weighted scores across security, hardware, storage, battery, drivers, OS, identity, TPM, display</td>
-              <td class="if-option"><span>Option</span>48</td>
+              <td class="if-option"><span>Option</span>40</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -646,25 +646,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#127993;</div><div class="if-name">Classify severity (L1/L2/L3)</div></div></td>
               <td class="if-desc">Runs full scan + 3-level classification: L1 software-fixable, L2 replaceable component, L3 technician required — no fixes applied</td>
-              <td class="if-option"><span>Option</span>56</td>
+              <td class="if-option"><span>Option</span>6</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#127961;</div><div class="if-name">Governance compliance audit</div></div></td>
               <td class="if-desc">AuditOnly mode — scans machine against enterprise policy (Strict/Balanced/Aggressive) with no fixes, no classification — scan + log only</td>
-              <td class="if-option"><span>Option</span>57</td>
+              <td class="if-option"><span>Option</span>7</td>
               <td><span class="badge badge-scan">SCAN</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9989;</div><div class="if-name">OEM factory baseline check</div></div></td>
               <td class="if-desc">Read-only 8-point OEM validation: SecureBoot, TPM, BIOS, fingerprint, Win11 readiness, POST history, driver catalog, baseline drift</td>
-              <td class="if-option"><span>Option</span>55</td>
+              <td class="if-option"><span>Option</span>5</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128187;</div><div class="if-name">Windows 11 upgrade ready?</div></div></td>
               <td class="if-desc">Checks TPM 2.0, Secure Boot, RAM (4GB+), storage (64GB+), CPU compatibility — tells you exactly what's blocking Win11 upgrade</td>
-              <td class="if-option"><span>Option</span>44</td>
+              <td class="if-option"><span>Option</span>36</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
 
@@ -673,25 +673,25 @@
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#9851;</div><div class="if-name">Refurbishing a used laptop</div></div></td>
               <td class="if-desc">10-point quality checklist: battery score, thermal stress test, hardware pass rate, disk health — generates refurb pass/fail certificate</td>
-              <td class="if-option"><span>Option</span>29</td>
+              <td class="if-option"><span>Option</span>47</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128267;</div><div class="if-name">Refurb battery check</div></div></td>
               <td class="if-desc">Battery-specific scoring for resale: cycle count, wear %, design vs actual capacity, charge rate — scored for resale readiness</td>
-              <td class="if-option"><span>Option</span>28</td>
+              <td class="if-option"><span>Option</span>46</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128230;</div><div class="if-name">Preparing for deployment</div></div></td>
               <td class="if-desc">Pre-deployment checklist: OS activation, security posture, driver status, update compliance — ensures machine is field-ready</td>
-              <td class="if-option"><span>Option</span>24</td>
+              <td class="if-option"><span>Option</span>42</td>
               <td><span class="badge badge-report">REPORT</span></td>
             </tr>
             <tr>
               <td><div class="if-problem"><div class="if-icon">&#128221;</div><div class="if-name">Secure data wipe</div></div></td>
               <td class="if-desc">Privacy cleanup: clears temp files, browser caches, recent file lists, and sensitive data traces — safe for reassignment</td>
-              <td class="if-option"><span>Option</span>23</td>
+              <td class="if-option"><span>Option</span>41</td>
               <td><span class="badge badge-guided">GUIDED</span></td>
             </tr>
 
@@ -729,28 +729,28 @@
         <div class="layer-badge" style="background:rgba(226,35,26,0.10)"><div class="lb-num" style="color:#FF6B6B">2</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">SMART DIAGNOSIS ENGINE -- Smart_Diagnosis_Engine.ps1 (2,816 lines)</div>
-          <div class="layer-desc">Option 54. The <strong>9-phase orchestrated root cause analysis engine</strong> with decision tree logic. Collects a full system snapshot, classifies hardware vs software faults, ranks root causes by weight, auto-remediates L1 software issues, validates fixes under stress, and produces JSON + HTML reports. This is the core of what this guide documents.</div>
+          <div class="layer-desc">Option 4. The <strong>9-phase orchestrated root cause analysis engine</strong> with decision tree logic. Collects a full system snapshot, classifies hardware vs software faults, ranks root causes by weight, auto-remediates L1 software issues, validates fixes under stress, and produces JSON + HTML reports. This is the core of what this guide documents.</div>
         </div>
       </div>
       <div class="layer-row reveal">
         <div class="layer-badge" style="background:rgba(0,200,117,0.10)"><div class="lb-num" style="color:var(--green)">3</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">QUICK START -- Quick_Start.ps1 (1,382 lines)</div>
-          <div class="layer-desc">Options 51-53. Three guided workflows: <strong>Auto-Discover</strong> (runs key diagnostics automatically), <strong>Quick Fix by Symptom</strong> (user picks the problem, tool fixes it), and <strong>Score This Machine</strong> (weighted 0-100 health score with letter grade A-F). Baseline comparison with JSON snapshots per device serial.</div>
+          <div class="layer-desc">Options 1-3. Three guided workflows: <strong>Auto-Discover</strong> (runs key diagnostics automatically), <strong>Quick Fix by Symptom</strong> (user picks the problem, tool fixes it), and <strong>Score This Machine</strong> (weighted 0-100 health score with letter grade A-F). Baseline comparison with JSON snapshots per device serial.</div>
         </div>
       </div>
       <div class="layer-row reveal">
         <div class="layer-badge" style="background:rgba(245,158,11,0.10)"><div class="lb-num" style="color:var(--amber)">4</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">TEAM SCANNER -- Team_Issue_Detector.ps1 (849 lines)</div>
-          <div class="layer-desc">Option 49. Fleet-wide scanning for the three most common team issues: <strong>BSOD patterns</strong> (minidump + BugCheck analysis), <strong>unexpected resets</strong> (Kernel-Power 41 + Event 6008), and <strong>VPN configuration problems</strong>. Generates CSV for fleet aggregation.</div>
+          <div class="layer-desc">Option 53. Fleet-wide scanning for the three most common team issues: <strong>BSOD patterns</strong> (minidump + BugCheck analysis), <strong>unexpected resets</strong> (Kernel-Power 41 + Event 6008), and <strong>VPN configuration problems</strong>. Generates CSV for fleet aggregation.</div>
         </div>
       </div>
       <div class="layer-row reveal">
         <div class="layer-badge" style="background:rgba(6,182,212,0.10)"><div class="lb-num" style="color:#22D3EE">5</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">FLEET AGGREGATOR -- Fleet_Aggregator.ps1 (394 lines)</div>
-          <div class="layer-desc">Option 50. Merges and deduplicates CSV results from multiple machines into a single fleet view. Generates a <strong>self-contained HTML dashboard</strong> with sortable table, score distribution chart, and severity breakdown. Identifies fleet-wide patterns.</div>
+          <div class="layer-desc">Option 54. Merges and deduplicates CSV results from multiple machines into a single fleet view. Generates a <strong>self-contained HTML dashboard</strong> with sortable table, score distribution chart, and severity breakdown. Identifies fleet-wide patterns.</div>
         </div>
       </div>
       <div class="layer-row reveal">
@@ -1159,13 +1159,13 @@
 <span class="ut-dir">E:\LDT-v9.0\</span>  <span class="ut-note">(USB Drive Root — drive letter detected automatically by BAT launcher)</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Master_Diagnostic.bat</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 0: Launcher (Options 0-57, admin elevation, PS check)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Diagnostic_Suite.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 1: Core engine (45 modules, 7,002 lines, Options 1-48)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Smart_Diagnosis_Engine.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 2: 9-phase diagnosis + ClassifyOnly mode (Options 54, 56)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Quick_Start.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 3: Guided workflows (Options 51-53)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Team_Issue_Detector.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 4: Fleet BSOD + Reset + VPN scanner (Option 49)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Fleet_Aggregator.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 5: CSV merge + HTML dashboard (Option 50)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── OEM_Validation.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← OEM read-only validation mode (Option 55)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Governance_Audit.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Governance audit — AuditOnly mode (Option 57)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Diagnostic_Suite.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 1: Core engine (45 modules, 7,002 lines, Options 8-48)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Smart_Diagnosis_Engine.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 2: 9-phase diagnosis + ClassifyOnly mode (Options 4, 6)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Quick_Start.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 3: Guided workflows (Options 1-3)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Team_Issue_Detector.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 4: Fleet BSOD + Reset + VPN scanner (Option 53)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Fleet_Aggregator.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 5: CSV merge + HTML dashboard (Option 54)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── OEM_Validation.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← OEM read-only validation mode (Option 5)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Governance_Audit.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Governance audit — AuditOnly mode (Option 7)</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Core\</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 5b: Enterprise engine modules (.psm1)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── GuardEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 7-gate remediation authority</span><br>

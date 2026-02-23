@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Smart Diagnosis Engine - LDT v9.0 Option 54
+    Smart Diagnosis Engine - LDT v9.0 Option 4
     9-phase orchestrated diagnostic with decision tree, root cause ranking,
     rollback protection, post-fix stress validation, and enterprise engines.
 

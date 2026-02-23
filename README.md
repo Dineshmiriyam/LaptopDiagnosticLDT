@@ -29,7 +29,7 @@ Optimized for Lenovo ThinkPad fleets but compatible with any Windows 10/11 lapto
 - [Directory Structure](#directory-structure)
 - [Scripts and Entry Points](#scripts-and-entry-points)
 - [Enterprise Engines (v9.0)](#enterprise-engines-v90)
-- [Smart Diagnosis Engine (Option 54)](#smart-diagnosis-engine-option-54)
+- [Smart Diagnosis Engine (Option 4)](#smart-diagnosis-engine-option-4)
 - [Configuration](#configuration)
 - [Quick Reference](#quick-reference)
 - [Built With](#built-with)
@@ -82,12 +82,12 @@ There is no installation. LDT runs directly from the USB drive.
 LDT-v9.0/
 |
 |-- Laptop_Master_Diagnostic.bat        Launcher (right-click -> Run as Administrator)
-|-- Laptop_Diagnostic_Suite.ps1         Core engine (45 diagnostic modules, Options 1-48)
-|-- Smart_Diagnosis_Engine.ps1          Option 54: 9-phase auto-detect + auto-fix
-|-- Team_Issue_Detector.ps1             Option 49: Quick triage (BSOD + Resets + VPN)
-|-- Quick_Start.ps1                     Options 51-53: Overview, auto-discover, scoring
-|-- Fleet_Aggregator.ps1                Option 50: Multi-machine fleet dashboard
-|-- OEM_Validation.ps1                  Option 55: 8 read-only hardware validation checks
+|-- Laptop_Diagnostic_Suite.ps1         Core engine (45 diagnostic modules, Options 8-48)
+|-- Smart_Diagnosis_Engine.ps1          Option 4: 9-phase auto-detect + auto-fix
+|-- Team_Issue_Detector.ps1             Option 53: Quick triage (BSOD + Resets + VPN)
+|-- Quick_Start.ps1                     Options 1-3: Auto-Discover, Quick Fix, Score Machine
+|-- Fleet_Aggregator.ps1                Option 54: Multi-machine fleet dashboard
+|-- OEM_Validation.ps1                  Option 5: 8 read-only hardware validation checks
 |
 |-- Config/
 |   |-- config.ini                      Master configuration (33 sections, 200+ parameters)
@@ -131,14 +131,14 @@ LDT-v9.0/
 | Script | Menu Option | Purpose |
 |--------|-------------|---------|
 | `Laptop_Master_Diagnostic.bat` | -- | **Launcher.** Right-click, Run as Administrator. Auto-elevates and presents the menu. |
-| `Laptop_Diagnostic_Suite.ps1` | 1--48 | **Core engine.** 45 diagnostic and repair modules covering hardware, OS, drivers, performance, network, and security. |
-| `Team_Issue_Detector.ps1` | 49 | **Quick triage.** Scans for BSOD events, unexpected resets, and VPN issues. Outputs terminal summary and HTML report. |
-| `Fleet_Aggregator.ps1` | 50 | **Fleet dashboard.** Aggregates diagnostic results across multiple machines into a single view. |
-| `Quick_Start.ps1` | 51--53 | **One-click workflows.** Option 51: Full overview. Option 52: Auto-discover issues. Option 53: Score this machine. |
-| `Smart_Diagnosis_Engine.ps1` | 54 | **Smart Diagnosis.** 9-phase orchestrated root cause analysis with auto-fix and compliance reporting. |
-| `OEM_Validation.ps1` | 55 | **OEM validation.** 8 read-only hardware checks (no modifications to the target system). |
-| `Smart_Diagnosis_Engine.ps1` | 56 | **Classification Engine (ClassifyOnly).** 3-level triage without remediation. |
-| `Smart_Diagnosis_Engine.ps1` | 57 | **Governance Audit (AuditOnly).** Full scan and report without fixes or classification. |
+| `Quick_Start.ps1` | 1--3 | **One-click workflows.** Option 1: Auto-Discover. Option 2: Quick Fix by Symptom. Option 3: Score This Machine. |
+| `Smart_Diagnosis_Engine.ps1` | 4 | **Smart Diagnosis.** 9-phase orchestrated root cause analysis with auto-fix and compliance reporting. |
+| `OEM_Validation.ps1` | 5 | **OEM validation.** 8 read-only hardware checks (no modifications to the target system). |
+| `Smart_Diagnosis_Engine.ps1` | 6 | **Classification Engine (ClassifyOnly).** 3-level triage without remediation. |
+| `Smart_Diagnosis_Engine.ps1` | 7 | **Governance Audit (AuditOnly).** Full scan and report without fixes or classification. |
+| `Laptop_Diagnostic_Suite.ps1` | 8--48 | **Core engine.** 45 diagnostic and repair modules covering hardware, OS, drivers, performance, network, and security. |
+| `Team_Issue_Detector.ps1` | 53 | **Quick triage.** Scans for BSOD events, unexpected resets, and VPN issues. Outputs terminal summary and HTML report. |
+| `Fleet_Aggregator.ps1` | 54 | **Fleet dashboard.** Aggregates diagnostic results across multiple machines into a single view. |
 
 ---
 
@@ -160,7 +160,7 @@ Version 9.0 provides nine enterprise-grade engine modules in the `Core/` directo
 
 ---
 
-## Smart Diagnosis Engine (Option 54)
+## Smart Diagnosis Engine (Option 4)
 
 The Smart Diagnosis Engine is a 9-phase orchestrated diagnostic pipeline that automatically detects issues, applies targeted fixes, and produces compliance-grade reports.
 
@@ -230,7 +230,7 @@ Common scenarios and which option to use:
 ## Known Limitations
 
 - **Display driver auto-update**: Phase 6A tries 4 methods in sequence (Windows Update COM API, Lenovo System Update, Lenovo Thin Installer, pnputil). If none of these tools are installed on the target machine or USB, the update will fail and the script escalates with a manual download URL. To maximize success, place [Lenovo Thin Installer](https://support.lenovo.com/solutions/ht037099) in `Tools/LenovoThinInstaller/` before deployment.
-- **Domain-joined machines**: Driver Auto-Update (Option 35) and some Phase 6 fixes may conflict with SCCM/WSUS/Intune policies. The toolkit detects domain membership and warns before proceeding, but cannot override Group Policy restrictions.
+- **Domain-joined machines**: Driver Auto-Update (Option 21) and some Phase 6 fixes may conflict with SCCM/WSUS/Intune policies. The toolkit detects domain membership and warns before proceeding, but cannot override Group Policy restrictions.
 - **Hardware diagnostics**: Some findings (e.g., swollen battery, cracked screen, physical damage) require visual inspection. The toolkit flags related symptoms (battery wear, display anomalies) but cannot replace hands-on assessment.
 - **Compliance mappings**: ISO 27001, SOC 2, and CIS benchmark artifact generation is self-assessed based on the toolkit's operational scope. These artifacts have not been certified by an external auditor. They are intended as supporting evidence for compliance programs, not as standalone proof of compliance.
 - **Offline driver catalog**: The toolkit ships no driver binaries. All driver updates require either an internet connection or pre-staged OEM update utilities on the USB drive.

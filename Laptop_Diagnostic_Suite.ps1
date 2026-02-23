@@ -6850,14 +6850,14 @@ function Invoke-EnterpriseReadinessReport {
             if ($r.Status -eq "Fail") {
                 $actionNum++
                 $action = switch -Wildcard ($r.Component) {
-                    "*Security*" { "Run Security Hardening (Option 34) to resolve security deficiencies" }
-                    "*Storage*" { "Run SMART Disk Analysis (Option 40) and free disk space or replace failing drive" }
-                    "*Battery*" { "Run Battery Health (Option 14) - consider battery replacement if cycle count high" }
-                    "*Driver*" { "Run Driver Auto-Update (Option 38) to resolve problem devices" }
-                    "*OS*" { "Run Win11 Readiness Check (Option 44) and plan OS upgrade" }
-                    "*Identity*" { "Run Machine Identity Check (Option 42) - reflash FRU data if serial/UUID invalid" }
-                    "*TPM*" { "Run TPM Health Check (Option 43) - enable TPM in BIOS or update firmware" }
-                    "*Display*" { "Run Display Pixel Check (Option 47) - update GPU drivers or replace display" }
+                    "*Security*" { "Run Security Hardening (Option 17) to resolve security deficiencies" }
+                    "*Storage*" { "Run SMART Disk Analysis (Option 32) and free disk space or replace failing drive" }
+                    "*Battery*" { "Run Battery Health (Option 22) - consider battery replacement if cycle count high" }
+                    "*Driver*" { "Run Driver Auto-Update (Option 21) to resolve problem devices" }
+                    "*OS*" { "Run Win11 Readiness Check (Option 36) and plan OS upgrade" }
+                    "*Identity*" { "Run Machine Identity Check (Option 34) - reflash FRU data if serial/UUID invalid" }
+                    "*TPM*" { "Run TPM Health Check (Option 35) - enable TPM in BIOS or update firmware" }
+                    "*Display*" { "Run Display Pixel Check (Option 39) - update GPU drivers or replace display" }
                     default { "Investigate and resolve: $($r.Details)" }
                 }
                 $null = $actionItems.Add([PSCustomObject]@{ Priority = $actionNum; Action = $action; Source = $r.Component })
