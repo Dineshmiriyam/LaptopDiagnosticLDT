@@ -2,6 +2,28 @@
 
 All notable changes to the Laptop Diagnostic Toolkit are documented here.
 
+## [10.0.0] - 2026-02-24
+
+### Added
+- **CertificationEngine.psm1** (`Core/`): Engine self-health check, KPI validation, config schema validation, security hardening status (7 exported functions)
+- **AuditExportEngine.psm1** (`Core/`): Packages all compliance JSON/HTML artifacts into timestamped zip with SHA256 manifest
+- **ZeroTrustEngine.psm1** (`Core/`): Script signature validation, approved files manifest, config hash verification (available for standalone use)
+- **ResilienceEngine.psm1** (`Core/`): Crash-proof transaction tokens, resource governance monitoring (available for standalone use)
+- **Phase 0 config schema validation** (0I): Validates config.ini structure on every diagnostic run; INVALID aborts, WARNING displays
+- **Cross-session remediation registry**: `Import/Export-RemediationRegistry` in Phase 6 prevents re-applying same fix across sessions
+- **Options 58-60**: Engine Health Check, Config Schema Validator, Export Audit Bundle
+- **GuardEngine enhancements**: `Export-RemediationRegistry`, `Import-RemediationRegistry`, `Test-MultiModuleOverlap`
+- **IntegrityEngine enhancement**: `New-ForensicArchive` with ChainHash support
+- **ClassificationEngine enhancement**: `Invoke-DiagnosticClassification` with mandatory cause validation
+- **FleetGovernance enhancement**: `Get-FleetKPIFields` formal KPI field definitions
+- **ComplianceExport expanded to 16 artifacts**: Added KPIReport, SecurityHardening, RegressionReport, AuditManifest
+- **8 new config.ini sections**: `[ZeroTrust]`, `[ResourceGovernance]`, `[ConfigSchema]`, `[SecurityHardening]`, `[ForensicIntegrity]`, `[KPIThresholds]`, `[RegressionHarness]`, `[AuditExport]`
+
+### Changed
+- Version bumped to 10.0.0 across Smart Diagnosis Engine, BAT launcher
+- BAT menu expanded from 57 to 60 options
+- BAT edition label changed from "Enterprise Governance Edition" to "Certification-Ready Edition"
+
 ## [9.0.0] - 2026-02-23
 
 ### Added

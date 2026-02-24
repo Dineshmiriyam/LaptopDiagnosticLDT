@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Smart Diagnosis Engine - LDT v9.0 Option 4
+    Smart Diagnosis Engine - LDT v10.0 Option 4
     9-phase orchestrated diagnostic with decision tree, root cause ranking,
     rollback protection, post-fix stress validation, and enterprise engines.
 
 .VERSION
-    9.0.0
+    10.0.0
 
 .NOTES
     Architecture: Standalone PS1 (called by Laptop_Master_Diagnostic.bat)
@@ -76,6 +76,20 @@ if ($v7EnginesAvailable -and (Test-Path $coreDir)) {
     catch {
         Write-Host "  [INFO] Governance engines not available: $($_.Exception.Message)" -ForegroundColor DarkGray
         $v9GovernanceAvailable = $false
+    }
+}
+
+# v10 Certification Engine import (graceful degradation)
+$v10CertificationAvailable = $false
+if ($v9GovernanceAvailable -and (Test-Path $coreDir)) {
+    try {
+        Import-Module (Join-Path $coreDir "CertificationEngine.psm1") -Force -ErrorAction Stop
+        Import-Module (Join-Path $coreDir "AuditExportEngine.psm1") -Force -ErrorAction Stop
+        $v10CertificationAvailable = $true
+    }
+    catch {
+        Write-Host "  [INFO] v10 certification engines not available: $($_.Exception.Message)" -ForegroundColor DarkGray
+        $v10CertificationAvailable = $false
     }
 }
 
@@ -714,6 +728,25 @@ function Invoke-Phase0-Preflight {
         }
         catch {
             Write-Finding -Label "  Log Integrity" -Value "Skipped" -Color "DarkGray"
+        }
+    }
+
+    # 0I: Config Schema Validation (v10)
+    if ($v10CertificationAvailable) {
+        try {
+            $schemaResult = Test-ConfigSchema -ConfigIniPath (Join-Path $ScriptRoot "Config\config.ini") -ConfigJsonPath (Join-Path $ScriptRoot "Config\config.json")
+            if ($schemaResult.Status -eq 'VALID') {
+                Write-Finding -Label "  Config Schema" -Value "VALID ($($schemaResult.SectionsChecked) sections)" -Color "Green"
+            } elseif ($schemaResult.Status -eq 'WARNING') {
+                Write-Finding -Label "  Config Schema" -Value "WARN: $($schemaResult.Warnings.Count) warning(s)" -Color "Yellow"
+            } else {
+                Write-Finding -Label "  Config Schema" -Value "INVALID: $($schemaResult.Errors.Count) error(s)" -Color "Red"
+                $phase0Pass = $false
+            }
+            Write-Log "Config schema: $($schemaResult.Status)"
+        }
+        catch {
+            Write-Finding -Label "  Config Schema" -Value "Skipped" -Color "DarkGray"
         }
     }
 
@@ -2551,6 +2584,20 @@ function Invoke-Phase6-AutoRemediation {
         Write-Log "Backup verification warning: backup may be incomplete"
     }
 
+    # v10: Import cross-session remediation registry for dedup
+    if ($v7EnginesAvailable -and (Get-Command 'Import-RemediationRegistry' -ErrorAction SilentlyContinue)) {
+        try {
+            $regPath = Join-Path $DataPath "RemediationRegistry.json"
+            if (Test-Path $regPath) {
+                Import-RemediationRegistry -FilePath $regPath -MachineName $env:COMPUTERNAME
+                Write-Host "    Cross-session remediation registry loaded" -ForegroundColor DarkGray
+                Write-Log "RemediationRegistry imported from $regPath"
+            }
+        } catch {
+            Write-Log "RemediationRegistry import skipped: $($_.Exception.Message)"
+        }
+    }
+
     Write-Host ""
 
     # ================================================================
@@ -3122,6 +3169,18 @@ function Invoke-Phase6-AutoRemediation {
     $DiagState.PhaseTimestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
     Write-PhaseResult -Phase "Phase 6: Remediation" -Status $status -Details "$totalFixed applied ($directFixCount direct + $fixCount suite), $totalFailed failed"
     Write-Log "Phase 6 complete: $totalFixed applied ($directFixCount direct, $fixCount suite), $totalFailed failed"
+
+    # v10: Export remediation registry for cross-session dedup
+    if ($v7EnginesAvailable -and (Get-Command 'Export-RemediationRegistry' -ErrorAction SilentlyContinue)) {
+        try {
+            $regPath = Join-Path $DataPath "RemediationRegistry.json"
+            Export-RemediationRegistry -FilePath $regPath
+            Write-Log "RemediationRegistry exported to $regPath"
+        } catch {
+            Write-Log "RemediationRegistry export failed: $($_.Exception.Message)"
+        }
+    }
+
     Stop-PhaseTimer -DiagState $DiagState -PhaseName "Phase6"
 }
 

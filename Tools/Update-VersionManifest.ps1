@@ -80,3 +80,61 @@ Write-Host "  Hash    : $selfHash" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  VersionManifest.json is now the integrity baseline." -ForegroundColor Green
 Write-Host ""
+
+# ============================================================
+# SECTION 2: Update ApprovedFiles.json with SHA256 hashes
+# ============================================================
+
+$approvedPath = Join-Path $PlatformRoot 'Config\ApprovedFiles.json'
+
+if (Test-Path $approvedPath) {
+    Write-Host "  ---------------------------------------------------------" -ForegroundColor DarkGray
+    Write-Host "  Updating ApprovedFiles.json hashes..." -ForegroundColor Cyan
+    Write-Host ""
+
+    $approved = Get-Content $approvedPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+    $afUpdated = 0
+    $afMissing = 0
+
+    foreach ($entry in $approved.files) {
+        $fullPath = Join-Path $PlatformRoot $entry.relativePath
+        if (Test-Path $fullPath) {
+            $hash = (Get-FileHash $fullPath -Algorithm SHA256).Hash
+            # Add or update sha256 property
+            if ($entry.PSObject.Properties['sha256']) {
+                $entry.sha256 = $hash
+            } else {
+                $entry | Add-Member -MemberType NoteProperty -Name 'sha256' -Value $hash -Force
+            }
+            $afUpdated++
+            Write-Host "  [OK] $($entry.relativePath)" -ForegroundColor Green
+            Write-Host "       $hash" -ForegroundColor DarkGray
+        } else {
+            $afMissing++
+            Write-Host "  [MISSING] $($entry.relativePath)" -ForegroundColor Yellow
+        }
+    }
+
+    # Update generation timestamp
+    if ($approved.PSObject.Properties['_generatedAt']) {
+        $approved._generatedAt = (Get-Date -Format 'o')
+    } else {
+        $approved | Add-Member -MemberType NoteProperty -Name '_generatedAt' -Value (Get-Date -Format 'o') -Force
+    }
+
+    $approved | ConvertTo-Json -Depth 15 | Set-Content $approvedPath -Encoding UTF8
+
+    Write-Host ""
+    Write-Host "  ---------------------------------------------------------" -ForegroundColor DarkGray
+    if ($afMissing -gt 0) { $afMissingColor = 'Yellow' } else { $afMissingColor = 'Green' }
+    Write-Host "  Updated : $afUpdated file(s)" -ForegroundColor Green
+    Write-Host "  Missing : $afMissing file(s)" -ForegroundColor $afMissingColor
+    Write-Host "  Manifest: $approvedPath" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  ApprovedFiles.json hashes are now current." -ForegroundColor Green
+    Write-Host ""
+} else {
+    Write-Host "  [SKIP] ApprovedFiles.json not found at: $approvedPath" -ForegroundColor Yellow
+    Write-Host ""
+}

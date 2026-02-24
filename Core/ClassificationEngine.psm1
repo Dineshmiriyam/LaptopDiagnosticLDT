@@ -953,6 +953,48 @@ function Get-ClassificationReport {
     return $report
 }
 
+function Invoke-DiagnosticClassification {
+    <#
+    .SYNOPSIS
+        v10 S14: Master classification function with mandatory PrimaryCause/SecondaryCause
+        validation and enhanced confidence enforcement. Wrapper around Get-ClassificationReport
+        that ensures certification-grade output compliance.
+    .OUTPUTS
+        [ordered] hashtable with validated classification report
+    #>
+    [CmdletBinding()]
+    [OutputType([ordered])]
+    param(
+        [Parameter(Mandatory)] [hashtable] $DiagState,
+        [hashtable] $Config = @{},
+        [PSCustomObject] $RootCauseRanking = $null,
+        [hashtable] $TrendData = @{}
+    )
+
+    $report = Get-ClassificationReport -DiagState $DiagState -Config $Config `
+        -RootCauseRanking $RootCauseRanking -TrendData $TrendData
+
+    # v10: Enforce mandatory PrimaryCause
+    if (-not $report.primary_cause -or $report.primary_cause -eq '') {
+        $report.primary_cause = 'No issues detected'
+    }
+
+    # v10: Enforce mandatory SecondaryCause list (must always be present, even if empty)
+    if ($null -eq $report.secondary_symptoms) {
+        $report['secondary_symptoms'] = @()
+    }
+
+    # v10: Confidence validation -- ensure within 0-100 range
+    if ($report.confidence_pct -lt 0) { $report['confidence_pct'] = 0 }
+    if ($report.confidence_pct -gt 100) { $report['confidence_pct'] = 100 }
+
+    # v10: Add certification metadata
+    $report['_certificationVersion'] = '10.0.0'
+    $report['_causeValidated']       = $true
+
+    return $report
+}
+
 #endregion
 
 Export-ModuleMember -Function @(
@@ -961,5 +1003,6 @@ Export-ModuleMember -Function @(
     'Get-SeverityScore',
     'Invoke-DecisionTree',
     'Get-DiagnosticLevel',
-    'Get-ClassificationReport'
+    'Get-ClassificationReport',
+    'Invoke-DiagnosticClassification'
 )

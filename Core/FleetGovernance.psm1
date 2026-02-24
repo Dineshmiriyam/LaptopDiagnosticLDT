@@ -422,6 +422,63 @@ function New-FleetGovernanceSummary {
 
 #endregion
 
+#endregion
+
+#region -- v10 KPI Validation Support
+
+function Get-FleetKPIFields {
+    <#
+    .SYNOPSIS
+        v10 S9: Returns formal KPI field definitions for certification validation.
+        Used by CertificationEngine.Test-KPIThresholds to validate fleet metrics.
+    .OUTPUTS
+        [PSCustomObject] with KPI field definitions and current values
+    #>
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param(
+        [string] $TrendStorePath = '',
+        [hashtable] $CurrentSession = @{}
+    )
+
+    # Get fleet KPIs from existing function
+    $kpis = Export-FleetKPIs -TrendStorePath $TrendStorePath -CurrentSession $CurrentSession
+
+    # Map to formal v10 KPI fields
+    $formal = [ordered]@{
+        _type                          = 'FLEET_KPI_FIELDS'
+        _version                       = '10.0.0'
+        generatedAt                    = Get-Date -Format 'o'
+        machineName                    = $env:COMPUTERNAME
+        autoFixRate                    = $kpis.L1FixRate
+        rollbackSuccessRate            = 100  # Default; updated by session data
+        stressPassRate                 = 100  # Default; updated by session data
+        classificationConfidenceAvg    = 0    # Default; updated by session data
+        sessionCount                   = $kpis.SessionCount
+        l2AdvisoryCount                = $kpis.L2AdvisoryCount
+        l3EscalationCount              = $kpis.L3EscalationCount
+        meanScoreImprovement           = $kpis.MeanScoreImprovement
+        recurrenceRate                 = $kpis.RecurrenceRate
+    }
+
+    # Update from current session if available
+    if ($CurrentSession.Count -gt 0) {
+        if ($CurrentSession.ContainsKey('RollbackSuccessRate')) {
+            $formal.rollbackSuccessRate = $CurrentSession['RollbackSuccessRate']
+        }
+        if ($CurrentSession.ContainsKey('StressPassRate')) {
+            $formal.stressPassRate = $CurrentSession['StressPassRate']
+        }
+        if ($CurrentSession.ContainsKey('ClassificationConfidenceAvg')) {
+            $formal.classificationConfidenceAvg = $CurrentSession['ClassificationConfidenceAvg']
+        }
+    }
+
+    return [PSCustomObject]$formal
+}
+
+#endregion
+
 #region -- Module Exports
 
 Export-ModuleMember -Function @(
@@ -430,7 +487,8 @@ Export-ModuleMember -Function @(
     'Test-WhitelistApproval',
     'Test-RollbackSimulation',
     'Export-FleetKPIs',
-    'New-FleetGovernanceSummary'
+    'New-FleetGovernanceSummary',
+    'Get-FleetKPIFields'
 )
 
 #endregion

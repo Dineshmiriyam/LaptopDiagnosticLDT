@@ -3,11 +3,11 @@ setlocal EnableDelayedExpansion
 
 :: ============================================================
 :: Laptop Diagnostic Toolkit - Launcher
-:: Version: 9.0.0
+:: Version: 10.0.0
 :: Architecture: Single-module (Laptop_Diagnostic_Suite.ps1)
 :: ============================================================
 
-title Laptop Diagnostic Toolkit v9.0.0
+title Laptop Diagnostic Toolkit v10.0.0
 
 :: ============================================================
 :: PATH DETECTION
@@ -95,8 +95,8 @@ if /I "%EXEC_POLICY%"=="Restricted" (
 :main_menu
 cls
 echo ============================================================
-echo   Laptop Diagnostic Toolkit v9.0.0
-echo   Enterprise Governance Edition
+echo   Laptop Diagnostic Toolkit v10.0.0
+echo   Certification-Ready Edition
 echo   Location: %SCRIPT_DRIVE%\
 echo ============================================================
 echo.
@@ -189,10 +189,16 @@ echo   ---------------------------------------------------------
 echo   55. Run Interactive Menu     PS1 built-in menu
 echo   56. Open Logs Folder
 echo   57. Open Reports Folder
+echo.
+echo   CERTIFICATION TOOLS
+echo   ---------------------------------------------------------
+echo   58. Engine Health Check      Module load + function check
+echo   59. Config Schema Validator  Validate config.ini/json
+echo   60. Export Audit Bundle      Zip all compliance artifacts
 echo    0. Exit
 echo.
 echo ============================================================
-set /p "CHOICE=  Select option (0-57): "
+set /p "CHOICE=  Select option (0-60): "
 
 :: Validate input
 if "%CHOICE%"=="" goto main_menu
@@ -280,6 +286,11 @@ if "%CHOICE%"=="54" goto run_aggregator
 if "%CHOICE%"=="55" goto run_interactive
 if "%CHOICE%"=="56" goto open_logs
 if "%CHOICE%"=="57" goto open_reports
+
+:: CERTIFICATION TOOLS [58-60]
+if "%CHOICE%"=="58" goto run_healthcheck
+if "%CHOICE%"=="59" goto run_configschema
+if "%CHOICE%"=="60" goto run_auditbundle
 
 echo.
 echo  Invalid selection. Press any key to try again...
@@ -575,6 +586,54 @@ if !errorlevel! neq 0 (
     call :log_message "Interactive menu exited with error code !errorlevel!"
     type nul > "%LOGS_DIR%\error_detected.flag"
 )
+
+echo.
+echo  Press any key to return to the main menu...
+pause >nul
+goto main_menu
+
+:: ============================================================
+:: CERTIFICATION TOOLS (Options 58-60)
+:: ============================================================
+:run_healthcheck
+cls
+echo ============================================================
+echo  Running: Engine Health Check (v10 Certification)
+echo ============================================================
+echo.
+call :log_message "Running Engine Health Check"
+
+powershell -NoProfile %PS_POLICY% -Command "& { Import-Module '%SCRIPT_DIR%Core\CertificationEngine.psm1' -Force; $r = Invoke-EngineHealthCheck -PlatformRoot '%SCRIPT_DIR%' -ConfigPath '%SCRIPT_DIR%Config'; Write-Host ''; Write-Host ('  Engine Status: ' + $r.Status) -ForegroundColor $(if($r.Status -eq 'HEALTHY'){'Green'}elseif($r.Status -eq 'DEGRADED'){'Yellow'}else{'Red'}); Write-Host ('  Modules Loaded: ' + $r.ModulesLoaded + '/' + $r.ModulesExpected); Write-Host ('  Functions OK: ' + $r.FunctionsFound + '/' + $r.FunctionsExpected); if($r.Warnings){foreach($w in $r.Warnings){Write-Host ('  WARN: ' + $w) -ForegroundColor Yellow}}; if($r.Errors){foreach($e in $r.Errors){Write-Host ('  ERROR: ' + $e) -ForegroundColor Red}} }"
+
+echo.
+echo  Press any key to return to the main menu...
+pause >nul
+goto main_menu
+
+:run_configschema
+cls
+echo ============================================================
+echo  Running: Config Schema Validator (v10 Certification)
+echo ============================================================
+echo.
+call :log_message "Running Config Schema Validator"
+
+powershell -NoProfile %PS_POLICY% -Command "& { Import-Module '%SCRIPT_DIR%Core\CertificationEngine.psm1' -Force; $r = Test-ConfigSchema -ConfigIniPath '%SCRIPT_DIR%Config\config.ini' -ConfigJsonPath '%SCRIPT_DIR%Config\config.json'; Write-Host ''; Write-Host ('  Schema Status: ' + $r.Status) -ForegroundColor $(if($r.Status -eq 'VALID'){'Green'}elseif($r.Status -eq 'WARNING'){'Yellow'}else{'Red'}); Write-Host ('  Sections Checked: ' + $r.SectionsChecked); if($r.Warnings){foreach($w in $r.Warnings){Write-Host ('  WARN: ' + $w) -ForegroundColor Yellow}}; if($r.Errors){foreach($e in $r.Errors){Write-Host ('  ERROR: ' + $e) -ForegroundColor Red}} }"
+
+echo.
+echo  Press any key to return to the main menu...
+pause >nul
+goto main_menu
+
+:run_auditbundle
+cls
+echo ============================================================
+echo  Running: Export Audit Bundle (v10 Certification)
+echo ============================================================
+echo.
+call :log_message "Running Export Audit Bundle"
+
+powershell -NoProfile %PS_POLICY% -Command "& { Import-Module '%SCRIPT_DIR%Core\AuditExportEngine.psm1' -Force; $r = Export-AuditBundle -ReportPath '%REPORTS_DIR%' -PlatformRoot '%SCRIPT_DIR%'; Write-Host ''; if($r.Status -eq 'SUCCESS'){Write-Host ('  Bundle created: ' + $r.BundlePath) -ForegroundColor Green; Write-Host ('  Files included: ' + $r.FileCount); Write-Host ('  Zip size: ' + $r.ZipSizeKB + ' KB')}elseif($r.Status -eq 'NO_ARTIFACTS'){Write-Host '  No artifacts found in Reports directory' -ForegroundColor Yellow}else{Write-Host ('  Error: ' + $r.Error) -ForegroundColor Red} }"
 
 echo.
 echo  Press any key to return to the main menu...

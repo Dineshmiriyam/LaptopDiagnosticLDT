@@ -481,6 +481,194 @@ function Test-PreRemediationIntegrity {
     }
 }
 
+function New-ForensicArchive {
+    <#
+    .SYNOPSIS
+        v10 S8: Generates a forensic-immutable archive with SHA256 + ChainHash.
+        Bundles all session logs, marks archive read-only.
+        ChainHash = SHA256(ArchiveHash + PreviousChainHash).
+    .OUTPUTS
+        [PSCustomObject] with archivePath, archiveHash, chainHash, timestamp
+    #>
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param(
+        [Parameter(Mandatory)] [string] $SessionId,
+        [Parameter(Mandatory)] [string] $PlatformRoot,
+        [Parameter(Mandatory)] [string] $OutputDir,
+        [string] $LogFilePath = ''
+    )
+
+    $result = [ordered]@{
+        sessionId        = $SessionId
+        timestamp        = Get-Date -Format 'o'
+        archivePath      = ''
+        archiveHash      = ''
+        chainHash        = ''
+        previousChainHash = ''
+        filesIncluded    = 0
+        readOnlySet      = $false
+        engineVersion    = '10.0.0'
+        signatureThumbprint = ''
+    }
+
+    Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'IntegrityEngine' `
+        -Message "Generating forensic archive with ChainHash"
+
+    # Create archive directory
+    $archiveDir = Join-Path $PlatformRoot 'Archive'
+    if (-not (Test-Path $archiveDir)) {
+        New-Item -Path $archiveDir -ItemType Directory -Force | Out-Null
+    }
+
+    $archiveName = "ForensicArchive_${SessionId}_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+    $archiveSubDir = Join-Path $archiveDir $archiveName
+    New-Item -Path $archiveSubDir -ItemType Directory -Force | Out-Null
+
+    # Collect files to archive
+    $filesToArchive = @()
+
+    # Session log
+    if ($LogFilePath -and (Test-Path $LogFilePath)) {
+        $filesToArchive += $LogFilePath
+    }
+
+    # Compliance artifacts
+    $complianceDir = Join-Path $OutputDir 'Compliance*'
+    $compDirs = Get-ChildItem -Path $OutputDir -Filter 'Compliance*' -Directory -ErrorAction SilentlyContinue
+    foreach ($cd in $compDirs) {
+        $files = Get-ChildItem -Path $cd.FullName -Filter '*.json' -File -ErrorAction SilentlyContinue
+        foreach ($f in $files) {
+            $filesToArchive += $f.FullName
+        }
+    }
+
+    # Execution receipt
+    $receipts = Get-ChildItem -Path $OutputDir -Filter "ExecutionReceipt_$SessionId*" -File -ErrorAction SilentlyContinue
+    foreach ($r in $receipts) {
+        $filesToArchive += $r.FullName
+    }
+
+    # Copy files to archive
+    foreach ($src in $filesToArchive) {
+        if (Test-Path $src) {
+            Copy-Item -Path $src -Destination $archiveSubDir -Force -ErrorAction SilentlyContinue
+            $result.filesIncluded++
+        }
+    }
+
+    # Compute archive hash (hash of all file hashes concatenated)
+    $allHashes = ''
+    $archivedFiles = Get-ChildItem -Path $archiveSubDir -File -ErrorAction SilentlyContinue | Sort-Object Name
+    foreach ($af in $archivedFiles) {
+        $fileHash = (Get-FileHash $af.FullName -Algorithm SHA256).Hash
+        $allHashes += $fileHash
+    }
+    $result.archiveHash = Get-StringHash -InputString $allHashes
+
+    # Load previous ChainHash
+    $chainStorePath = Join-Path $PlatformRoot 'Data\ChainHash.json'
+    $previousChainHash = ''
+    if (Test-Path $chainStorePath) {
+        try {
+            $chainStore = Get-Content $chainStorePath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($chainStore.currentChainHash) {
+                $previousChainHash = $chainStore.currentChainHash
+            }
+        }
+        catch { }
+    }
+    $result.previousChainHash = $previousChainHash
+
+    # Compute ChainHash = SHA256(ArchiveHash + PreviousChainHash)
+    $result.chainHash = Get-StringHash -InputString "$($result.archiveHash)$previousChainHash"
+
+    # Get signature thumbprint if available
+    $mainScript = Join-Path $PlatformRoot 'Smart_Diagnosis_Engine.ps1'
+    if (Test-Path $mainScript) {
+        try {
+            $sig = Get-AuthenticodeSignature -FilePath $mainScript -ErrorAction SilentlyContinue
+            if ($sig -and $sig.SignerCertificate) {
+                $result.signatureThumbprint = $sig.SignerCertificate.Thumbprint
+            }
+        }
+        catch { }
+    }
+
+    # Write archive manifest
+    $archiveManifest = [ordered]@{
+        _type               = 'FORENSIC_ARCHIVE'
+        sessionId           = $SessionId
+        timestamp           = $result.timestamp
+        archiveHash         = $result.archiveHash
+        chainHash           = $result.chainHash
+        previousChainHash   = $previousChainHash
+        engineVersion       = '10.0.0'
+        signatureThumbprint = $result.signatureThumbprint
+        filesIncluded       = $result.filesIncluded
+        machineName         = $env:COMPUTERNAME
+    }
+    $manifestFile = Join-Path $archiveSubDir 'ArchiveManifest.json'
+    $archiveManifest | ConvertTo-Json -Depth 10 | Set-Content $manifestFile -Encoding UTF8
+
+    # Update ChainHash store
+    $dataDir = Join-Path $PlatformRoot 'Data'
+    if (-not (Test-Path $dataDir)) {
+        New-Item -Path $dataDir -ItemType Directory -Force | Out-Null
+    }
+    $chainStoreData = [ordered]@{
+        _type            = 'CHAIN_HASH_STORE'
+        currentChainHash = $result.chainHash
+        previousHash     = $previousChainHash
+        lastSessionId    = $SessionId
+        updatedAt        = Get-Date -Format 'o'
+        history          = @()
+    }
+    # Preserve history
+    if ((Test-Path $chainStorePath)) {
+        try {
+            $existing = Get-Content $chainStorePath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($existing.history) {
+                $chainStoreData.history = @($existing.history)
+            }
+        }
+        catch { }
+    }
+    $chainStoreData.history += [PSCustomObject]@{
+        sessionId  = $SessionId
+        chainHash  = $result.chainHash
+        archiveHash = $result.archiveHash
+        timestamp  = $result.timestamp
+    }
+    $chainStoreData | ConvertTo-Json -Depth 10 | Set-Content $chainStorePath -Encoding UTF8
+
+    # Set archive read-only
+    try {
+        $archivedFiles = Get-ChildItem -Path $archiveSubDir -File -ErrorAction SilentlyContinue
+        foreach ($af in $archivedFiles) {
+            $af.IsReadOnly = $true
+        }
+        $result.readOnlySet = $true
+    }
+    catch {
+        Write-EngineLog -SessionId $SessionId -Level 'WARN' -Source 'IntegrityEngine' `
+            -Message "Could not set archive files to read-only: $($_.Exception.Message)"
+    }
+
+    $result.archivePath = $archiveSubDir
+
+    Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'IntegrityEngine' `
+        -Message "Forensic archive sealed" `
+        -Data @{
+            path        = $archiveSubDir
+            archiveHash = $result.archiveHash
+            chainHash   = $result.chainHash
+            files       = $result.filesIncluded
+        }
+
+    return [PSCustomObject]$result
+}
+
 #endregion
 
 #region -- Private Helpers
@@ -501,5 +689,6 @@ Export-ModuleMember -Function @(
     'Test-PreRemediationIntegrity',
     'Invoke-LogIntegrityCheck',
     'Seal-SessionLog',
-    'New-ExecutionReceipt'
+    'New-ExecutionReceipt',
+    'New-ForensicArchive'
 )

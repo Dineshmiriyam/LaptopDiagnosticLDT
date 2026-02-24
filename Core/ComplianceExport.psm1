@@ -296,8 +296,82 @@ function Export-ComplianceArtifacts {
         } catch { }
     }
 
+    # ── Artifact 13: KPI Report (v10.0) ──────────────────────────────────────
+    if (Get-Command 'Test-KPIThresholds' -ErrorAction SilentlyContinue) {
+        try {
+            $kpiResult = Test-KPIThresholds -SessionId $SessionId -DiagState $DiagState `
+                -ConfigIniPath (Join-Path $PlatformRoot 'Config\config.ini')
+            if ($kpiResult) {
+                $kpiRecord = [ordered]@{
+                    _type             = 'KPI_REPORT'
+                    _version          = '10.0.0'
+                    sessionId         = $SessionId
+                    generatedAt       = Get-Date -Format 'o'
+                    computername      = $env:COMPUTERNAME
+                    overallStatus     = $kpiResult.overallStatus
+                    governanceWarning = $kpiResult.governanceWarning
+                    kpis              = $kpiResult.kpis
+                }
+                $kpiPath = Join-Path $complianceDir 'KPIReport.json'
+                $kpiRecord | ConvertTo-Json -Depth 10 | Set-Content $kpiPath -Encoding UTF8
+                $artifacts['KPIReport'] = $kpiPath
+            }
+        } catch { }
+    }
+
+    # ── Artifact 14: Security Hardening Report (v10.0) ─────────────────────
+    if (Get-Command 'Get-SecurityHardeningStatus' -ErrorAction SilentlyContinue) {
+        try {
+            $shResult = Get-SecurityHardeningStatus -SessionId $SessionId `
+                -ConfigIniPath (Join-Path $PlatformRoot 'Config\config.ini')
+            if ($shResult) {
+                $shRecord = [ordered]@{
+                    _type           = 'SECURITY_HARDENING_REPORT'
+                    _version        = '10.0.0'
+                    sessionId       = $SessionId
+                    generatedAt     = Get-Date -Format 'o'
+                    computername    = $env:COMPUTERNAME
+                    overallPosture  = $shResult.overallPosture
+                    checks          = $shResult.checks
+                }
+                $shPath = Join-Path $complianceDir 'SecurityHardeningReport.json'
+                $shRecord | ConvertTo-Json -Depth 10 | Set-Content $shPath -Encoding UTF8
+                $artifacts['SecurityHardeningReport'] = $shPath
+            }
+        } catch { }
+    }
+
+    # ── Artifact 15: Regression Report (v10.0, if available) ───────────────
+    if ($DiagState.ContainsKey('RegressionReport') -and $DiagState['RegressionReport']) {
+        $regPath = Join-Path $complianceDir 'RegressionReport.json'
+        $DiagState['RegressionReport'] | ConvertTo-Json -Depth 10 | Set-Content $regPath -Encoding UTF8
+        $artifacts['RegressionReport'] = $regPath
+    }
+
+    # ── Artifact 16: Audit Manifest (v10.0) ────────────────────────────────
+    $auditManifest = [ordered]@{
+        _type             = 'AUDIT_MANIFEST'
+        _version          = '10.0.0'
+        sessionId         = $SessionId
+        generatedAt       = Get-Date -Format 'o'
+        computername      = $env:COMPUTERNAME
+        platformVersion   = '10.0.0'
+        artifactCount     = $artifacts.Count + 1
+        artifactList      = @($artifacts.Keys | Sort-Object)
+        complianceDir     = $complianceDir
+        manifestHash      = ''
+    }
+    $auditManifestPath = Join-Path $complianceDir 'AuditManifest.json'
+    $auditManifest | ConvertTo-Json -Depth 10 | Set-Content $auditManifestPath -Encoding UTF8
+    # Self-hash the manifest
+    $amHash = (Get-FileHash $auditManifestPath -Algorithm SHA256).Hash
+    $amContent = Get-Content $auditManifestPath -Raw -Encoding UTF8
+    $amContent = $amContent -replace '"manifestHash":\s*""', "`"manifestHash`": `"$amHash`""
+    $amContent | Set-Content $auditManifestPath -Encoding UTF8
+    $artifacts['AuditManifest'] = $auditManifestPath
+
     Write-EngineLog -SessionId $SessionId -Level 'AUDIT' -Source 'ComplianceExport' `
-        -Message "Compliance artifacts generated" `
+        -Message "Compliance artifacts generated (v10: 16 artifacts)" `
         -Data @{ artifactCount = $artifacts.Count; outputDir = $complianceDir }
 
     # Write artifact index

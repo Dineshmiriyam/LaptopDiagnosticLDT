@@ -513,6 +513,118 @@ function Get-RollbackTokens {
     return $script:_GuardState.RollbackTokens.ToArray()
 }
 
+function Export-RemediationRegistry {
+    <#
+    .SYNOPSIS
+        v10: Persists the in-memory deduplication registry to RemediationRegistry.json.
+        Enables cross-session deduplication and multi-module overlap prevention.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string] $OutputPath
+    )
+
+    if (-not (Test-Path $OutputPath)) {
+        New-Item -Path $OutputPath -ItemType Directory -Force | Out-Null
+    }
+
+    $registryFile = Join-Path $OutputPath 'RemediationRegistry.json'
+
+    $registry = [ordered]@{
+        _type       = 'REMEDIATION_REGISTRY'
+        _version    = '10.0.0'
+        sessionId   = $script:_GuardState.SessionId
+        exportedAt  = Get-Date -Format 'o'
+        machineName = $env:COMPUTERNAME
+        entries     = [ordered]@{}
+    }
+
+    foreach ($key in $script:_GuardState.DeduplicationRegistry.Keys) {
+        $registry.entries[$key] = $script:_GuardState.DeduplicationRegistry[$key]
+    }
+
+    $registry | ConvertTo-Json -Depth 10 | Set-Content $registryFile -Encoding UTF8
+
+    Write-EngineLog -SessionId $script:_GuardState.SessionId -Level 'AUDIT' -Source 'GuardEngine' `
+        -Message "Remediation registry exported: $($script:_GuardState.DeduplicationRegistry.Count) entries" `
+        -Data @{ file = $registryFile }
+
+    return $registryFile
+}
+
+function Import-RemediationRegistry {
+    <#
+    .SYNOPSIS
+        v10: Imports a previously exported RemediationRegistry.json for cross-session
+        deduplication. Prevents re-execution of fixes already applied in prior sessions.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string] $OutputPath
+    )
+
+    Assert-GuardInitialized
+
+    $registryFile = Join-Path $OutputPath 'RemediationRegistry.json'
+    if (-not (Test-Path $registryFile)) {
+        return 0
+    }
+
+    $imported = 0
+    try {
+        $registry = Get-Content $registryFile -Raw -Encoding UTF8 | ConvertFrom-Json
+
+        # Only import if from the same machine (cross-session, not cross-machine)
+        if ($registry.machineName -ne $env:COMPUTERNAME) {
+            return 0
+        }
+
+        # Import entries that aren't already in the current session
+        if ($registry.entries) {
+            foreach ($prop in $registry.entries.PSObject.Properties) {
+                if (-not $script:_GuardState.DeduplicationRegistry.ContainsKey($prop.Name)) {
+                    $script:_GuardState.DeduplicationRegistry[$prop.Name] = $prop.Value
+                    $imported++
+                }
+            }
+        }
+
+        Write-EngineLog -SessionId $script:_GuardState.SessionId -Level 'INFO' -Source 'GuardEngine' `
+            -Message "Remediation registry imported: $imported cross-session entries" `
+            -Data @{ imported = $imported; source = $registryFile }
+    }
+    catch {
+        Write-EngineLog -SessionId $script:_GuardState.SessionId -Level 'WARN' -Source 'GuardEngine' `
+            -Message "Could not import remediation registry: $($_.Exception.Message)"
+    }
+
+    return $imported
+}
+
+function Test-MultiModuleOverlap {
+    <#
+    .SYNOPSIS
+        v10: Checks if an action has already been executed by another module this session.
+        Returns $true if overlap detected (action should be skipped).
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)] [string] $ActionId,
+        [Parameter(Mandatory)] [string] $RequestingModule
+    )
+
+    Assert-GuardInitialized
+
+    if ($script:_GuardState.DeduplicationRegistry.ContainsKey($ActionId)) {
+        Write-EngineLog -SessionId $script:_GuardState.SessionId -Level 'INFO' -Source 'GuardEngine' `
+            -Message "OVERLAP: $ActionId already executed -- $RequestingModule request blocked" `
+            -Data @{ actionId = $ActionId; requestedBy = $RequestingModule }
+        return $true
+    }
+    return $false
+}
+
 #endregion
 
 #region -- Private Functions
@@ -552,5 +664,8 @@ Export-ModuleMember -Function @(
     'Get-GuardStatus',
     'Get-GuardDecisionLog',
     'Get-RollbackTokens',
-    'Test-ProhibitedAction'
+    'Test-ProhibitedAction',
+    'Export-RemediationRegistry',
+    'Import-RemediationRegistry',
+    'Test-MultiModuleOverlap'
 )
