@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>LDT v9.0.0 — Architecture & Field Guide</title>
+<title>LDT v10.0.0 — Architecture & Field Guide</title>
 <style>
   @font-face { font-family:'Bebas Neue'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/bebas-neue-latin.woff2) format('woff2'); }
   @font-face { font-family:'DM Sans'; font-style:normal; font-weight:300; font-display:swap; src:url(fonts/dm-sans-latin.woff2) format('woff2'); }
@@ -319,7 +319,7 @@
 <a class="skip-link" href="#main">Skip to content</a>
 
 <nav class="sticky-nav" id="stickyNav" role="navigation" aria-label="Section navigation">
-  <span class="sticky-nav-brand">LDT <span>v9.0.0</span></span>
+  <span class="sticky-nav-brand">LDT <span>v10.0.0</span></span>
   <ul class="sticky-nav-links">
     <li><a href="#section-finder">Quick Finder</a></li>
     <li><a href="#section-architecture">Architecture</a></li>
@@ -339,7 +339,7 @@
 <main id="main">
   <div class="header">
     <div class="header-eyebrow">Department-Wide Standard Edition</div>
-    <h1>LAPTOP DIAGNOSTIC<br><span>TOOLKIT v9.0.0</span></h1>
+    <h1>LAPTOP DIAGNOSTIC<br><span>TOOLKIT v10.0.0</span></h1>
     <p class="header-sub">Production-Grade &nbsp;·&nbsp; Fully Offline &nbsp;·&nbsp; USB-Portable &nbsp;·&nbsp; Windows 10 &amp; 11</p>
     <div class="header-pills">
       <span class="pill blue">9-Phase Engine</span>
@@ -358,7 +358,7 @@
     <div class="intro-card reveal">
       <h2>Core Objective -- Understand This First</h2>
       <p>
-        Laptop Diagnostic Toolkit v9.0.0 is a <strong>deterministic, state-driven diagnostic and remediation engine</strong>
+        Laptop Diagnostic Toolkit v10.0.0 is a <strong>deterministic, state-driven diagnostic and remediation engine</strong>
         for Windows 10 and Windows 11 laptops. Runs 100% from a USB drive — no installation, no internet, no cloud,
         no telemetry. The <strong>Smart Diagnosis Engine (Option 4)</strong> runs a 9-phase analysis with decision tree logic,
         creates rollback backups before any fix, validates fixes under stress, and produces
@@ -700,6 +700,77 @@
       </div>
     </div>
 
+    <!-- QUICK LOOKUP TABLE — SYMPTOM → DIAGNOSE → AUTO-FIX -->
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">Symptom &rarr; Option Reference</div><div class="divider-line"></div></div>
+    <div class="section-header reveal">
+      <div class="section-number">—</div>
+      <div class="section-title-block">
+        <div class="section-label">Symptom &rarr; Option Reference</div>
+        <div class="section-title">QUICK LOOKUP TABLE</div>
+      </div>
+    </div>
+    <p class="step-desc reveal" style="margin-bottom:20px;max-width:820px;">Find the right option for the symptom:</p>
+    <div class="fix-table-wrap reveal">
+      <div class="table-container">
+        <table class="fix-table">
+          <thead>
+            <tr><th style="width:35%">Symptom</th><th style="width:35%">Diagnose</th><th style="width:30%">Auto-Fix</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Laptop crashes / BSOD</td><td>Option 9 (BSOD Analysis)</td><td>Option 19 (BSOD Troubleshooter)</td></tr>
+            <tr><td>Wi-Fi not connecting</td><td>Option 23 (Network Diagnostic)</td><td>Option 18 (Network Troubleshooter)</td></tr>
+            <tr><td>Bluetooth not working</td><td>Option 23 (Network Diagnostic)</td><td>Option 18 (Network Troubleshooter)</td></tr>
+            <tr><td>VPN broken / missing</td><td>Option 23 (Network Diagnostic)</td><td>Option 18 (Network Troubleshooter)</td></tr>
+            <tr><td>Keyboard typing wrong chars</td><td>Option 28 (Keyboard Test)</td><td>Option 20 (Input Troubleshooter)</td></tr>
+            <tr><td>Fn keys not working</td><td>Option 28 (Keyboard Test)</td><td>Option 20 (Input Troubleshooter)</td></tr>
+            <tr><td>TrackPoint / touchpad issues</td><td>Option 29 (TrackPoint Cal.)</td><td>Option 20 (Input Troubleshooter)</td></tr>
+            <tr><td>No sound / audio crackling</td><td>Option 27 (Audio Diagnostic)</td><td>—</td></tr>
+            <tr><td>Antivirus / Defender disabled</td><td>Option 45 (Security Check)</td><td>Option 17 (Security Hardening)</td></tr>
+            <tr><td>Firewall profiles off</td><td>Option 45 (Security Check)</td><td>Option 17 (Security Hardening)</td></tr>
+            <tr><td>Driver problems / yellow triangle</td><td>Option 15 (Driver Repair)</td><td>Option 21 (Driver Auto-Update)</td></tr>
+            <tr><td>Display issues / dead pixels</td><td>Option 39 (Display Pixel Check)</td><td>Option 26 (Display Calibration)</td></tr>
+            <tr><td>Screen flickering / artifacts</td><td>Option 39 (Display Pixel Check)</td><td>Option 21 (Driver Auto-Update)</td></tr>
+            <tr><td>Laptop running slow</td><td>Option 24 (Performance Analyzer)</td><td>Option 16 (Software Cleanup)</td></tr>
+            <tr><td>Too many startup programs</td><td>Option 24 (Performance Analyzer)</td><td>Option 16 (Software Cleanup)</td></tr>
+            <tr><td>Laptop overheating / fan loud</td><td>Option 25 (Thermal Analysis)</td><td>—</td></tr>
+            <tr><td>Battery draining fast</td><td>Option 22 (Battery Health)</td><td>—</td></tr>
+            <tr><td>Hard drive failing / slow disk</td><td>Option 32 (SMART Disk Analysis)</td><td>—</td></tr>
+            <tr><td>RAM / memory errors</td><td>Option 38 (Memory Error Log)</td><td>—</td></tr>
+            <tr><td>Windows won't boot</td><td>Option 9 (BSOD Analysis)</td><td>Option 13 (Boot Repair)</td></tr>
+            <tr><td>System file corruption</td><td>Option 8 (Advanced Diagnostic)</td><td>Option 13 (Boot Repair)</td></tr>
+            <tr><td>Windows Update stuck</td><td>Option 43 (Update Manager)</td><td>Option 43 (Update Manager)</td></tr>
+            <tr><td>BIOS needs update</td><td>Option 44 (BIOS Update)</td><td>Option 44 (BIOS Update)</td></tr>
+            <tr><td>BIOS beep codes / POST errors</td><td>Option 31 (POST Error Reader)</td><td>Option 14 (BIOS Repair)</td></tr>
+            <tr><td>TPM / BitLocker issues</td><td>Option 35 (TPM Health Check)</td><td>—</td></tr>
+            <tr><td>CMOS battery dead / clock wrong</td><td>Option 33 (CMOS Battery Check)</td><td>—</td></tr>
+            <tr><td>Power plan issues / sleep problems</td><td>Option 30 (Power Settings)</td><td>—</td></tr>
+            <tr><td>Not sure what's wrong</td><td>Option 1 (Auto-Discover)</td><td>Option 4 (Smart Diagnosis)</td></tr>
+            <tr><td>Quick health score needed</td><td>Option 3 (Score Machine)</td><td>—</td></tr>
+            <tr><td>Need L1/L2/L3 classification</td><td>Option 6 (Classification)</td><td>—</td></tr>
+            <tr><td>Governance compliance audit</td><td>Option 7 (Governance Audit)</td><td>—</td></tr>
+            <tr><td>OEM factory baseline check</td><td>Option 5 (OEM Validation)</td><td>—</td></tr>
+            <tr><td>Windows 11 upgrade ready?</td><td>Option 36 (Win11 Readiness)</td><td>—</td></tr>
+            <tr><td>Lenovo Vantage missing</td><td>Option 37 (Vantage Check)</td><td>—</td></tr>
+            <tr><td>Enterprise health scorecard</td><td>Option 40 (Enterprise Readiness)</td><td>—</td></tr>
+            <tr><td>Secure wipe before reassignment</td><td>—</td><td>Option 41 (Secure Wipe)</td></tr>
+            <tr><td>Pre-deployment checklist</td><td>Option 42 (Deployment Prep)</td><td>—</td></tr>
+            <tr><td>Refurbishing a used laptop</td><td>Option 47 (Refurb Quality)</td><td>—</td></tr>
+            <tr><td>Refurb battery assessment</td><td>Option 46 (Refurb Battery)</td><td>—</td></tr>
+            <tr><td>Refurb thermal stress test</td><td>Option 48 (Refurb Thermal)</td><td>—</td></tr>
+            <tr><td>Same issue across fleet</td><td>Option 53 (Team Issue Detector)</td><td>—</td></tr>
+            <tr><td>Merge fleet CSV results</td><td>Option 54 (Fleet Aggregator)</td><td>—</td></tr>
+            <tr><td>Full hardware inventory</td><td>Option 52 (Hardware Inventory)</td><td>—</td></tr>
+            <tr><td>Machine identity / serial</td><td>Option 34 (Machine Identity)</td><td>—</td></tr>
+            <tr><td>Verify script integrity</td><td>Option 50 (Verify Scripts)</td><td>—</td></tr>
+            <tr><td>Check PS/.NET compatibility</td><td>Option 51 (Compatibility)</td><td>—</td></tr>
+            <tr><td>Engine modules healthy?</td><td>Option 58 (Health Check)</td><td>—</td></tr>
+            <tr><td>Config file valid?</td><td>Option 59 (Config Schema)</td><td>—</td></tr>
+            <tr><td>Package audit artifacts</td><td>—</td><td>Option 60 (Audit Bundle)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- SECTION 01 — ARCHITECTURE -->
     <div class="divider" id="section-architecture"><div class="divider-line"></div><div class="divider-label">System Design</div><div class="divider-line"></div></div>
     <div class="section-header reveal">
@@ -715,7 +786,7 @@
         <div class="layer-badge" style="background:rgba(26,93,204,0.12)"><div class="lb-num" style="color:var(--blue-light)">0</div><div class="lb-label">Layer</div></div>
         <div class="layer-content">
           <div class="layer-name">LAUNCHER -- Laptop_Master_Diagnostic.bat</div>
-          <div class="layer-desc">Single-click entry point. Checks admin privileges, auto-elevates via UAC, validates PowerShell version (5.1+), sets USB drive path. Presents a <strong>58-option menu</strong> (Options 0-57) organized by category. Dispatches to the appropriate PS1 script based on selection.</div>
+          <div class="layer-desc">Single-click entry point. Checks admin privileges, auto-elevates via UAC, validates PowerShell version (5.1+), sets USB drive path. Presents a <strong>61-option menu</strong> (Options 0-60) organized by category. Dispatches to the appropriate PS1 script based on selection.</div>
         </div>
       </div>
       <div class="layer-row reveal">
@@ -1088,12 +1159,12 @@
       <div class="section-number">05</div>
       <div class="section-title-block">
         <div class="section-label">Structured Report Output</div>
-        <div class="section-title">REPORT FORMAT — final_report.json v9.0.0 SCHEMA</div>
+        <div class="section-title">REPORT FORMAT — final_report.json v10.0.0 SCHEMA</div>
       </div>
     </div>
-    <p class="step-desc reveal" style="margin-bottom:20px;max-width:820px;">Multiple files are generated per run: <strong>snapshot.json</strong> (Phase 1), <strong>final_report.json</strong> (Phase 8), an <strong>HTML summary report</strong> (Phase 8), and when enterprise engines are present, <strong>12 compliance artifacts</strong> including ClassificationReport.json. The JSON files are structured for fleet aggregation and can be imported into dashboards or ticketing systems.</p>
+    <p class="step-desc reveal" style="margin-bottom:20px;max-width:820px;">Multiple files are generated per run: <strong>snapshot.json</strong> (Phase 1), <strong>final_report.json</strong> (Phase 8), an <strong>HTML summary report</strong> (Phase 8), and when enterprise engines are present, <strong>16 compliance artifacts</strong> including ClassificationReport.json, KPIReport.json, and AuditManifest.json. The JSON files are structured for fleet aggregation and can be imported into dashboards or ticketing systems.</p>
     <div class="json-block reveal">
-<span class="jc">// final_report.json — v9.0.0 schema — generated by Export-SmartDiagJSON at Phase 8</span><br>
+<span class="jc">// final_report.json — v10.0.0 schema — generated by Export-SmartDiagJSON at Phase 8</span><br>
 {<br>
 &nbsp;&nbsp;<span class="jk">"device"</span>: {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"serial"</span>: <span class="js">"PF3XXXXX"</span>,<br>
@@ -1133,7 +1204,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"Phase3"</span>: <span class="js">"WARNING"</span>, <span class="jk">"Phase4"</span>: <span class="js">"FAIL"</span>, <span class="jk">"Phase5"</span>: <span class="js">"WARNING"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"Phase6"</span>: <span class="js">"REMEDIATED"</span>, <span class="jk">"Phase7"</span>: <span class="js">"PASS"</span>, <span class="jk">"Phase8"</span>: <span class="js">"COMPLETE"</span><br>
 &nbsp;&nbsp;},<br>
-&nbsp;&nbsp;<span class="jk">"classification"</span>: {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="jc">// v9.0.0 — ClassificationEngine output</span><br>
+&nbsp;&nbsp;<span class="jk">"classification"</span>: {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="jc">// v10.0.0 — ClassificationEngine output</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"escalation_level"</span>: <span class="js">"L1"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"severity_score"</span>: <span class="jn">55</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="jk">"branch"</span>: <span class="js">"SOFTWARE"</span>,<br>
@@ -1152,13 +1223,13 @@
       <div class="section-number">06</div>
       <div class="section-title-block">
         <div class="section-label">USB Directory Structure</div>
-        <div class="section-title">OFFLINE USB LAYOUT — v9.0.0</div>
+        <div class="section-title">OFFLINE USB LAYOUT — v10.0.0</div>
       </div>
     </div>
     <div class="usb-tree reveal">
-<span class="ut-dir">E:\LDT-v9.0\</span>  <span class="ut-note">(USB Drive Root — drive letter detected automatically by BAT launcher)</span><br>
+<span class="ut-dir">E:\LDT-v10.0\</span>  <span class="ut-note">(USB Drive Root — drive letter detected automatically by BAT launcher)</span><br>
 <br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Master_Diagnostic.bat</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 0: Launcher (Options 0-57, admin elevation, PS check)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Master_Diagnostic.bat</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 0: Launcher (Options 0-60, admin elevation, PS check)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Laptop_Diagnostic_Suite.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 1: Core engine (45 modules, 7,002 lines, Options 8-48)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Smart_Diagnosis_Engine.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 2: 9-phase diagnosis + ClassifyOnly mode (Options 4, 6)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-exe">├── Quick_Start.ps1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 3: Guided workflows (Options 1-3)</span><br>
@@ -1172,18 +1243,23 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── IntegrityEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← SHA256 tamper detection + log sealing</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ScoringEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Weighted 0-100 health score</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── TrendEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 90-session historical tracking</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ComplianceExport.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← ISO/SOC2/CIS artifact generation (12 artifacts)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ComplianceExport.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← ISO/SOC2/CIS artifact generation (16 artifacts)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ClassificationEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← 3-Level L1/L2/L3 diagnostic classification</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── GovernanceEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Enterprise governance: policy profiles, transaction control, 5 exec modes</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── FleetGovernance.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Fleet governance: tamper detection, whitelist enforcement, KPI export</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── CertificationEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Config schema validation, engine health check, KPI validation (v10)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── AuditExportEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Audit bundle zip export with SHA256 manifest (v10)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ZeroTrustEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Script signatures, approved files, config hashes (v10)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ResilienceEngine.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Transaction tokens, resource governance (v10)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">└── LDT-EngineAdapter.psm1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Bridge between LDT conventions and engines</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── CHANGELOG.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Version history</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── CONTEXT.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Project context and architecture notes</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Config\</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── config.ini</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 6: 25 sections, all thresholds configurable</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── config.ini</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 6: 41 sections, all thresholds configurable</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── config.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Enterprise engine configuration</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">├── ApprovedFiles.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Directory whitelist manifest with SHA256 hashes (v10)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-file">└── VersionManifest.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← SHA256 integrity baseline for all platform files</span><br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-dir">├── Docs\</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ut-note">← Layer 7: This guide + fonts (offline rendering)</span><br>
@@ -1205,7 +1281,7 @@
       <div class="section-number">07</div>
       <div class="section-title-block">
         <div class="section-label">Enterprise Acceptance Targets</div>
-        <div class="section-title">PERFORMANCE TARGETS — v9.0.0 ACCEPTANCE CRITERIA</div>
+        <div class="section-title">PERFORMANCE TARGETS — v10.0.0 ACCEPTANCE CRITERIA</div>
       </div>
     </div>
     <div class="targets-grid reveal">
@@ -1257,7 +1333,7 @@
       <div class="achieve-card blue">
         <div class="achieve-icon">📊</div>
         <div class="achieve-title">final_report.json</div>
-        <div class="achieve-desc">Full structured findings in v9.0.0 schema. Contains findings[], primary_cause, severity_score, confidence_pct, enterprise_score, actions_taken[], phase_results, rollback_tokens, and <strong>classification{}</strong> block with L1/L2/L3 breakdown. <strong>Phase 8 output.</strong></div>
+        <div class="achieve-desc">Full structured findings in v10.0.0 schema. Contains findings[], primary_cause, severity_score, confidence_pct, enterprise_score, actions_taken[], phase_results, rollback_tokens, and <strong>classification{}</strong> block with L1/L2/L3 breakdown. <strong>Phase 8 output.</strong></div>
       </div>
       <div class="achieve-card purple">
         <div class="achieve-icon">🌐</div>
@@ -1340,7 +1416,7 @@
     <div class="bottom-card reveal">
       <h2>⚙️ THE BOTTOM LINE</h2>
       <p>
-        Laptop Diagnostic Toolkit v9.0.0 is a <strong>deterministic, state-driven, 9-phase diagnostic engine</strong> with a formal
+        Laptop Diagnostic Toolkit v10.0.0 is a <strong>deterministic, state-driven, 9-phase diagnostic engine</strong> with a formal
         <strong>3-level classification system (L1/L2/L3)</strong> that collects a complete system snapshot, classifies hardware vs software faults
         using a 5-branch decision tree, creates rollback backups before every fix, validates repairs under stress, and produces
         <strong>structured JSON + HTML reports</strong> with visual triage panels — all from a USB drive with zero installation, zero internet, and zero telemetry.

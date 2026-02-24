@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laptop Diagnostic Toolkit v6.0 - Team Guide</title>
+<title>Laptop Diagnostic Toolkit v10.0 - Team Guide</title>
 <style>
   @page { size: A4; margin: 15mm 18mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,9 +46,9 @@
 <body>
 
 <div class="header-bar">
-  <h1 style="font-size:26pt;">Laptop Diagnostic Toolkit v6.0</h1>
+  <h1 style="font-size:26pt;">Laptop Diagnostic Toolkit v10.0</h1>
   <p style="font-size:13pt;">Team Reference Guide &mdash; Consolidated Single-Module Architecture</p>
-  <p style="font-size:10pt; margin-top:8px;">Version 6.0.0 &bull; February 2026 &bull; 45 Functions &bull; USB-Portable</p>
+  <p style="font-size:10pt; margin-top:8px;">Version 10.0.0 &bull; February 2026 &bull; 60 Options &bull; USB-Portable</p>
 </div>
 
 <div class="container">
@@ -77,7 +77,7 @@
 
 <!-- SECTION 1 -->
 <h2 id="s1">1. Overview &amp; Architecture</h2>
-<p>The Laptop Diagnostic Toolkit v6.0 is a USB-portable, single-module PowerShell diagnostic and remediation suite designed for Lenovo ThinkPad fleet management. It runs from any USB drive with no installation required.</p>
+<p>The Laptop Diagnostic Toolkit v10.0 is a USB-portable, single-module PowerShell diagnostic and remediation suite designed for Lenovo ThinkPad fleet management. It runs from any USB drive with no installation required.</p>
 
 <h3>Architecture</h3>
 <table>
@@ -364,7 +364,7 @@
 </table>
 
 <div class="success-box">
-  <strong>v6.0 Improvements (Input Troubleshooter):</strong>
+  <strong>Input Troubleshooter Improvements:</strong>
   <ul>
     <li>HID devices with "Unknown" status are now correctly recognized as normal (composite USB devices) and skipped</li>
     <li>Duplicate HID devices are grouped &mdash; one Y/N prompt per device type instead of per instance</li>
@@ -618,7 +618,7 @@
 <h3>[General]</h3>
 <table>
   <tr><th>Key</th><th>Default</th><th>Description</th></tr>
-  <tr><td>Version</td><td>6.0.0</td><td>Toolkit version</td></tr>
+  <tr><td>Version</td><td>10.0.0</td><td>Toolkit version</td></tr>
   <tr><td>ScriptFile</td><td>Laptop_Diagnostic_Suite.ps1</td><td>Main PS1 module filename</td></tr>
 </table>
 
@@ -688,7 +688,7 @@
 <h2 id="s14" class="page-break">14. USB Directory Structure</h2>
 <pre>
 E:\ (USB Drive)
-+-- LDT-v9.0\
++-- LDT-v10.0\
     +-- Laptop_Diagnostic_Suite.ps1    (Main PS1 module - 45 functions)
     +-- Laptop_Master_Diagnostic.bat   (BAT launcher with menu)
     +-- DiagnosticModules.csv          (Function registry)
@@ -751,7 +751,7 @@ E:\ (USB Drive)
 <!-- SECTION 16 -->
 <h2 id="s16">16. Changelog</h2>
 
-<h3>v6.0.0 (February 2026)</h3>
+<h3>v10.0.0 (February 2026)</h3>
 <ul>
   <li><strong>Troubleshooter Functions Added:</strong> 5 new auto-fix functions (Options 17&ndash;21) with Y/N prompt per fix and verify-after-fix cycle</li>
   <li><strong>Security Hardening (17):</strong> Auto-fix Defender, firewall, UAC, Windows Update, temp cleanup</li>
@@ -764,7 +764,7 @@ E:\ (USB Drive)
   <li><strong>[AutoRemediation] Config:</strong> New config section with DNS, thresholds, driver update source, blocked categories</li>
 </ul>
 
-<h3>v6.0.0 Advanced Diagnostics (10 New Modules)</h3>
+<h3>Advanced Diagnostics (10 Modules)</h3>
 <ul>
   <li><strong>POST Error Reader (31):</strong> ThinkPad POST/BIOS error code detection from Event Logs with Lenovo error code database (0175&ndash;2201)</li>
   <li><strong>SMART Disk Analysis (32):</strong> Deep SMART attribute analysis: temperature, wear, read errors, uncorrectable sectors, known bad SSD flagging</li>
@@ -780,7 +780,7 @@ E:\ (USB Drive)
   <li><strong>Coverage increase:</strong> 35 &rarr; 45 functions, ~85% of all ThinkPad enterprise issues now covered</li>
 </ul>
 
-<h3>v6.0.0 Bug Fixes</h3>
+<h3>Bug Fixes</h3>
 <ul>
   <li><strong>ThinkPad Detection Fixed:</strong> Now checks 3 WMI sources (Model, SystemFamily, ComputerSystemProduct.Version) instead of just Model. Resolves false "Non-ThinkPad" warnings on actual ThinkPads where Model returns machine type code instead of product name.</li>
   <li><strong>HID Device False Positives Fixed:</strong> Input Troubleshooter no longer flags HID devices with "Unknown" status as problems. "Unknown" is normal for composite USB HID endpoints. Only "Error" and "Degraded" statuses trigger the fix prompt.</li>
@@ -792,7 +792,7 @@ E:\ (USB Drive)
 
 <hr style="margin-top:30px; border:1px solid #cce0f0;">
 <p style="text-align:center; color:#888; font-size:9pt; margin-top:10px;">
-  Laptop Diagnostic Toolkit v6.0.0 &bull; Team Reference Guide &bull; Generated February 2026
+  Laptop Diagnostic Toolkit v10.0.0 &bull; Team Reference Guide &bull; Generated February 2026
 </p>
 
 </div>
